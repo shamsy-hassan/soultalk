@@ -5,13 +5,22 @@ import Users from './Users';
 import Chat from './Chat';
 import { io } from 'socket.io-client';
 import './index.css';
+import { useTranslation } from 'react-i18next';
+import i18n from './i18n';
 
 function App() {
+  const { t } = useTranslation();
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('soultalk_user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
   const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      i18n.changeLanguage(user.language);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (user && !socket) {
@@ -29,6 +38,7 @@ function App() {
   const handleLogin = (userData) => {
     setUser(userData);
     localStorage.setItem('soultalk_user', JSON.stringify(userData));
+    i18n.changeLanguage(userData.language);
   };
 
   const handleLogout = () => {
@@ -48,9 +58,9 @@ function App() {
           <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full"></div>
-              <h1 className="text-2xl font-bold text-gray-800">SoulTalk</h1>
+              <h1 className="text-2xl font-bold text-gray-800">{t('soultalk_title')}</h1>
               <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
-                Real-time Language Bridge
+                {t('real_time_language_bridge')}
               </span>
             </div>
             {user && (
@@ -64,7 +74,7 @@ function App() {
                   <div>
                     <p className="font-medium text-gray-800">{user.username}</p>
                     <p className="text-xs text-gray-500">
-                      Language: {user.language === 'en' ? 'English' : 
+                      {t('language')}: {user.language === 'en' ? 'English' : 
                                user.language === 'sw' ? 'Swahili' : 
                                user.language === 'am' ? 'Amharic' : user.language}
                     </p>
@@ -74,7 +84,7 @@ function App() {
                   onClick={handleLogout}
                   className="text-sm text-gray-600 hover:text-purple-600 px-3 py-1 hover:bg-purple-50 rounded-lg transition-colors"
                 >
-                  Logout
+                  {t('logout')}
                 </button>
               </div>
             )}
@@ -99,8 +109,8 @@ function App() {
         </main>
 
         <footer className="mt-12 py-6 border-t border-gray-200 text-center text-gray-600">
-          <p className="text-sm">SoulTalk - Breaking language barriers in real-time communication</p>
-          <p className="text-xs mt-2">Made with ❤️ for Africa and the world</p>
+          <p className="text-sm">{t('soultalk_footer')}</p>
+          <p className="text-xs mt-2">{t('made_with_love')}</p>
         </footer>
       </div>
     </Router>

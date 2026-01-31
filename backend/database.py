@@ -38,12 +38,26 @@ def init_db():
         ''')
 
         conn.commit()
-        print("'users' table created successfully.")
+
+    # Check if the 'messages' table exists
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='messages'")
+    table_exists = cursor.fetchone()
+
+    if not table_exists:
+        print("Creating 'messages' table as it doesn't exist.")
+        cursor.execute('''
+            CREATE TABLE messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                from_user TEXT NOT NULL,
+                to_user TEXT NOT NULL,
+                message TEXT NOT NULL,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        conn.commit()
+        print("'messages' table created successfully.")
     
     conn.close()
-
-# Messages database (still in-memory)
-messages_db = []
 
 def add_user(user):
     """Adds a new user to the database."""
@@ -80,15 +94,31 @@ def get_all_users():
     return users
 
 def add_message(message):
-    messages_db.append(message)
+    """Adds a new message to the database."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            'INSERT INTO messages (from_user, to_user, message) VALUES (?, ?, ?)',
+            (message['from'], message['to'], message['message'])
+        )
+        conn.commit()
+    finally:
+        conn.close()
 
 def get_messages_between(user1, user2):
-    messages = []
-    for msg in messages_db:
-        if (msg['from'] == user1 and msg['to'] == user2) or \
-           (msg['from'] == user2 and msg['to'] == user1):
-            messages.append(msg)
-    return messages
+    """Retrieves all messages between two users from the database."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        '''SELECT * FROM messages 
+           WHERE (from_user = ? AND to_user = ?) OR (from_user = ? AND to_user = ?)
+           ORDER BY timestamp ASC''',
+        (user1, user2, user2, user1)
+    )
+    messages = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in messages]
 
 def update_user_status(username, online):
     """Updates the online status of a user in the database."""

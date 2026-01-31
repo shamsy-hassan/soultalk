@@ -2,8 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Send, ArrowLeft, Globe, Clock, User, Sparkles, Mic, Image as ImageIcon, Smile } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { getLanguageName, getLanguageFlag } from './i18n';
 
 const Chat = ({ user, socket }) => {
+  const { t } = useTranslation();
   const { username } = useParams();
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
@@ -131,28 +134,6 @@ const Chat = ({ user, socket }) => {
     }, 2000);
   };
 
-  const getLanguageName = (code) => {
-    const languages = {
-      'en': 'English',
-      'sw': 'Swahili',
-      'am': 'Amharic',
-      'fr': 'French',
-      'ar': 'Arabic'
-    };
-    return languages[code] || code;
-  };
-
-  const getLanguageFlag = (code) => {
-    const flags = {
-      'en': '🇺🇸',
-      'sw': '🇹🇿',
-      'am': '🇪🇹',
-      'fr': '🇫🇷',
-      'ar': '🇸🇦'
-    };
-    return flags[code] || '🌐';
-  };
-
   if (!targetUser) return null;
 
   return (
@@ -187,7 +168,7 @@ const Chat = ({ user, socket }) => {
                 <span className="text-gray-400">•</span>
                 <div className="flex items-center space-x-1">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-green-600">Online</span>
+                  <span className="text-green-600">{t('online')}</span>
                 </div>
               </div>
             </div>
@@ -196,7 +177,7 @@ const Chat = ({ user, socket }) => {
 
         <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
           <Sparkles className="w-4 h-4 text-purple-600" />
-          <span className="text-sm font-medium text-purple-700">Real-time Translation Active</span>
+          <span className="text-sm font-medium text-purple-700">{t('real_time_translation_active')}</span>
         </div>
       </div>
 
@@ -204,7 +185,7 @@ const Chat = ({ user, socket }) => {
       <div className="card mb-6">
         <div className="grid md:grid-cols-3 gap-4">
           <div className="text-center p-4">
-            <div className="text-lg font-semibold text-gray-900 mb-1">You</div>
+            <div className="text-lg font-semibold text-gray-900 mb-1">{t('you')}</div>
             <div className="flex items-center justify-center space-x-2">
               <User className="w-4 h-4 text-purple-600" />
               <span className="font-medium">{user.username}</span>
@@ -237,7 +218,7 @@ const Chat = ({ user, socket }) => {
         
         <div className="mt-4 pt-4 border-t border-gray-100 text-center">
           <p className="text-sm text-gray-600">
-            <span className="font-medium">Magic happening:</span> Your messages auto-translate to {getLanguageName(targetUser.language)}
+            <span className="font-medium">{t('magic_happening')}:</span> {t('messages_auto_translate', { targetLanguage: getLanguageName(targetUser.language) })}
           </p>
         </div>
       </div>
@@ -263,7 +244,7 @@ const Chat = ({ user, socket }) => {
                   <div className="mt-2 pt-2 border-t border-white/20">
                     <div className="flex items-center space-x-1 text-xs opacity-80">
                       <Sparkles className="w-3 h-3" />
-                      <span>Translated to {getLanguageName(targetUser.language)}</span>
+                      <span>{t('translated_to_target_language', { targetLanguage: getLanguageName(targetUser.language) })}</span>
                     </div>
                   </div>
                 )}
@@ -271,11 +252,11 @@ const Chat = ({ user, socket }) => {
                 {(msg.from !== user.username && msg.originalText !== msg.translatedText) && (
                   <div className="mt-2 pt-2 border-t border-gray-200">
                     <div className="text-xs text-gray-500">
-                      Original: {msg.originalText}
+                      {t('original')}: {msg.originalText}
                     </div>
                     <div className="flex items-center space-x-1 text-xs text-gray-500 mt-1">
                       <Sparkles className="w-3 h-3" />
-                      <span>Translated from {getLanguageName(msg.fromLanguage)}</span>
+                      <span>{t('translated_from_source_language', { sourceLanguage: getLanguageName(msg.fromLanguage) })}</span>
                     </div>
                   </div>
                 )}
@@ -298,7 +279,7 @@ const Chat = ({ user, socket }) => {
                   <div className="typing-dot"></div>
                   <div className="typing-dot" style={{ animationDelay: '0.2s' }}></div>
                   <div className="typing-dot" style={{ animationDelay: '0.4s' }}></div>
-                  <span className="text-sm text-gray-600 ml-2">{username} is typing...</span>
+                  <span className="text-sm text-gray-600 ml-2">{username} {t('is_typing')}</span>
                 </div>
               </div>
             </div>
@@ -331,7 +312,7 @@ const Chat = ({ user, socket }) => {
                     handleTyping();
                   }}
                   onKeyPress={handleKeyPress}
-                  placeholder={`Type your message in ${getLanguageName(user.language)}...`}
+                  placeholder={t('type_your_message_in', { language: getLanguageName(user.language) })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none resize-none"
                   rows="2"
                 />
@@ -342,7 +323,7 @@ const Chat = ({ user, socket }) => {
                 </div>
               </div>
               <div className="text-xs text-gray-500 mt-2">
-                Press Enter to send • Shift+Enter for new line
+                {t('press_enter_to_send')} • {t('shift_enter_for_new_line')}
               </div>
             </div>
             
@@ -363,7 +344,7 @@ const Chat = ({ user, socket }) => {
             <div className="inline-flex items-center space-x-2 text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-full">
               <Sparkles className="w-4 h-4 text-purple-500" />
               <span>
-                Messages auto-translate to <span className="font-medium">{getLanguageName(targetUser.language)}</span>
+                {t('messages_auto_translate_to_target_language', { targetLanguage: getLanguageName(targetUser.language) })}
               </span>
             </div>
           </div>
@@ -372,27 +353,27 @@ const Chat = ({ user, socket }) => {
 
       {/* Translation Info */}
       <div className="mt-6 card">
-        <h3 className="font-semibold text-gray-900 mb-4">How Translation Works</h3>
+        <h3 className="font-semibold text-gray-900 mb-4">{t('how_translation_works')}</h3>
         <div className="grid md:grid-cols-3 gap-4">
           <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-white rounded-xl">
             <div className="text-2xl mb-2">1</div>
-            <h4 className="font-medium mb-2">You Type</h4>
+            <h4 className="font-medium mb-2">{t('you_type')}</h4>
             <p className="text-sm text-gray-600">
-              Write naturally in {getLanguageName(user.language)}
+              {t('write_naturally_in_language', { language: getLanguageName(user.language) })}
             </p>
           </div>
           <div className="text-center p-4 bg-gradient-to-br from-pink-50 to-white rounded-xl">
             <div className="text-2xl mb-2">2</div>
-            <h4 className="font-medium mb-2">We Translate</h4>
+            <h4 className="font-medium mb-2">{t('we_translate')}</h4>
             <p className="text-sm text-gray-600">
-              AI instantly translates to {getLanguageName(targetUser.language)}
+              {t('ai_instantly_translates_to_language', { language: getLanguageName(targetUser.language) })}
             </p>
           </div>
           <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-white rounded-xl">
             <div className="text-2xl mb-2">3</div>
-            <h4 className="font-medium mb-2">They Read</h4>
+            <h4 className="font-medium mb-2">{t('they_read')}</h4>
             <p className="text-sm text-gray-600">
-              {username} sees message in {getLanguageName(targetUser.language)}
+              {t('username_sees_message_in_language', { username: username, language: getLanguageName(targetUser.language) })}
             </p>
           </div>
         </div>

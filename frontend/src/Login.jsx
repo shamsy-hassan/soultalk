@@ -2,9 +2,11 @@
 import React from 'react';
 import { MessageSquare, Sparkles, Users } from 'lucide-react';
 import VerifyFlow from './VerifyFlow';
+import { useTranslation } from 'react-i18next';
 
 
 const Login = ({ onLogin }) => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-[80vh] flex items-center justify-center">
       <div className="max-w-4xl w-full mx-auto">
@@ -20,10 +22,10 @@ const Login = ({ onLogin }) => {
             </div>
           </div>
           <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            Welcome to <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">SoulTalk</span>
+            {t('login_to_soultalk')}
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Chat naturally with anyone, anywhere. We translate in real-time so you can focus on the conversation.
+            {t('soultalk_footer')}
           </p>
         </div>
 
@@ -35,8 +37,8 @@ const Login = ({ onLogin }) => {
                 <span role="img" aria-label="globe" className="text-2xl">🌍</span>
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">How it Works</h3>
-                <p className="text-sm text-gray-600">Real-time translation magic</p>
+                <h3 className="font-semibold text-gray-900">{t('how_it_works')}</h3>
+                <p className="text-sm text-gray-600">{t('real_time_translation_magic')}</p>
               </div>
             </div>
 
@@ -44,24 +46,24 @@ const Login = ({ onLogin }) => {
               <div className="flex items-start space-x-3">
                 <div className="w-6 h-6 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm font-bold">1</div>
                 <div>
-                  <h4 className="font-medium">You speak your language</h4>
-                  <p className="text-sm text-gray-600">Type naturally in your preferred language</p>
+                  <h4 className="font-medium">{t('you_speak_your_language')}</h4>
+                  <p className="text-sm text-gray-600">{t('type_naturally')}</p>
                 </div>
               </div>
 
               <div className="flex items-start space-x-3">
                 <div className="w-6 h-6 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm font-bold">2</div>
                 <div>
-                  <h4 className="font-medium">We translate instantly</h4>
-                  <p className="text-sm text-gray-600">AI-powered real-time translation</p>
+                  <h4 className="font-medium">{t('we_translate_instantly')}</h4>
+                  <p className="text-sm text-gray-600">{t('ai_powered_translation')}</p>
                 </div>
               </div>
 
               <div className="flex items-start space-x-3">
                 <div className="w-6 h-6 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm font-bold">3</div>
                 <div>
-                  <h4 className="font-medium">They read in their language</h4>
-                  <p className="text-sm text-gray-600">Messages arrive already translated</p>
+                  <h4 className="font-medium">{t('they_read_in_their_language')}</h4>
+                  <p className="text-sm text-gray-600">{t('messages_arrive_translated')}</p>
                 </div>
               </div>
             </div>
@@ -69,16 +71,16 @@ const Login = ({ onLogin }) => {
             <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100">
               <div className="flex items-center space-x-2">
                 <Users className="w-5 h-5 text-purple-600" />
-                <span className="font-medium text-purple-700">Live Example</span>
+                <span className="font-medium text-purple-700">{t('live_example')}</span>
               </div>
               <p className="text-sm text-gray-700 mt-2">
-                Ali (Swahili) → "Habari yako?" → Hana (Amharic) sees: "እንዴት ነሽ?"
+                {t('live_example_text')}
               </p>
             </div>
           </div>
 
           <div className="card">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Verify your phone number</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('verify_phone_number')}</h2>
             <VerifyFlow onLogin={onLogin} />
           </div>
         </div>
@@ -86,18 +88,18 @@ const Login = ({ onLogin }) => {
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
             <div className="text-3xl mb-2">🌍</div>
-            <h4 className="font-semibold text-gray-900">Cross-Cultural</h4>
-            <p className="text-sm text-gray-600 mt-2">Connect across languages and cultures</p>
+            <h4 className="font-semibold text-gray-900">{t('cross_cultural')}</h4>
+            <p className="text-sm text-gray-600 mt-2">{t('connect_across_cultures')}</p>
           </div>
           <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
             <div className="text-3xl mb-2">⚡</div>
-            <h4 className="font-semibold text-gray-900">Real-Time</h4>
-            <p className="text-sm text-gray-600 mt-2">Instant translation as you chat</p>
+            <h4 className="font-semibold text-gray-900">{t('real_time')}</h4>
+            <p className="text-sm text-gray-600 mt-2">{t('instant_translation')}</p>
           </div>
           <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
             <div className="text-3xl mb-2">🔒</div>
-            <h4 className="font-semibold text-gray-900">Private</h4>
-            <p className="text-sm text-gray-600 mt-2">One-to-one encrypted conversations</p>
+            <h4 className="font-semibold text-gray-900">{t('private')}</h4>
+            <p className="text-sm text-gray-600 mt-2">{t('encrypted_conversations')}</p>
           </div>
         </div>
       </div>
@@ -106,5 +108,3 @@ const Login = ({ onLogin }) => {
 };
 
 export default Login;
-
-

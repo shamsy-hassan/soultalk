@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Search, Globe, Wifi, WifiOff, MessageSquare, UserPlus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Users = ({ user, socket }) => {
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -59,16 +61,16 @@ const Users = ({ user, socket }) => {
 
   const getLanguageName = (code) => {
     const languages = {
-      'en': 'English 🇺🇸',
-      'sw': 'Swahili 🇹🇿',
-      'am': 'Amharic 🇪🇹',
-      'fr': 'French 🇫🇷',
-      'ar': 'Arabic 🇸🇦',
-      'es': 'Spanish 🇪🇸',
-      'pt': 'Portuguese 🇵🇹',
-      'yo': 'Yoruba 🇳🇬',
-      'ha': 'Hausa 🇳🇬',
-      'zu': 'Zulu 🇿🇦'
+      'en': t('language_english'),
+      'sw': t('language_swahili'),
+      'am': t('language_amharic'),
+      'fr': t('language_french'),
+      'ar': t('language_arabic'),
+      'es': t('language_spanish'),
+      'pt': t('language_portuguese'),
+      'yo': t('language_yoruba'),
+      'ha': t('language_hausa'),
+      'zu': t('language_zulu')
     };
     return languages[code] || code;
   };
@@ -80,9 +82,9 @@ const Users = ({ user, socket }) => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Friends to Chat With</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('find_friends_to_chat_with')}</h1>
         <p className="text-gray-600">
-          Connect with people from different cultures and languages. Chat naturally in your own language.
+          {t('connect_with_people_description')}
         </p>
       </div>
 
@@ -93,19 +95,19 @@ const Users = ({ user, socket }) => {
               <UserPlus className="w-6 h-6 text-purple-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">Active Users</h3>
-              <p className="text-sm text-gray-600">Connect with people around the world</p>
+              <h3 className="font-semibold text-gray-900">{t('active_users')}</h3>
+              <p className="text-sm text-gray-600">{t('connect_with_people_world')}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2 text-sm">
             <div className="flex items-center space-x-1">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-gray-600">{onlineUsers.length} online</span>
+              <span className="text-gray-600">{onlineUsers.length} {t('online')}</span>
             </div>
             <span className="text-gray-400">•</span>
             <div className="flex items-center space-x-1">
               <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              <span className="text-gray-600">{users.length - onlineUsers.length} offline</span>
+              <span className="text-gray-600">{users.length - onlineUsers.length} {t('offline')}</span>
             </div>
           </div>
         </div>
@@ -116,7 +118,7 @@ const Users = ({ user, socket }) => {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search users by name..."
+            placeholder={t('search_users_placeholder')}
             className="input-field pl-10"
           />
         </div>
@@ -153,12 +155,12 @@ const Users = ({ user, socket }) => {
                         {onlineUsers.includes(targetUser.username) ? (
                           <>
                             <Wifi className="w-3 h-3 text-green-500" />
-                            <span className="text-xs text-green-600">Online</span>
+                            <span className="text-xs text-green-600">{t('online')}</span>
                           </>
                         ) : (
                           <>
                             <WifiOff className="w-3 h-3 text-gray-400" />
-                            <span className="text-xs text-gray-500">Offline</span>
+                            <span className="text-xs text-gray-500">{t('offline')}</span>
                           </>
                         )}
                       </div>
@@ -171,26 +173,26 @@ const Users = ({ user, socket }) => {
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center space-x-2">
                       <Globe className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-600">Speaks:</span>
+                      <span className="text-gray-600">{t('speaks')}:</span>
                     </div>
                     <span className="font-medium">{getLanguageName(targetUser.language)}</span>
                   </div>
                   
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">You speak:</span>
+                    <span className="text-gray-600">{t('you_speak')}:</span>
                     <span className="font-medium">{getLanguageName(user.language)}</span>
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-100">
                   <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded-lg">
-                    <span className="font-medium">Example:</span> 
+                    <span className="font-medium">{t('example')}:</span> 
                     <div className="mt-1">
-                      <div className="text-purple-600">You: Hello</div>
+                      <div className="text-purple-600">{t('you')}: {t('hello')}</div>
                       <div className="text-gray-700">
-                        {targetUser.username} sees: {targetUser.language === 'sw' ? 'Hujambo' : 
+                        {targetUser.username} {t('sees')}: {targetUser.language === 'sw' ? 'Hujambo' : 
                                                    targetUser.language === 'am' ? 'ሰላም' : 
-                                                   targetUser.language === 'fr' ? 'Bonjour' : 'Hello'}
+                                                   targetUser.language === 'fr' ? 'Bonjour' : t('hello')}
                       </div>
                     </div>
                   </div>
@@ -200,7 +202,7 @@ const Users = ({ user, socket }) => {
                   className="mt-4 w-full py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center justify-center space-x-2"
                 >
                   <MessageSquare className="w-4 h-4" />
-                  <span>Start Chat</span>
+                  <span>{t('start_chat')}</span>
                 </button>
               </div>
             ))}
@@ -212,9 +214,9 @@ const Users = ({ user, socket }) => {
             <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
               <UserPlus className="w-10 h-10 text-gray-400" />
             </div>
-            <h4 className="text-lg font-medium text-gray-700 mb-2">No users found</h4>
+            <h4 className="text-lg font-medium text-gray-700 mb-2">{t('no_users_found')}</h4>
             <p className="text-gray-500">
-              {search ? 'Try a different search term' : 'No other users available'}
+              {search ? t('try_different_search_term') : t('no_other_users_available')}
             </p>
           </div>
         )}
@@ -225,25 +227,25 @@ const Users = ({ user, socket }) => {
           <div className="p-1.5 bg-green-100 rounded-lg">
             <Wifi className="w-4 h-4 text-green-600" />
           </div>
-          <span>Live Connection Status</span>
+          <span>{t('live_connection_status')}</span>
         </h3>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-gray-600">Your Status</span>
+            <span className="text-gray-600">{t('your_status')}</span>
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="font-medium text-green-600">Connected</span>
+              <span className="font-medium text-green-600">{t('connected')}</span>
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-gray-600">WebSocket</span>
+            <span className="text-gray-600">{t('websocket')}</span>
             <span className={`font-medium ${socket ? 'text-green-600' : 'text-red-600'}`}>
-              {socket ? 'Live' : 'Disconnected'}
+              {socket ? t('live') : t('disconnected')}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-gray-600">Active Users</span>
-            <span className="font-medium text-purple-600">{onlineUsers.length} online now</span>
+            <span className="text-gray-600">{t('active_users_count')}</span>
+            <span className="font-medium text-purple-600">{onlineUsers.length} {t('online_now')}</span>
           </div>
         </div>
       </div>

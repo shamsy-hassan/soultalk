@@ -1,5 +1,5 @@
 from flask_socketio import emit, join_room, leave_room, SocketIO
-from database import messages_db, add_message, get_user
+from database import add_message, get_user
 from translate import translate_text
 
 def init_sockets(socketio: SocketIO):
@@ -19,8 +19,11 @@ def init_sockets(socketio: SocketIO):
             join_room(username)
             # Update user status
             user = get_user(username)
-            if user:
-                user['online'] = True
+            # The get_user function from database.py returns a sqlite3.Row object
+            # which can be accessed like a dictionary.
+            # However, direct assignment like user['online'] = True won't persist
+            # changes to the database. We need a separate function for that.
+            # For now, we'll just emit the status.
             emit('user_status', {'username': username, 'online': True}, broadcast=True)
 
     @socketio.on('leave')
@@ -28,10 +31,7 @@ def init_sockets(socketio: SocketIO):
         username = data.get('username')
         if username:
             leave_room(username)
-            # Update user status
-            user = get_user(username)
-            if user:
-                user['online'] = False
+            # Update user status (similar to join, need a db function for persistence)
             emit('user_status', {'username': username, 'online': False}, broadcast=True)
 
     @socketio.on('send_message')
@@ -56,23 +56,19 @@ def init_sockets(socketio: SocketIO):
                 to_lang=receiver['language']
             )
             
-            # Store message
+            # Store message in the database
             message_data = {
-                'id': len(messages_db) + 1,
                 'from': from_user,
                 'to': to_user,
-                'originalText': message,
-                'translatedText': translated_message,
-                'fromLanguage': sender['language'],
-                'toLanguage': receiver['language'],
-                'timestamp': 'now'
+                'message': message, # Store original message
+                'translated_message': translated_message # Store translated message
             }
             add_message(message_data)
             
             # Send translated message to receiver
             emit('receive_message', {
                 'from': from_user,
-                'message': translated_message,
+                'message': translated_message, # Receiver gets translated message
                 'originalMessage': message,
                 'timestamp': 'now'
             }, room=to_user)
@@ -80,8 +76,8 @@ def init_sockets(socketio: SocketIO):
             # Send original message to sender
             emit('message_sent', {
                 'to': to_user,
-                'message': message,
-                'translatedMessage': translated_message,
+                'message': message, # Sender sees their original message
+                'translatedMessage': translated_message, # But also gets the translated version for context
                 'timestamp': 'now'
             }, room=from_user)
             
