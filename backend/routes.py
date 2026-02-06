@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from database import get_user, add_user, get_all_users
+from database import get_user, add_user, get_all_users, get_messages_between
 
 bp = Blueprint('main', __name__, url_prefix='/api')
 
@@ -64,6 +64,16 @@ def get_user_details(username):
     if user:
         return jsonify({key: user[key] for key in user.keys()})
     return jsonify({'error': 'User not found'}), 404
+
+@bp.route('/messages/<other_user>', methods=['GET'])
+def get_user_messages(other_user):
+    # TODO: Add authentication to get the current user
+    current_user = request.args.get('current_user')
+    if not current_user:
+        return jsonify({'error': 'current_user parameter is required'}), 400
+
+    messages = get_messages_between(current_user, other_user)
+    return jsonify(messages)
 
 @bp.route('/test', methods=['GET'])
 def test():

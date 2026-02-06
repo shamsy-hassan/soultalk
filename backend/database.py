@@ -99,8 +99,8 @@ def add_message(message):
     cursor = conn.cursor()
     try:
         cursor.execute(
-            'INSERT INTO messages (from_user, to_user, message) VALUES (?, ?, ?)',
-            (message['from'], message['to'], message['message'])
+            'INSERT INTO messages (from_user, to_user, message, translated_text) VALUES (?, ?, ?, ?)',
+            (message['from'], message['to'], message['message'], message.get('translated_message'))
         )
         conn.commit()
     finally:
@@ -169,5 +169,23 @@ def run_migrations():
         except sqlite3.OperationalError as e:
             print(f"Error migrating 'email' column: {e}")
 
+    # Migration for 'translated_text' column in 'messages' table
+    try:
+        cursor.execute("PRAGMA table_info(messages)")
+        message_columns_info = cursor.fetchall()
+        message_columns = [row['name'] for row in message_columns_info]
+
+        if 'translated_text' not in message_columns:
+            print("Applying migration: Adding 'translated_text' column to 'messages' table.")
+            try:
+                cursor.execute("ALTER TABLE messages ADD COLUMN translated_text TEXT")
+                conn.commit()
+                print("Migration for 'translated_text' column successful.")
+            except sqlite3.OperationalError as e:
+                print(f"Error migrating 'translated_text' column: {e}")
+    except sqlite3.OperationalError:
+        # If the table doesn't exist, there's nothing to migrate.
+        pass
+        
     # Close the connection
     conn.close()

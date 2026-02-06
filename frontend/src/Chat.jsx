@@ -30,7 +30,29 @@ const Chat = ({ user, socket }) => {
       }
     };
 
+    const fetchMessages = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/messages/${username}`, {
+          params: { current_user: user.username },
+        });
+        const history = response.data.map(msg => ({
+          id: msg.id,
+          from: msg.from_user,
+          to: msg.to_user,
+          originalText: msg.message,
+          translatedText: msg.translated_text || msg.message,
+          fromLanguage: msg.from_user === user.username ? user.language : targetUser?.language || 'en',
+          toLanguage: msg.to_user === user.username ? user.language : targetUser?.language || 'en',
+          timestamp: new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        }));
+        setMessages(history);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+
     fetchTargetUser();
+    fetchMessages();
 
     // Set up event listeners
     socket.on('receive_message', handleReceiveMessage);
@@ -38,16 +60,13 @@ const Chat = ({ user, socket }) => {
     socket.on('user_typing', handleUserTyping);
     socket.on('error', handleError);
 
-    // Clear messages when chat changes
-    setMessages([]);
-
     return () => {
       socket.off('receive_message');
       socket.off('message_sent');
       socket.off('user_typing');
       socket.off('error');
     };
-  }, [socket, username, user, navigate]);
+  }, [socket, username, user, navigate, targetUser?.language]);
 
   useEffect(() => {
     scrollToBottom();
