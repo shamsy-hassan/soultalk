@@ -5,9 +5,12 @@
 import { useState } from "react";
 import PhoneVerification from "./PhoneVerification";
 import OtpVerification from "./OtpVerification";
+import { CheckCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 // This component manages the full phone verification flow
 export default function VerifyFlow({ onLogin }) {
+  const { t } = useTranslation();
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState(""); // Add email state
   const [username, setUsername] = useState("");
@@ -40,7 +43,7 @@ export default function VerifyFlow({ onLogin }) {
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "50px auto", padding: "20px", border: "1px solid #ccc", borderRadius: "8px", background: "#fafcff" }}>
+    <div className="w-full max-w-md mx-auto">
       {step === "phone" && (
         <PhoneVerification onOtpRequested={handleOtpRequested} />
       )}
@@ -48,14 +51,15 @@ export default function VerifyFlow({ onLogin }) {
         <OtpVerification phone={phone} email={email} username={username} language={language} onVerified={handleVerified} />
       )}
       {step === "done" && (
-        <div style={{ textAlign: "center", marginTop: "50px" }}>
-          <h2>✅ Phone Verified Successfully!</h2>
-          <p>Welcome, {username}</p>
+        <div className="text-center p-4">
+          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('phone_verified_successfully')}</h2>
+          <p className="text-gray-600 mb-6">{t('welcome')}, {username}</p>
           <button
             onClick={handleStartChatting}
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 px-4 rounded-lg hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300 ease-in-out"
           >
-            Start Your Journey
+            {t('start_your_journey')}
           </button>
         </div>
       )}
