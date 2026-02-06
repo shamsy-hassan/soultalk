@@ -1,0 +1,27 @@
+{
+  "name": "soultalk",
+  "version": "1.0.0",
+  "description": "This is a web application that allows users to chat with each other.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shamsy-hassan/soultalk.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shamsy-hassan/soultalk/issues"
+  },
+  "homepage": "https://github.com/shamsy-hassan/soultalk#readme",
+  "dependencies": {
+    "@hotosm/iso-countries-languages": "^1.1.2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0"
+  }
+}

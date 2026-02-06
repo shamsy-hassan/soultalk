@@ -1,0 +1,11 @@
+{
+  "select_country": "Land auswählen",
+  "select_language": "Sprache auswählen",
+  "phone_number": "Telefonnummer",
+  "username": "Benutzername",
+  "email": "E-Mail",
+  "otp": "OTP",
+  "register": "Registrieren",
+  "country": "Land",
+  "language": "Sprache"
+}

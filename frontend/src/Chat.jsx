@@ -175,14 +175,7 @@ const Chat = ({ user, socket }) => {
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
-          <Sparkles className="w-4 h-4 text-purple-600" />
-          <span className="text-sm font-medium text-purple-700">{t('real_time_translation_active')}</span>
-        </div>
-      </div>
-
       {/* Language Bridge Info */}
-      <div className="card mb-6">
         <div className="grid md:grid-cols-3 gap-4">
           <div className="text-center p-4">
             <div className="text-lg font-semibold text-gray-900 mb-1">{t('you')}</div>
@@ -216,11 +209,7 @@ const Chat = ({ user, socket }) => {
           </div>
         </div>
         
-        <div className="mt-4 pt-4 border-t border-gray-100 text-center">
-          <p className="text-sm text-gray-600">
-            <span className="font-medium">{t('magic_happening')}:</span> {t('messages_auto_translate', { targetLanguage: getLanguageName(targetUser.language) })}
-          </p>
-        </div>
+
       </div>
 
       {/* Chat Container */}
@@ -351,33 +340,7 @@ const Chat = ({ user, socket }) => {
         </div>
       </div>
 
-      {/* Translation Info */}
-      <div className="mt-6 card">
-        <h3 className="font-semibold text-gray-900 mb-4">{t('how_translation_works')}</h3>
-        <div className="grid md:grid-cols-3 gap-4">
-          <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-white rounded-xl">
-            <div className="text-2xl mb-2">1</div>
-            <h4 className="font-medium mb-2">{t('you_type')}</h4>
-            <p className="text-sm text-gray-600">
-              {t('write_naturally_in_language', { language: getLanguageName(user.language) })}
-            </p>
-          </div>
-          <div className="text-center p-4 bg-gradient-to-br from-pink-50 to-white rounded-xl">
-            <div className="text-2xl mb-2">2</div>
-            <h4 className="font-medium mb-2">{t('we_translate')}</h4>
-            <p className="text-sm text-gray-600">
-              {t('ai_instantly_translates_to_language', { language: getLanguageName(targetUser.language) })}
-            </p>
-          </div>
-          <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-white rounded-xl">
-            <div className="text-2xl mb-2">3</div>
-            <h4 className="font-medium mb-2">{t('they_read')}</h4>
-            <p className="text-sm text-gray-600">
-              {t('username_sees_message_in_language', { username: username, language: getLanguageName(targetUser.language) })}
-            </p>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 };

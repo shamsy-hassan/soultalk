@@ -1,10 +1,12 @@
 Flask
-Flask-SocketIO
-python-engineio
-python-socketio
+Flask-SocketIO==5.3.1
+python-engineio==4.3.4
+python-socketio==5.0.2
 SQLAlchemy
 requests
 Flask-CORS
 bidict
 python-dotenv
 PyJWT
+gevent
+greenlet

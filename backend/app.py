@@ -19,7 +19,7 @@ def create_app():
     CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 
     # Initialize SocketIO
-    socketio = SocketIO(app, cors_allowed_origins="http://localhost:5173")
+    socketio = SocketIO(app, cors_allowed_origins="http://localhost:5173", async_mode="threading")
 
     # Import and register blueprints
     from routes import bp as main_bp
