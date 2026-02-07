@@ -79,9 +79,6 @@ const Users = ({ user, socket, onLogout }) => {
             {t('find_friends_to_chat_with')}
           </p>
         </div>
-        <button onClick={onLogout} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <LogOut className="w-5 h-5 text-gray-600"/>
-        </button>
       </div>
 
       <div className="mb-6">
