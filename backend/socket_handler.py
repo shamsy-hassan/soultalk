@@ -16,14 +16,11 @@ def init_sockets(socketio: SocketIO):
     def handle_join(data):
         username = data.get('username')
         if username:
+            print(f"User '{username}' attempting to join room.")
             join_room(username)
+            print(f"User '{username}' joined room '{username}'.")
             # Update user status
             user = get_user(username)
-            # The get_user function from database.py returns a sqlite3.Row object
-            # which can be accessed like a dictionary.
-            # However, direct assignment like user['online'] = True won't persist
-            # changes to the database. We need a separate function for that.
-            # For now, we'll just emit the status.
             emit('user_status', {'username': username, 'online': True}, broadcast=True)
 
     @socketio.on('leave')
@@ -31,7 +28,6 @@ def init_sockets(socketio: SocketIO):
         username = data.get('username')
         if username:
             leave_room(username)
-            # Update user status (similar to join, need a db function for persistence)
             emit('user_status', {'username': username, 'online': False}, broadcast=True)
 
     @socketio.on('send_message')
@@ -40,13 +36,24 @@ def init_sockets(socketio: SocketIO):
             from_user = data.get('from')
             to_user = data.get('to')
             message = data.get('message')
+            message_id = data.get('messageId') # Retrieve messageId
+            
+            print(f"Received message from '{from_user}' to '{to_user}': '{message}'")
             
             # Get sender and receiver info
             sender = get_user(from_user)
             receiver = get_user(to_user)
             
+            print(f"Sender found: {sender is not None}, Receiver found: {receiver is not None}")
+
             if not sender or not receiver:
-                emit('error', {'message': 'User not found'})
+                error_message = ""
+                if not sender:
+                    error_message += f"Sender '{from_user}' not found. "
+                if not receiver:
+                    error_message += f"Receiver '{to_user}' not found. "
+                print(f"Error: {error_message}")
+                emit('error', {'message': error_message.strip()})
                 return
             
             # Translate message
@@ -66,6 +73,7 @@ def init_sockets(socketio: SocketIO):
             add_message(message_data)
             
             # Send translated message to receiver
+            print(f"Emitting 'receive_message' to room '{to_user}'")
             emit('receive_message', {
                 'from': from_user,
                 'message': translated_message, # Receiver gets translated message
@@ -74,14 +82,17 @@ def init_sockets(socketio: SocketIO):
             }, room=to_user)
             
             # Send original message to sender
+            print(f"Emitting 'message_sent' to room '{from_user}'")
             emit('message_sent', {
                 'to': to_user,
                 'message': message, # Sender sees their original message
                 'translatedMessage': translated_message, # But also gets the translated version for context
-                'timestamp': 'now'
+                'timestamp': 'now',
+                'messageId': message_id # Include messageId here
             }, room=from_user)
             
         except Exception as e:
+            print(f"Error handling message: {e}")
             emit('error', {'message': str(e)})
 
     @socketio.on('typing')

@@ -76,10 +76,10 @@ def add_user(user):
         conn.close()
 
 def get_user(username):
-    """Retrieves a user from the database by username."""
+    """Retrieves a user from the database by username (case-insensitive)."""
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+    cursor.execute('SELECT * FROM users WHERE username COLLATE NOCASE = ?', (username,))
     user = cursor.fetchone()
     conn.close()
     return user

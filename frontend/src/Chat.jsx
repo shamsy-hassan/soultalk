@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Send, ArrowLeft, Globe, Clock, User, Sparkles, Mic, Image as ImageIcon, Smile } from 'lucide-react';
@@ -16,6 +16,86 @@ const Chat = ({ user, socket }) => {
   const [targetUser, setTargetUser] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const typingTimeoutRef = useRef(null); // Use useRef for typingTimeout
+
+  const handleReceiveMessage = useCallback((data) => {
+    console.log('Received message:', data); // Debugging line
+    setMessages(prevMessages => {
+      const message = {
+        id: data.messageId || prevMessages.length + 1, // Use messageId if present, else fall back
+        from: data.from,
+        to: user.username,
+        originalText: data.originalMessage || data.message,
+        translatedText: data.message,
+        fromLanguage: targetUser?.language || 'en',
+        toLanguage: user.language,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isReceived: true
+      };
+      return [...prevMessages, message];
+    });
+  }, [user.username, user.language, targetUser?.language]);
+
+  const handleMessageSent = useCallback((data) => {
+    setMessages(prevMessages => {
+      const existingMessageIndex = prevMessages.findIndex(msg =>
+        msg.id === data.messageId && msg.isOptimistic
+      );
+
+      if (existingMessageIndex > -1) {
+        // Update the existing optimistic message
+        const updatedMessages = [...prevMessages];
+        updatedMessages[existingMessageIndex] = {
+          ...updatedMessages[existingMessageIndex],
+          translatedText: data.translatedMessage,
+          isOptimistic: false, // Mark as no longer optimistic
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) // Update timestamp from server
+        };
+        return updatedMessages;
+      } else {
+        // Add new message if no optimistic message found (e.g., reloaded or missed optimistic update)
+        const message = {
+          id: data.messageId || prevMessages.length + 1, // Use messageId if present, else fall back
+          from: user.username,
+          to: data.to,
+          originalText: data.message,
+          translatedText: data.translatedMessage,
+          fromLanguage: user.language,
+          toLanguage: targetUser?.language || 'en',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          isSent: true
+        };
+        return [...prevMessages, message];
+      }
+    });
+  }, [user.username, user.language, targetUser?.language]);
+
+  const handleUserTyping = useCallback((data) => {
+    if (data.from === username) {
+      setIsTyping(data.is_typing);
+    }
+  }, [username]);
+
+  const handleError = useCallback((data) => {
+    console.error('Socket error:', data.message);
+  }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    // Set up event listeners
+    socket.on('receive_message', handleReceiveMessage);
+    socket.on('message_sent', handleMessageSent);
+    socket.on('user_typing', handleUserTyping);
+    socket.on('error', handleError);
+
+    return () => {
+      socket.off('receive_message');
+      socket.off('message_sent');
+      socket.off('user_typing');
+      socket.off('error');
+    };
+  }, [socket, handleReceiveMessage, handleMessageSent, handleUserTyping, handleError]);
 
   useEffect(() => {
     if (!socket) return;
@@ -53,19 +133,6 @@ const Chat = ({ user, socket }) => {
 
     fetchTargetUser();
     fetchMessages();
-
-    // Set up event listeners
-    socket.on('receive_message', handleReceiveMessage);
-    socket.on('message_sent', handleMessageSent);
-    socket.on('user_typing', handleUserTyping);
-    socket.on('error', handleError);
-
-    return () => {
-      socket.off('receive_message');
-      socket.off('message_sent');
-      socket.off('user_typing');
-      socket.off('error');
-    };
   }, [socket, username, user, navigate, targetUser?.language]);
 
   useEffect(() => {
@@ -76,58 +143,39 @@ const Chat = ({ user, socket }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleReceiveMessage = (data) => {
-    const message = {
-      id: messages.length + 1,
-      from: data.from,
-      to: user.username,
-      originalText: data.originalMessage || data.message,
-      translatedText: data.message,
-      fromLanguage: targetUser?.language || 'en',
-      toLanguage: user.language,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isReceived: true
-    };
-    setMessages(prev => [...prev, message]);
-  };
-
-  const handleMessageSent = (data) => {
-    const message = {
-      id: messages.length + 1,
-      from: user.username,
-      to: data.to,
-      originalText: data.message,
-      translatedText: data.translatedMessage,
-      fromLanguage: user.language,
-      toLanguage: targetUser?.language || 'en',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isSent: true
-    };
-    setMessages(prev => [...prev, message]);
-  };
-
-  const handleUserTyping = (data) => {
-    if (data.from === username) {
-      setIsTyping(data.is_typing);
-    }
-  };
-
-  const handleError = (data) => {
-    console.error('Socket error:', data.message);
-  };
-
-  const handleSend = () => {
+    const handleSend = () => {
     if (!newMessage.trim() || !socket) return;
+
+    const messageToSend = newMessage;
+    setNewMessage(''); // Clear input immediately
+
+    const messageId = Date.now().toString(); // Generate a unique client-side ID
+
+    // Optimistically add message to sender's UI
+    const optimisticMessage = {
+      id: messageId, // Use the generated client-side ID
+      from: user.username,
+      to: username,
+      originalText: messageToSend,
+      translatedText: messageToSend, // Initially, sender sees their original message
+      fromLanguage: user.language,
+      toLanguage: targetUser?.language || 'en', // Assuming targetUser is available
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isSent: true, // Mark as sent for display purposes
+      isOptimistic: true // Custom flag to identify optimistic updates
+    };
+
+    setMessages(prevMessages => [...prevMessages, optimisticMessage]);
 
     socket.emit('send_message', {
       from: user.username,
       to: username,
-      message: newMessage
+      message: messageToSend,
+      messageId: messageId // Include the client-side ID
     });
 
     setTyping(false);
     socket.emit('typing', { from: user.username, to: username, is_typing: false });
-    setNewMessage('');
   };
 
   const handleKeyPress = (e) => {
@@ -145,9 +193,11 @@ const Chat = ({ user, socket }) => {
       socket.emit('typing', { from: user.username, to: username, is_typing: true });
     }
 
-    // Reset typing indicator after 2 seconds
-    clearTimeout(typingTimeout);
-    const typingTimeout = setTimeout(() => {
+    if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+    }
+    
+    typingTimeoutRef.current = setTimeout(() => {
       setTyping(false);
       socket.emit('typing', { from: user.username, to: username, is_typing: false });
     }, 2000);
