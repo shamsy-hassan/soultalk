@@ -1,40 +1,72 @@
+# app.py
+# SoulTalk backend server
+
 import os
 from flask import Flask
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from dotenv import load_dotenv
 
+# 🔥 Load environment variables
+load_dotenv()
+
+# 🔥 Initialize SocketIO globally with Eventlet
+socketio = SocketIO(
+    cors_allowed_origins="http://localhost:5173",
+    async_mode="eventlet",
+    logger=True,
+    engineio_logger=True
+)
+
 def create_app():
-    load_dotenv()
-
-    # Initialize the database and run migrations
-    from database import init_db, run_migrations
-    init_db()
-    run_migrations()
-
+    """Create and configure the Flask app."""
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'soultalk-secret-key-2024')
+    
+    # 🔥 Flask config
+    app.config.from_mapping(
+        SECRET_KEY=os.getenv('SECRET_KEY', 'soultalk-secret-key-2024'),
+        DATABASE=os.getenv('DATABASE_PATH', os.path.join(app.instance_path, 'users.db'))
+    )
 
-    # Configure CORS
+    # 🔥 Ensure instance folder exists
+    os.makedirs(app.instance_path, exist_ok=True)
+
+    # 🔥 Initialize database
+    from database import init_db, run_migrations, close_db
+    with app.app_context():
+        init_db()
+        run_migrations()
+
+    app.teardown_appcontext(close_db)
+
+    # 🔥 Enable CORS
     CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 
-    # Initialize SocketIO
-    socketio = SocketIO(app, cors_allowed_origins="http://localhost:5173", async_mode="threading")
+    # 🔥 Attach SocketIO
+    socketio.init_app(app)
 
-    # Import and register blueprints
-    from routes import bp as main_bp
-    app.register_blueprint(main_bp)
+    return app
 
-    from verification_routes import bp as verification_bp
-    app.register_blueprint(verification_bp)
 
-    # Initialize socket handlers
-    from socket_handler import init_sockets
-    init_sockets(socketio)
+# 🔥 Create Flask app
+app = create_app()
 
-    return app, socketio
+# 🔥 Register blueprints
+from routes import bp as main_bp
+app.register_blueprint(main_bp)
 
-if __name__ == '__main__':
-    app, socketio = create_app()
-    print("Starting server...")
-    socketio.run(app, debug=True, port=5000)
+from verification_routes import bp as verification_bp
+app.register_blueprint(verification_bp)
+
+# 🔥 Initialize socket handlers
+from socket_handler import init_sockets
+init_sockets(socketio)
+
+
+if __name__ == "__main__":
+    print("🚀 Starting SoulTalk server on http://0.0.0.0:5000 ...")
+    # 🔥 Run server with Eventlet (supports WebSockets)
+    import eventlet
+    import eventlet.wsgi
+    eventlet.monkey_patch()
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)

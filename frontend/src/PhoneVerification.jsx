@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertCircle, ArrowRight, CheckCircle, Loader, User, Mail, Phone } from "lucide-react";
+import { checkPhone, requestOtp } from "./api"; // Import the API functions
 
 function formatPhoneNumber(input) {
   let num = input.replace(/\D/g, "");
@@ -30,25 +31,16 @@ export default function PhoneVerification({ onOtpRequested }) {
     setChecking(true);
     const formatted = formatPhoneNumber(phone);
     try {
-      const res = await fetch("/api/check-phone", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: formatted }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        if (data.registered) {
-          setEmail(data.email);
-          setUsername(data.username);
-          setFlowStep("confirmRegistered");
-        } else {
-          setFlowStep("enterNewDetails");
-        }
+      const data = await checkPhone(formatted);
+      if (data.registered) {
+        setEmail(data.email);
+        setUsername(data.username);
+        setFlowStep("confirmRegistered");
       } else {
-        setError(data.error || t('error_checking_number'));
+        setFlowStep("enterNewDetails");
       }
     } catch (err) {
-      setError(t('failed_to_check_number'));
+      setError(err.message || t('error_checking_number'));
     } finally {
       setChecking(false);
     }
@@ -60,20 +52,11 @@ export default function PhoneVerification({ onOtpRequested }) {
     setMessage("");
     const formattedPhone = formatPhoneNumber(phone);
     try {
-      const res = await fetch("/api/request-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: formattedPhone, email, username, language }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setMessage(data.message);
-        onOtpRequested(formattedPhone, email, username, language);
-      } else {
-        setError(data.error || t('error_requesting_otp'));
-      }
+      const data = await requestOtp(formattedPhone, email);
+      setMessage(data.message);
+      onOtpRequested(formattedPhone, email, username, language);
     } catch (err) {
-      setError(t('failed_to_request_otp'));
+      setError(err.message || t('error_requesting_otp'));
     } finally {
       setChecking(false);
     }

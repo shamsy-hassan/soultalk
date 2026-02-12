@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader, ShieldCheck, AlertTriangle } from "lucide-react";
+import { verifyOtp, requestOtp } from "./api"; // Import the API functions
 
 export default function OtpVerification({ phone, email, username, language, onVerified }) {
   const { t } = useTranslation();
@@ -15,22 +16,13 @@ export default function OtpVerification({ phone, email, username, language, onVe
     setError("");
     setMessage("");
     try {
-      const res = await fetch("/api/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, otp, username, language, email }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setMessage(data.message || t('verification_successful'));
-        localStorage.setItem("soultalk_token", data.token);
-        localStorage.setItem("soultalk_user", JSON.stringify(data.user));
-        onVerified(data.user);
-      } else {
-        setError(data.error || data.message || t('failed_to_verify_otp'));
-      }
+      const data = await verifyOtp(phone, otp, username, language, email);
+      setMessage(data.message || t('verification_successful'));
+      localStorage.setItem("soultalk_token", data.token);
+      localStorage.setItem("soultalk_user", JSON.stringify(data.user));
+      onVerified(data.user);
     } catch (err) {
-      setError(t('failed_to_verify_otp'));
+      setError(err.message || t('failed_to_verify_otp'));
     } finally {
       setLoading(false);
     }
@@ -41,15 +33,10 @@ export default function OtpVerification({ phone, email, username, language, onVe
     setError("");
     setMessage("");
     try {
-      const res = await fetch("/api/request-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, email }),
-      });
-      const data = await res.json();
+      const data = await requestOtp(phone, email);
       setMessage(data.message || t('otp_resent_message'));
     } catch (err) {
-      setError(t('failed_to_resend_otp'));
+      setError(err.message || t('failed_to_resend_otp'));
     } finally {
       setResending(false);
     }

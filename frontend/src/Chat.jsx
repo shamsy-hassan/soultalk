@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Send, ArrowLeft, Globe, Clock, User, Sparkles, Mic, Image as ImageIcon, Smile } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getLanguageName, getLanguageFlag } from './i18n';
+import { getUserDetails, getMessagesBetween } from './api'; // Import API functions
 
 const Chat = ({ user, socket }) => {
   const { t } = useTranslation();
@@ -16,13 +16,26 @@ const Chat = ({ user, socket }) => {
   const [targetUser, setTargetUser] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
-  const typingTimeoutRef = useRef(null); // Use useRef for typingTimeout
+  const typingTimeoutRef = useRef(null);
+  const token = localStorage.getItem("soultalk_token");
+
+  // Check socket connection status and rejoin room if reconnected
+  useEffect(() => {
+    if (!socket) return;
+
+    console.log('Socket connection status:', socket.connected ? 'Connected' : 'Disconnected');
+    
+    // Rejoin room if reconnected
+    if (socket.connected && user?.username) {
+      socket.emit('join', { username: user.username });
+    }
+  }, [socket, user?.username]);
 
   const handleReceiveMessage = useCallback((data) => {
-    console.log('Received message:', data); // Debugging line
+    console.log('Received message:', data);
     setMessages(prevMessages => {
       const message = {
-        id: data.messageId || prevMessages.length + 1, // Use messageId if present, else fall back
+        id: data.messageId || prevMessages.length + 1,
         from: data.from,
         to: user.username,
         originalText: data.originalMessage || data.message,
@@ -48,14 +61,14 @@ const Chat = ({ user, socket }) => {
         updatedMessages[existingMessageIndex] = {
           ...updatedMessages[existingMessageIndex],
           translatedText: data.translatedMessage,
-          isOptimistic: false, // Mark as no longer optimistic
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) // Update timestamp from server
+          isOptimistic: false,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         return updatedMessages;
       } else {
-        // Add new message if no optimistic message found (e.g., reloaded or missed optimistic update)
+        // Add new message if no optimistic message found
         const message = {
-          id: data.messageId || prevMessages.length + 1, // Use messageId if present, else fall back
+          id: data.messageId || prevMessages.length + 1,
           from: user.username,
           to: data.to,
           originalText: data.message,
@@ -102,8 +115,8 @@ const Chat = ({ user, socket }) => {
 
     const fetchTargetUser = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/user/${username}`);
-        setTargetUser(response.data);
+        const data = await getUserDetails(username, token);
+        setTargetUser(data);
       } catch (error) {
         console.error('Error fetching target user:', error);
         navigate('/users');
@@ -112,10 +125,8 @@ const Chat = ({ user, socket }) => {
 
     const fetchMessages = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/messages/${username}`, {
-          params: { current_user: user.username },
-        });
-        const history = response.data.map(msg => ({
+        const data = await getMessagesBetween(user.username, username, token);
+        const history = data.map(msg => ({
           id: msg.id,
           from: msg.from_user,
           to: msg.to_user,
@@ -133,7 +144,7 @@ const Chat = ({ user, socket }) => {
 
     fetchTargetUser();
     fetchMessages();
-  }, [socket, username, user, navigate, targetUser?.language]);
+  }, [socket, username, user, navigate, targetUser?.language, token]);
 
   useEffect(() => {
     scrollToBottom();
@@ -143,26 +154,29 @@ const Chat = ({ user, socket }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-    const handleSend = () => {
-    if (!newMessage.trim() || !socket) return;
+  const handleSend = () => {
+    if (!newMessage.trim() || !socket) {
+      console.error('Cannot send message: No message or socket not available');
+      return;
+    }
 
     const messageToSend = newMessage;
-    setNewMessage(''); // Clear input immediately
+    setNewMessage('');
 
-    const messageId = Date.now().toString(); // Generate a unique client-side ID
+    const messageId = Date.now().toString();
 
     // Optimistically add message to sender's UI
     const optimisticMessage = {
-      id: messageId, // Use the generated client-side ID
+      id: messageId,
       from: user.username,
       to: username,
       originalText: messageToSend,
-      translatedText: messageToSend, // Initially, sender sees their original message
+      translatedText: messageToSend,
       fromLanguage: user.language,
-      toLanguage: targetUser?.language || 'en', // Assuming targetUser is available
+      toLanguage: targetUser?.language || 'en',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isSent: true, // Mark as sent for display purposes
-      isOptimistic: true // Custom flag to identify optimistic updates
+      isSent: true,
+      isOptimistic: true
     };
 
     setMessages(prevMessages => [...prevMessages, optimisticMessage]);
@@ -171,7 +185,7 @@ const Chat = ({ user, socket }) => {
       from: user.username,
       to: username,
       message: messageToSend,
-      messageId: messageId // Include the client-side ID
+      messageId: messageId
     });
 
     setTyping(false);
@@ -194,7 +208,7 @@ const Chat = ({ user, socket }) => {
     }
 
     if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
+      clearTimeout(typingTimeoutRef.current);
     }
     
     typingTimeoutRef.current = setTimeout(() => {
@@ -235,7 +249,7 @@ const Chat = ({ user, socket }) => {
                       {getLanguageName(targetUser.language)} {getLanguageFlag(targetUser.language)}
                     </span>
                   </div>
-                  <span className="text-gray-400\">•</span>
+                  <span className="text-gray-400">•</span>
                   <div className="flex items-center space-x-1">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     <span className="text-green-600">{t('online')}</span>
@@ -255,7 +269,7 @@ const Chat = ({ user, socket }) => {
             </div>
             
             <div className="flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-purple-500" />
+              <Sparkles className="w-6 h-6 text-purple-500" />
             </div>
             
             <div className="text-center p-2">
@@ -351,7 +365,7 @@ const Chat = ({ user, socket }) => {
                     rows="1"
                   />
                   <div className="absolute right-3 bottom-2 flex items-center space-x-2">
-                     <button className="p-1 hover:bg-gray-200 rounded-lg transition-colors">
+                    <button className="p-1 hover:bg-gray-200 rounded-lg transition-colors">
                       <Smile className="w-5 h-5 text-gray-500" />
                     </button>
                   </div>
@@ -369,9 +383,9 @@ const Chat = ({ user, socket }) => {
               >
                 <Send className="w-5 h-5" />
               </button>
-               <button className="p-3 hover:bg-gray-200 rounded-xl transition-colors md:hidden">
-                  <Mic className="w-5 h-5 text-gray-500" />
-                </button>
+              <button className="p-3 hover:bg-gray-200 rounded-xl transition-colors md:hidden">
+                <Mic className="w-5 h-5 text-gray-500" />
+              </button>
             </div>
           </div>
         </div>

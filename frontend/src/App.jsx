@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './Login';
 import Users from './Users';
 import Chat from './Chat';
-import { io } from 'socket.io-client';
+import { initSocket } from './socket';
 import './index.css';
 import { useTranslation } from 'react-i18next';
 import i18n from './i18n';
@@ -30,10 +30,28 @@ function App() {
 
   useEffect(() => {
     if (user && !socket) {
-      const newSocket = io('http://localhost:5000');
+      const newSocket = initSocket(user.username);
       setSocket(newSocket);
-      newSocket.emit('join', { username: user.username });
-      return () => newSocket.disconnect();
+
+      const handleConnect = () => {
+        if (user && newSocket.connected) {
+          newSocket.emit('join', { username: user.username });
+          console.log(`User ${user.username} joined socket room.`);
+        }
+      };
+
+      newSocket.on('connect', handleConnect);
+
+      // Also emit join immediately if already connected (e.g., after initial mount)
+      if (user && newSocket.connected) {
+        newSocket.emit('join', { username: user.username });
+        console.log(`User ${user.username} joined socket room (initial connect).`);
+      }
+
+      return () => {
+        newSocket.off('connect', handleConnect);
+        // newSocket.disconnect(); // Temporarily disable for StrictMode development
+      };
     }
   }, [user, socket]);
   

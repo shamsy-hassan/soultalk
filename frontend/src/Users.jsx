@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Search, Globe, Wifi, WifiOff, MessageSquare, UserPlus, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { getUsers } from './api'; // Import the API function
 
 const Users = ({ user, socket, onLogout }) => {
   const { t } = useTranslation();
@@ -11,6 +11,7 @@ const Users = ({ user, socket, onLogout }) => {
   const [search, setSearch] = useState('');
   const [onlineUsers, setOnlineUsers] = useState(new Set());
   const navigate = useNavigate();
+  const token = localStorage.getItem("soultalk_token");
 
   useEffect(() => {
     fetchUsers();
@@ -42,10 +43,8 @@ const Users = ({ user, socket, onLogout }) => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/users', {
-        params: { current_user: user.username }
-      });
-      setUsers(response.data.users);
+      const data = await getUsers(user.username, token);
+      setUsers(data.users);
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {

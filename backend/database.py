@@ -1,24 +1,32 @@
 import sqlite3
 import os
-
-# Database path
-DB_PATH = os.path.join('instance', 'users.db')
+from flask import current_app, g
 
 def get_db_connection():
     """Establishes a connection to the database."""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+    if 'db' not in g:
+        g.db = sqlite3.connect(
+            current_app.config['DATABASE'],
+            detect_types=sqlite3.PARSE_DECLTYPES
+        )
+        g.db.row_factory = sqlite3.Row
+    return g.db
+
+def close_db(e=None):
+    db = g.pop('db', None)
+
+    if db is not None:
+        db.close()
 
 def init_db():
     """Initializes the database and creates the users table if it doesn't exist."""
+    db = get_db_connection()
+    cursor = db.cursor()
+
     # Ensure the instance directory exists
-    db_dir = os.path.dirname(DB_PATH)
+    db_dir = os.path.dirname(current_app.config['DATABASE'])
     if not os.path.exists(db_dir):
         os.makedirs(db_dir)
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
 
     # Check if the 'users' table exists
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
@@ -37,7 +45,7 @@ def init_db():
             )
         ''')
 
-        conn.commit()
+        db.commit()
 
     # Check if the 'messages' table exists
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='messages'")
@@ -54,11 +62,9 @@ def init_db():
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         ''')
-        conn.commit()
+        db.commit()
         print("'messages' table created successfully.")
     
-    conn.close()
-
 def add_user(user):
     """Adds a new user to the database."""
     conn = get_db_connection()
@@ -72,8 +78,7 @@ def add_user(user):
     except sqlite3.IntegrityError:
         # User already exists
         pass
-    finally:
-        conn.close()
+    # No close_db here as it's handled by app context teardown
 
 def get_user(username):
     """Retrieves a user from the database by username (case-insensitive)."""
@@ -81,7 +86,7 @@ def get_user(username):
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM users WHERE username COLLATE NOCASE = ?', (username,))
     user = cursor.fetchone()
-    conn.close()
+    # No close_db here as it's handled by app context teardown
     return user
 
 def get_all_users():
@@ -90,7 +95,7 @@ def get_all_users():
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM users')
     users = cursor.fetchall()
-    conn.close()
+    # No close_db here as it's handled by app context teardown
     return users
 
 def add_message(message):
@@ -104,7 +109,8 @@ def add_message(message):
         )
         conn.commit()
     finally:
-        conn.close()
+        # No close_db here as it's handled by app context teardown
+        pass
 
 def get_messages_between(user1, user2):
     """Retrieves all messages between two users from the database."""
@@ -117,7 +123,7 @@ def get_messages_between(user1, user2):
         (user1, user2, user2, user1)
     )
     messages = cursor.fetchall()
-    conn.close()
+    # No close_db here as it's handled by app context teardown
     return [dict(row) for row in messages]
 
 def update_user_status(username, online):
@@ -126,7 +132,60 @@ def update_user_status(username, online):
     cursor = conn.cursor()
     cursor.execute('UPDATE users SET online = ? WHERE username = ?', (online, username))
     conn.commit()
-    conn.close()
+    # No close_db here as it's handled by app context teardown
+
+def update_user(username, language=None, phone=None, email=None):
+    """Updates user details in the database."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    updates = []
+    params = []
+
+    if language is not None:
+        updates.append('language = ?')
+        params.append(language)
+    if phone is not None:
+        updates.append('phone = ?')
+        params.append(phone)
+    if email is not None:
+        updates.append('email = ?')
+        params.append(email)
+    
+    if not updates:
+        # No close_db here as it's handled by app context teardown
+        return False # No updates to perform
+
+    query = f"UPDATE users SET {', '.join(updates)} WHERE username = ?"
+    params.append(username)
+
+    try:
+        cursor.execute(query, tuple(params))
+        conn.commit()
+        return cursor.rowcount > 0
+    except sqlite3.IntegrityError:
+        # Handle cases where phone or email might already exist if UNIQUE constraint is violated
+        return False
+    finally:
+        # No close_db here as it's handled by app context teardown
+        pass
+
+def delete_user(username):
+    """Deletes a user from the database."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM users WHERE username = ?', (username,))
+    conn.commit()
+    # No close_db here as it's handled by app context teardown
+    return cursor.rowcount > 0
+
+def delete_message(message_id):
+    """Deletes a message from the database by its ID."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM messages WHERE id = ?', (message_id,))
+    conn.commit()
+    # No close_db here as it's handled by app context teardown
+    return cursor.rowcount > 0
 
 def run_migrations():
     """Applies database schema migrations."""
@@ -139,12 +198,12 @@ def run_migrations():
         cursor.execute("PRAGMA table_info(users)")
         columns_info = cursor.fetchall()
         if not columns_info: # No table found
-             conn.close()
+             # No close_db here as it's handled by app context teardown
              return
         columns = [row['name'] for row in columns_info]
     except sqlite3.OperationalError:
         # If the table doesn't exist, there's nothing to migrate.
-        conn.close()
+        # No close_db here as it's handled by app context teardown
         return
 
     # Migration for 'phone' column
@@ -187,5 +246,4 @@ def run_migrations():
         # If the table doesn't exist, there's nothing to migrate.
         pass
         
-    # Close the connection
-    conn.close()
+    # Close the connection is handled by app context teardown

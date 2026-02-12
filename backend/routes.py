@@ -1,5 +1,6 @@
+#backend/routes.py
 from flask import Blueprint, request, jsonify
-from database import get_user, add_user, get_all_users, get_messages_between
+from database import get_user, add_user, get_all_users, get_messages_between, update_user, delete_user, delete_message
 
 bp = Blueprint('main', __name__, url_prefix='/api')
 
@@ -65,6 +66,32 @@ def get_user_details(username):
         return jsonify({key: user[key] for key in user.keys()})
     return jsonify({'error': 'User not found'}), 404
 
+@bp.route('/user/<username>', methods=['PUT'])
+def update_user_details(username):
+    data = request.get_json()
+    language = data.get('language')
+    phone = data.get('phone')
+    email = data.get('email')
+
+    if not any([language, phone, email]):
+        return jsonify({'error': 'No update data provided'}), 400
+
+    success = update_user(username, language=language, phone=phone, email=email)
+    if success:
+        updated_user = get_user(username)
+        return jsonify({
+            'message': 'User updated successfully',
+            'user': {key: updated_user[key] for key in updated_user.keys()}
+        }), 200
+    return jsonify({'error': 'User not found or update failed'}), 404
+
+@bp.route('/user/<username>', methods=['DELETE'])
+def delete_user_route(username):
+    success = delete_user(username)
+    if success:
+        return jsonify({'message': 'User deleted successfully'}), 200
+    return jsonify({'error': 'User not found or deletion failed'}), 404
+
 @bp.route('/messages/<other_user>', methods=['GET'])
 def get_user_messages(other_user):
     # TODO: Add authentication to get the current user
@@ -74,6 +101,13 @@ def get_user_messages(other_user):
 
     messages = get_messages_between(current_user, other_user)
     return jsonify(messages)
+
+@bp.route('/message/<int:message_id>', methods=['DELETE'])
+def delete_message_route(message_id):
+    success = delete_message(message_id)
+    if success:
+        return jsonify({'message': f'Message with ID {message_id} deleted successfully'}), 200
+    return jsonify({'error': f'Message with ID {message_id} not found or deletion failed'}), 404
 
 @bp.route('/test', methods=['GET'])
 def test():
