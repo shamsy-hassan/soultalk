@@ -51,6 +51,7 @@ def init_db():
                 from_user TEXT NOT NULL,
                 to_user TEXT NOT NULL,
                 message TEXT NOT NULL,
+                translated_message TEXT NOT NULL,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         ''')
@@ -93,14 +94,14 @@ def get_all_users():
     conn.close()
     return users
 
-def add_message(message):
+def add_message(message_data):
     """Adds a new message to the database."""
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(
-            'INSERT INTO messages (from_user, to_user, message) VALUES (?, ?, ?)',
-            (message['from'], message['to'], message['message'])
+            'INSERT INTO messages (from_user, to_user, message, translated_message) VALUES (?, ?, ?, ?)',
+            (message_data['from'], message_data['to'], message_data['message'], message_data['translated_message'])
         )
         conn.commit()
     finally:
@@ -168,6 +169,24 @@ def run_migrations():
             print("Migration for 'email' column successful.")
         except sqlite3.OperationalError as e:
             print(f"Error migrating 'email' column: {e}")
+
+    # Check if the 'messages' table exists before attempting to migrate it
+    try:
+        cursor.execute("PRAGMA table_info(messages)")
+        messages_columns_info = cursor.fetchall()
+        messages_columns = [row['name'] for row in messages_columns_info]
+
+        if 'translated_message' not in messages_columns:
+            print("Applying migration: Adding 'translated_message' column to 'messages' table.")
+            try:
+                cursor.execute("ALTER TABLE messages ADD COLUMN translated_message TEXT")
+                conn.commit()
+                print("Migration for 'translated_message' column successful.")
+            except sqlite3.OperationalError as e:
+                print(f"Error migrating 'translated_message' column: {e}")
+    except sqlite3.OperationalError:
+        # If the messages table doesn't exist, init_db will create it with the new schema.
+        pass
 
     # Close the connection
     conn.close()

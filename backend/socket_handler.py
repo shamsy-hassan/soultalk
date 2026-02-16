@@ -1,5 +1,5 @@
 from flask_socketio import emit, join_room, leave_room, SocketIO
-from database import add_message, get_user
+from database import add_message, get_user, get_messages_between
 from translate import translate_text
 
 def init_sockets(socketio: SocketIO):
@@ -94,3 +94,21 @@ def init_sockets(socketio: SocketIO):
             'from': from_user,
             'is_typing': is_typing
         }, room=to_user)
+
+    @socketio.on('request_message_history')
+    def handle_request_message_history(data):
+        try:
+            user1 = data.get('user1')
+            user2 = data.get('user2')
+            
+            if not user1 or not user2:
+                emit('error', {'message': 'Both users are required to fetch message history'})
+                return
+            
+            messages = get_messages_between(user1, user2)
+            
+            # Emit messages back to the requesting user (user1)
+            emit('message_history', {'messages': messages, 'chatPartner': user2}, room=user1)
+            
+        except Exception as e:
+            emit('error', {'message': str(e)})

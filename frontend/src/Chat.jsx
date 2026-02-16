@@ -16,29 +16,20 @@ const Chat = ({ user, socket }) => {
   const [targetUser, setTargetUser] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const typingTimeoutRef = useRef(null); // Declare typingTimeout using useRef
 
   useEffect(() => {
-    if (!socket) return;
-
-    const fetchTargetUser = async () => {
-      try {
-        const response = await axios.get(`http://localhost:5000/api/user/${username}`);
-        setTargetUser(response.data);
-      } catch (error) {
-        console.error('Error fetching target user:', error);
-        navigate('/users');
-      }
-    };
-
-    fetchTargetUser();
+    if (!socket || !user || !username) return;
 
     // Set up event listeners
     socket.on('receive_message', handleReceiveMessage);
     socket.on('message_sent', handleMessageSent);
     socket.on('user_typing', handleUserTyping);
     socket.on('error', handleError);
+    socket.on('message_history', handleMessageHistory); 
 
     // Clear messages when chat changes
+    console.log('Chat.jsx: Clearing messages on chat change. Current username:', username, 'User object:', user);
     setMessages([]);
 
     return () => {
@@ -46,10 +37,39 @@ const Chat = ({ user, socket }) => {
       socket.off('message_sent');
       socket.off('user_typing');
       socket.off('error');
+      socket.off('message_history'); 
     };
   }, [socket, username, user, navigate]);
 
   useEffect(() => {
+    if (!username || !user || !socket) return;
+
+    console.log('Chat.jsx: Attempting to fetch target user:', username);
+    const fetchTargetUser = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/user/${username}`);
+        setTargetUser(response.data);
+        console.log('Chat.jsx: Successfully fetched target user:', response.data);
+      } catch (error) {
+        console.error('Chat.jsx: Error fetching target user:', error);
+        navigate('/users');
+      }
+    };
+
+    fetchTargetUser();
+  }, [username, user, navigate, socket]);
+
+  useEffect(() => {
+    if (targetUser && user && socket) {
+      console.log(`Chat.jsx: Target user and current user available. Emitting request_message_history for user1: ${user.username}, user2: ${username}`);
+      socket.emit('request_message_history', { user1: user.username, user2: username });
+    } else {
+      console.log('Chat.jsx: Not emitting request_message_history. targetUser:', targetUser, 'user:', user, 'socket:', socket);
+    }
+  }, [targetUser, user, socket, username]);
+
+  useEffect(() => {
+    console.log('Chat.jsx: Messages state updated, scrolling to bottom. Current messages count:', messages.length);
     scrollToBottom();
   }, [messages]);
 
@@ -58,8 +78,9 @@ const Chat = ({ user, socket }) => {
   };
 
   const handleReceiveMessage = (data) => {
+    console.log('Chat.jsx: Received new message:', data);
     const message = {
-      id: messages.length + 1,
+      id: `${Date.now()}-${data.from}-${user.username}`, // More robust temporary ID
       from: data.from,
       to: user.username,
       originalText: data.originalMessage || data.message,
@@ -69,12 +90,17 @@ const Chat = ({ user, socket }) => {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       isReceived: true
     };
-    setMessages(prev => [...prev, message]);
+    setMessages(prev => {
+      const newMessages = [...prev, message];
+      console.log('Chat.jsx: New messages state after handleReceiveMessage:', newMessages);
+      return newMessages;
+    });
   };
 
   const handleMessageSent = (data) => {
+    console.log('Chat.jsx: Message sent confirmation:', data);
     const message = {
-      id: messages.length + 1,
+      id: `${Date.now()}-${user.username}-${data.to}`, // More robust temporary ID
       from: user.username,
       to: data.to,
       originalText: data.message,
@@ -84,17 +110,46 @@ const Chat = ({ user, socket }) => {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       isSent: true
     };
-    setMessages(prev => [...prev, message]);
+    setMessages(prev => {
+      const newMessages = [...prev, message];
+      console.log('Chat.jsx: New messages state after handleMessageSent:', newMessages);
+      return newMessages;
+    });
   };
 
   const handleUserTyping = (data) => {
     if (data.from === username) {
       setIsTyping(data.is_typing);
+      console.log(`Chat.jsx: User ${data.from} is typing: ${data.is_typing}`);
     }
   };
 
   const handleError = (data) => {
-    console.error('Socket error:', data.message);
+    console.error('Chat.jsx: Socket error:', data.message);
+  };
+
+  const handleMessageHistory = (data) => {
+    console.log('Chat.jsx: Received message history. Data:', data);
+    const chatPartner = data.chatPartner;
+    const history = data.messages.map(msg => {
+      const isSent = msg.from_user === user.username;
+      const isReceived = msg.to_user === user.username;
+      return {
+        id: msg.id,
+        from: msg.from_user,
+        to: msg.to_user,
+        originalText: msg.message,
+        translatedText: msg.translated_message,
+        fromLanguage: isSent ? user.language : targetUser?.language || 'en',
+        toLanguage: isReceived ? user.language : targetUser?.language || 'en',
+        timestamp: new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isSent: isSent,
+        isReceived: isReceived,
+      };
+    });
+    console.log('Chat.jsx: Mapped message history:', history);
+    setMessages(history);
+    console.log('Chat.jsx: Messages state after handleMessageHistory. Count:', history.length, 'Messages:', history);
   };
 
   const handleSend = () => {
@@ -127,8 +182,8 @@ const Chat = ({ user, socket }) => {
     }
 
     // Reset typing indicator after 2 seconds
-    clearTimeout(typingTimeout);
-    const typingTimeout = setTimeout(() => {
+    clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
       setTyping(false);
       socket.emit('typing', { from: user.username, to: username, is_typing: false });
     }, 2000);
