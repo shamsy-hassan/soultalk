@@ -108,5 +108,10 @@
   "we_translate": "We Translate",
   "ai_instantly_translates_to_language": "AI instantly translates to {{language}}",
   "they_read": "They Read",
-  "username_sees_message_in_language": "{{username}} sees message in {{language}}"
+  "username_sees_message_in_language": "{{username}} sees message in {{language}}",
+  "logout_confirm_title": "Confirm Logout",
+  "logout_confirm_message": "Are you sure you want to log out?",
+  "cancel": "Cancel",
+  "goodbye_message": "Wishing to see you next time!"
 }
+

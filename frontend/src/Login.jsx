@@ -1,16 +1,36 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react'; // Import useState and useEffect
 import { MessageSquare, Sparkles, Users } from 'lucide-react';
 import VerifyFlow from './VerifyFlow';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom'; // Import useLocation
 
 
 const Login = ({ onLogin }) => {
   const { t } = useTranslation();
+  const location = useLocation(); // Initialize useLocation
+  const [goodbyeMessage, setGoodbyeMessage] = useState(null);
+
+  useEffect(() => {
+    if (location.state && location.state.goodbyeMessage) {
+      setGoodbyeMessage(location.state.goodbyeMessage);
+      // Clear the message after some time, e.g., 5 seconds
+      const timer = setTimeout(() => {
+        setGoodbyeMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer); // Cleanup timer
+    }
+  }, [location]);
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center">
-      <div className="max-w-4xl w-full mx-auto">
+      <div className="max-w-4xl w-full w-full mx-auto">
         <div className="text-center mb-12">
+          {goodbyeMessage && ( // Display goodbye message
+            <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg mb-4">
+              {goodbyeMessage}
+            </div>
+          )}
           <div className="flex justify-center mb-6">
             <div className="relative">
               <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">

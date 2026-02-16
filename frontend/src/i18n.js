@@ -54,6 +54,10 @@ i18n
     interpolation: {
       escapeValue: false,
     },
+    detection: {
+      order: ['localStorage', 'navigator'], // Prioritize localStorage, then browser language
+      caches: ['localStorage'], // Persist the chosen language in localStorage
+    },
   });
 
 export default i18n;
