@@ -1,8 +1,9 @@
 import sqlite3
 import os
+from config import DB_PATH as CONFIG_DB_PATH
 
 # Database path
-DB_PATH = os.path.join('instance', 'users.db')
+DB_PATH = CONFIG_DB_PATH
 
 def get_db_connection():
     """Establishes a connection to the database."""

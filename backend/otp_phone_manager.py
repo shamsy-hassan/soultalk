@@ -83,10 +83,42 @@ def get_user_by_phone(phone_number):
     conn.close()
     return user
 
-def register_number(phone_number, username, language, email):
-    """Add a new phone number to the database"""
+def get_user_by_email(email):
+    """Check if the email is already in the database and return user data"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email=?", (email,))
+    user = cursor.fetchone()
+    conn.close()
+    return user
+
+def register_number(phone_number, username, language, email, profile_picture_url=None):
+    """Add a new phone number to the database, or update existing user if email matches."""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO users (phone, username, language, email, online) VALUES (?, ?, ?, ?, ?)", (phone_number, username, language, email, True))
+
+    existing_user = get_user_by_email(email)
+
+    if existing_user:
+        # Update existing user
+        cursor.execute(
+            "UPDATE users SET phone=?, username=?, language=?, profile_picture_url=?, online=? WHERE email=?",
+            (phone_number, username, language, profile_picture_url, True, email)
+        )
+    else:
+        # Insert new user
+        cursor.execute(
+            "INSERT INTO users (phone, username, language, email, profile_picture_url, online) VALUES (?, ?, ?, ?, ?, ?)",
+            (phone_number, username, language, email, profile_picture_url, True)
+        )
+    conn.commit()
+    conn.close()
+
+def update_profile_picture(phone_number, profile_picture_url):
+    """Update the profile picture URL for an existing user"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET profile_picture_url = ? WHERE phone = ?", (profile_picture_url, phone_number))
     conn.commit()
     conn.close()

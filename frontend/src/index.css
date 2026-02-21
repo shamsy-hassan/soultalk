@@ -4,25 +4,25 @@
 
 @layer base {
   body {
-    @apply bg-gradient-to-br from-soultalk-light to-gray-100 min-h-screen;
+    @apply bg-soultalk-white min-h-screen;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-soultalk-primary hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg;
+    @apply bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg;
   }
   
   .btn-secondary {
-    @apply bg-soultalk-secondary hover:bg-emerald-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg;
+    @apply bg-soultalk-lavender hover:bg-soultalk-lavender/80 text-soultalk-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg;
   }
   
   .card {
-    @apply bg-white rounded-2xl shadow-xl p-6 border border-gray-100;
+    @apply bg-soultalk-warm-gray rounded-2xl shadow-xl p-6 border border-gray-100;
   }
   
   .input-field {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-soultalk-primary focus:border-transparent outline-none transition-all duration-300;
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-soultalk-lavender focus:border-transparent outline-none transition-all duration-300;
   }
   
   .message-bubble {
@@ -34,6 +34,31 @@
   }
   
   .typing-dot {
-    @apply w-2 h-2 bg-soultalk-primary rounded-full animate-pulse;
+    @apply w-2 h-2 bg-soultalk-lavender rounded-full animate-pulse;
   }
+}
+
+/* Animations for EmptyChatState */
+@keyframes pulse-slow {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.05); opacity: 0.6; }
+}
+@keyframes float-one {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(5px, 10px); }
+  66% { transform: translate(-5px, -10px); }
+}
+@keyframes float-two {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(-5px, -10px); }
+  66% { transform: translate(5px, 10px); }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 4s infinite ease-in-out;
+}
+.animate-float-one {
+  animation: float-one 6s infinite ease-in-out;
+}
+.animate-float-two {
+  animation: float-two 6s infinite ease-in-out reverse;
 }

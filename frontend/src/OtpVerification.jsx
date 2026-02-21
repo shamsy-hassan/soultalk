@@ -5,7 +5,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-export default function OtpVerification({ phone, email, username, language, onVerified }) {
+export default function OtpVerification({ phone, email, username, language, onVerified, onBack }) {
   const { t } = useTranslation();
   const [otp, setOtp] = useState("");
   const [message, setMessage] = useState("");
@@ -54,7 +54,7 @@ export default function OtpVerification({ phone, email, username, language, onVe
   };
 
   return (
-    <div>
+    <div className="space-y-4">
       <h2>{t('enter_6_digit_code', { email })}</h2>
       <input
         type="text"
@@ -62,20 +62,33 @@ export default function OtpVerification({ phone, email, username, language, onVe
         placeholder={t('enter_otp')}
         onChange={(e) => setOtp(e.target.value)}
         maxLength={6}
-        style={{ width: "100%", padding: 8, marginBottom: 8, fontSize: 18, letterSpacing: 4, textAlign: "center" }}
+        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-soultalk-lavender text-center tracking-widest"
         disabled={loading}
       />
-      <button onClick={handleVerifyOtp} disabled={loading || otp.length !== 6} style={{ width: "100%", padding: 8 }}>
+      <button 
+        onClick={handleVerifyOtp} 
+        disabled={loading || otp.length !== 6} 
+        className="w-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white font-bold py-3 px-4 rounded-lg hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out"
+      >
         {loading ? t('verifying') : t('verify_otp')}
       </button>
       {message && <p style={{ color: message.toLowerCase().includes("error") || message.toLowerCase().includes("fail") || message.toLowerCase().includes("invalid") ? "red" : "green", marginTop: 12 }}>{message}</p>}
-      {message.includes("Invalid or expired OTP") && (
+      {(message.includes(t("invalid_or_expired_otp")) || message.includes(t("failed_to_verify_otp"))) && (
         <button 
           onClick={handleResendOtp} 
           disabled={resending} 
-          style={{ width: "100%", padding: 8, marginTop: 8, background: "transparent", border: "1px solid #ccc", color: "#555" }}
+          className="w-full bg-soultalk-warm-gray text-soultalk-dark-gray font-bold py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out"
         >
           {resending ? t('resending') : t('resend_otp')}
+        </button>
+      )}
+      {/* Back button */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="w-full bg-transparent border border-gray-300 text-soultalk-medium-gray font-bold py-2 px-4 rounded-lg hover:bg-soultalk-warm-gray focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out mt-2"
+        >
+          {t('back')}
         </button>
       )}
     </div>

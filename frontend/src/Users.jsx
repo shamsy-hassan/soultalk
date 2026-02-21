@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Search, Globe, Wifi, WifiOff, MessageSquare, UserPlus } from 'lucide-react';
+import { Search, Globe, Wifi, WifiOff, MessageSquare, UserPlus, Heart } from 'lucide-react'; // Import Heart icon
 import { useTranslation } from 'react-i18next';
+import { getLanguageName, getLanguageFlag } from './i18n';
+import EmptyChatState from './EmptyChatState'; // Import EmptyChatState
 
 const Users = ({ user, socket }) => {
   const { t } = useTranslation();
@@ -11,6 +13,9 @@ const Users = ({ user, socket }) => {
   const [search, setSearch] = useState('');
   const [onlineUsers, setOnlineUsers] = useState([]);
   const navigate = useNavigate();
+
+  // Temporary state for filter (will be implemented later)
+  const [selectedLanguageFilter, setSelectedLanguageFilter] = useState('All Languages');
 
   useEffect(() => {
     fetchUsers();
@@ -43,7 +48,6 @@ const Users = ({ user, socket }) => {
       });
       setUsers(response.data.users);
       
-      // Initialize online users
       const online = response.data.users
         .filter(u => u.online)
         .map(u => u.username);
@@ -56,199 +60,135 @@ const Users = ({ user, socket }) => {
   };
 
   const filteredUsers = users.filter(u =>
-    u.username.toLowerCase().includes(search.toLowerCase())
+    u.username.toLowerCase().includes(search.toLowerCase()) && 
+    (selectedLanguageFilter === 'All Languages' || u.language === selectedLanguageFilter)
   );
 
-  const getLanguageName = (code) => {
-    const languages = {
-      'en': t('language_english'),
-      'sw': t('language_swahili'),
-      'am': t('language_amharic'),
-      'fr': t('language_french'),
-      'ar': t('language_arabic'),
-      'es': t('language_spanish'),
-      'pt': t('language_portuguese'),
-      'yo': t('language_yoruba'),
-      'ha': t('language_hausa'),
-      'zu': t('language_zulu')
-    };
-    return languages[code] || code;
+  const getLanguageNameAndFlag = (code) => {
+    const name = getLanguageName(code);
+    const flag = getLanguageFlag(code);
+    return `${name} ${flag}`;
   };
 
   const startChat = (targetUser) => {
     navigate(`/chat/${targetUser.username}`);
   };
 
+  // Conditional rendering for EmptyChatState
+  if (!loading && filteredUsers.length === 0 && search === '') {
+    return <EmptyChatState />;
+  }
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('find_friends_to_chat_with')}</h1>
-        <p className="text-gray-600">
+    <div className="flex flex-col h-full p-4"> {/* Full height to allow scrolling */}
+      <div className="mb-4">
+        <h1 className="text-xl font-bold text-soultalk-dark-gray mb-2">{t('find_souls')}</h1>
+        <p className="text-soultalk-medium-gray text-sm">
           {t('connect_with_people_description')}
         </p>
       </div>
 
-      <div className="card mb-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <UserPlus className="w-6 h-6 text-purple-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">{t('active_users')}</h3>
-              <p className="text-sm text-gray-600">{t('connect_with_people_world')}</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2 text-sm">
-            <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-gray-600">{onlineUsers.length} {t('online')}</span>
-            </div>
-            <span className="text-gray-400">•</span>
-            <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              <span className="text-gray-600">{users.length - onlineUsers.length} {t('offline')}</span>
-            </div>
-          </div>
-        </div>
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-soultalk-medium-gray w-5 h-5" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t('search_souls_placeholder')}
+          className="input-field pl-10 bg-soultalk-white" // Card background is warm-gray, input field inside it should be white
+        />
+      </div>
 
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t('search_users_placeholder')}
-            className="input-field pl-10"
-          />
-        </div>
+      {/* Filter Chips - Placeholder */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {['All Languages', 'en', 'es', 'fr', 'am', 'sw'].map(lang => (
+          <button
+            key={lang}
+            onClick={() => setSelectedLanguageFilter(lang)}
+            className={`px-3 py-1 text-sm rounded-full transition-colors ${
+              selectedLanguageFilter === lang
+                ? 'bg-soultalk-lavender text-soultalk-white'
+                : 'bg-soultalk-warm-gray text-soultalk-medium-gray hover:bg-gray-200'
+            }`}
+          >
+            {lang === 'All Languages' ? t('all_languages') : getLanguageFlag(lang)} {lang !== 'All Languages' && getLanguageName(lang)}
+          </button>
+        ))}
+      </div>
 
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-soultalk-lavender"></div>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto pr-2 -mr-2"> {/* Custom scrollbar area */}
+          <div className="grid grid-cols-1 gap-3">
             {filteredUsers.map((targetUser) => (
               <div
                 key={targetUser.id}
-                className="group border border-gray-200 rounded-xl p-4 hover:border-purple-300 hover:shadow-md transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                className="group card p-3 hover:border-soultalk-lavender hover:shadow-md transition-all duration-300 cursor-pointer" // card already has warm-gray bg
                 onClick={() => startChat(targetUser)}
               >
-                <div className="flex items-start justify-between mb-3">
+                <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="relative">
-                      <div className="w-12 h-12 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full flex items-center justify-center">
-                        <span className="text-xl font-bold text-purple-600">
+                      <div className="w-10 h-10 bg-gradient-to-r from-soultalk-coral to-soultalk-teal rounded-full flex items-center justify-center">
+                        <span className="text-lg font-bold text-soultalk-white">
                           {targetUser.username.charAt(0).toUpperCase()}
                         </span>
                       </div>
                       {onlineUsers.includes(targetUser.username) ? (
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 text-soultalk-coral animate-pulse" title="Connected soul">
+                          <Heart className="w-full h-full fill-current" />
+                        </div>
                       ) : (
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gray-300 rounded-full border-2 border-white"></div>
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 text-soultalk-medium-gray" title="Offline">
+                          <Heart className="w-full h-full fill-current" />
+                        </div>
                       )}
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">{targetUser.username}</h4>
-                      <div className="flex items-center space-x-1">
-                        {onlineUsers.includes(targetUser.username) ? (
-                          <>
-                            <Wifi className="w-3 h-3 text-green-500" />
-                            <span className="text-xs text-green-600">{t('online')}</span>
-                          </>
-                        ) : (
-                          <>
-                            <WifiOff className="w-3 h-3 text-gray-400" />
-                            <span className="text-xs text-gray-500">{t('offline')}</span>
-                          </>
-                        )}
-                      </div>
+                      <h4 className="font-semibold text-soultalk-dark-gray">{targetUser.username}</h4>
+                      <p className="text-xs text-soultalk-medium-gray">
+                        {t('speaks')}: {getLanguageNameAndFlag(targetUser.language)}
+                      </p>
+                      {/* Learning language placeholder */}
+                      <p className="text-xs text-soultalk-medium-gray">
+                        {t('learning')}: {getLanguageNameAndFlag('en')} {/* Placeholder */}
+                      </p>
                     </div>
                   </div>
-                  <MessageSquare className="w-5 h-5 text-gray-400 group-hover:text-purple-500 transition-colors" />
+                  <MessageSquare className="w-5 h-5 text-soultalk-medium-gray group-hover:text-soultalk-coral transition-colors" />
                 </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center space-x-2">
-                      <Globe className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-600">{t('speaks')}:</span>
-                    </div>
-                    <span className="font-medium">{getLanguageName(targetUser.language)}</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">{t('you_speak')}:</span>
-                    <span className="font-medium">{getLanguageName(user.language)}</span>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded-lg">
-                    <span className="font-medium">{t('example')}:</span> 
-                    <div className="mt-1">
-                      <div className="text-purple-600">{t('you')}: {t('hello')}</div>
-                      <div className="text-gray-700">
-                        {targetUser.username} {t('sees')}: {targetUser.language === 'sw' ? 'Hujambo' : 
-                                                   targetUser.language === 'am' ? 'ሰላም' : 
-                                                   targetUser.language === 'fr' ? 'Bonjour' : t('hello')}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  className="mt-4 w-full py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center justify-center space-x-2"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>{t('start_chat')}</span>
+                {/* Bio snippet placeholder */}
+                <p className="text-sm text-soultalk-medium-gray mt-2 line-clamp-2">
+                  {t('bio_snippet_placeholder')}
+                </p>
+                <button className="btn-primary btn-sm w-full mt-3">
+                  {t('connect')}
                 </button>
               </div>
             ))}
           </div>
-        )}
-
-        {!loading && filteredUsers.length === 0 && (
-          <div className="text-center py-12">
-            <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-              <UserPlus className="w-10 h-10 text-gray-400" />
-            </div>
-            <h4 className="text-lg font-medium text-gray-700 mb-2">{t('no_users_found')}</h4>
-            <p className="text-gray-500">
-              {search ? t('try_different_search_term') : t('no_other_users_available')}
-            </p>
-          </div>
-        )}
-      </div>
-
-      <div className="card">
-        <h3 className="font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-          <div className="p-1.5 bg-green-100 rounded-lg">
-            <Wifi className="w-4 h-4 text-green-600" />
-          </div>
-          <span>{t('live_connection_status')}</span>
-        </h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600">{t('your_status')}</span>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="font-medium text-green-600">{t('connected')}</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600">{t('websocket')}</span>
-            <span className={`font-medium ${socket ? 'text-green-600' : 'text-red-600'}`}>
-              {socket ? t('live') : t('disconnected')}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600">{t('active_users_count')}</span>
-            <span className="font-medium text-purple-600">{onlineUsers.length} {t('online_now')}</span>
-          </div>
         </div>
-      </div>
+      )}
+
+      {/* Random Soul Button */}
+      <button className="btn-secondary w-full mt-4">
+        {t('random_soul')}
+      </button>
+
+      {!loading && filteredUsers.length === 0 && search !== '' && ( // Only show if no users found WITH a search term
+        <div className="text-center py-12">
+          <div className="w-16 h-16 mx-auto mb-4 bg-soultalk-warm-gray rounded-full flex items-center justify-center">
+            <UserPlus className="w-8 h-8 text-soultalk-medium-gray" />
+          </div>
+          <h4 className="text-lg font-medium text-soultalk-dark-gray mb-2">{t('no_souls_found')}</h4>
+          <p className="text-soultalk-medium-gray text-sm">
+            {search ? t('try_different_search_term') : t('no_other_souls_available')}
+          </p>
+        </div>
+      )}
     </div>
   );
 };

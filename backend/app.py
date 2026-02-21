@@ -1,8 +1,10 @@
 import os
-from flask import Flask
+from flask import Flask, send_from_directory # Import send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from dotenv import load_dotenv
+
+from verification_routes import UPLOAD_FOLDER # Import UPLOAD_FOLDER
 
 def create_app():
     load_dotenv()
@@ -27,6 +29,11 @@ def create_app():
 
     from verification_routes import bp as verification_bp
     app.register_blueprint(verification_bp)
+
+    # Serve uploaded profile pictures statically
+    @app.route(f'/{UPLOAD_FOLDER}/<filename>')
+    def uploaded_file(filename):
+        return send_from_directory(os.path.join(app.root_path, UPLOAD_FOLDER), filename)
 
     # Initialize socket handlers
     from socket_handler import init_sockets
