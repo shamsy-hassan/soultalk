@@ -171,6 +171,16 @@ def run_migrations():
         except sqlite3.OperationalError as e:
             print(f"Error migrating 'email' column: {e}")
 
+    # Migration for 'profile_picture_url' column
+    if 'profile_picture_url' not in columns:
+        print("Applying migration: Adding 'profile_picture_url' column to 'users' table.")
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN profile_picture_url TEXT")
+            conn.commit()
+            print("Migration for 'profile_picture_url' column successful.")
+        except sqlite3.OperationalError as e:
+            print(f"Error migrating 'profile_picture_url' column: {e}")
+
     # Check if the 'messages' table exists before attempting to migrate it
     try:
         cursor.execute("PRAGMA table_info(messages)")

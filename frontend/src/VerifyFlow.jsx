@@ -166,7 +166,7 @@ export default function VerifyFlow({ onLogin }) {
     if (verifiedUser) {
       onLogin({
           ...verifiedUser,
-          profilePicture: profilePicture // Add profile picture blob URL to user data
+          profile_picture_url: verifiedUser.profile_picture_url
       });
     }
   };
