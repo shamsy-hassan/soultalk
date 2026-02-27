@@ -93,6 +93,16 @@ def get_user_by_email(email):
     conn.close()
     return user
 
+def get_user_by_username(username):
+    """Check if the username is already in the database and return user data"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username=?", (username,))
+    user = cursor.fetchone()
+    conn.close()
+    return user
+
 def register_number(phone_number, username, language, email, profile_picture_url=None):
     """Add a new phone number to the database, or update existing user if email matches."""
     conn = sqlite3.connect(DB_PATH)
@@ -120,5 +130,13 @@ def update_profile_picture(phone_number, profile_picture_url):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("UPDATE users SET profile_picture_url = ? WHERE phone = ?", (profile_picture_url, phone_number))
+    conn.commit()
+    conn.close()
+
+def update_profile_picture_by_username(username, profile_picture_url):
+    """Update the profile picture URL for an existing user using username"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET profile_picture_url = ? WHERE username = ?", (profile_picture_url, username))
     conn.commit()
     conn.close()

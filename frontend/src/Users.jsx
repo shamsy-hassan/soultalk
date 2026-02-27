@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Search, Globe, Wifi, WifiOff, MessageSquare, UserPlus, Heart } from 'lucide-react'; // Import Heart icon
+import { Search, MessageSquare, UserPlus, Heart } from 'lucide-react'; // Import Heart icon
 import { useTranslation } from 'react-i18next';
 import { getLanguageName, getLanguageFlag } from './i18n';
 import EmptyChatState from './EmptyChatState'; // Import EmptyChatState
+import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
 
 const Users = ({ user, socket }) => {
   const { t } = useTranslation();
@@ -123,7 +124,9 @@ const Users = ({ user, socket }) => {
       ) : (
         <div className="flex-1 overflow-y-auto pr-2 -mr-2"> {/* Custom scrollbar area */}
           <div className="grid grid-cols-1 gap-3">
-            {filteredUsers.map((targetUser) => (
+            {filteredUsers.map((targetUser) => {
+              const targetUserAvatarUrl = resolveProfilePictureUrl(targetUser.profile_picture_url);
+              return (
               <div
                 key={targetUser.id}
                 className="group card p-3 hover:border-soultalk-lavender hover:shadow-md transition-all duration-300 cursor-pointer" // card already has warm-gray bg
@@ -132,11 +135,12 @@ const Users = ({ user, socket }) => {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="relative">
-                      <div className="w-10 h-10 bg-gradient-to-r from-soultalk-coral to-soultalk-teal rounded-full flex items-center justify-center">
-                        <span className="text-lg font-bold text-soultalk-white">
-                          {targetUser.username.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
+                      <img
+                        src={targetUserAvatarUrl}
+                        alt={targetUser.username}
+                        className="w-10 h-10 rounded-full object-cover"
+                        onError={(e) => { e.currentTarget.src = DEFAULT_PROFILE_IMAGE_URL; }}
+                      />
                       {onlineUsers.includes(targetUser.username) ? (
                         <div className="absolute -bottom-1 -right-1 w-4 h-4 text-soultalk-coral animate-pulse" title="Connected soul">
                           <Heart className="w-full h-full fill-current" />
@@ -168,7 +172,8 @@ const Users = ({ user, socket }) => {
                   {t('connect')}
                 </button>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

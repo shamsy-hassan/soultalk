@@ -5,8 +5,12 @@ import os # Add os import
 from flask import Blueprint, request, jsonify, current_app, send_from_directory # Add send_from_directory
 import jwt
 import datetime
+import uuid
 from werkzeug.utils import secure_filename # Add secure_filename
-from otp_phone_manager import generate_otp, verify_otp, get_user_by_phone, register_number, send_otp_email, update_profile_picture # Add update_profile_picture
+from otp_phone_manager import (
+    generate_otp, verify_otp, get_user_by_phone, get_user_by_username,
+    register_number, send_otp_email, update_profile_picture, update_profile_picture_by_username
+)
 
 bp = Blueprint("verification", __name__, url_prefix="/api")
 
@@ -88,7 +92,12 @@ def verify():
         return jsonify({
             "message": "Phone verified successfully",
             "token": token,
-            "user": {"username": user["username"], "language": user["language"], "profile_picture_url": user["profile_picture_url"]} # Return profile_picture_url
+            "user": {
+                "username": user["username"],
+                "language": user["language"],
+                "phone": user["phone"],
+                "profile_picture_url": user["profile_picture_url"]
+            }
         }), 200
         
     return jsonify({"error": "Invalid or expired OTP"}), 400
@@ -104,7 +113,9 @@ def upload_profile_picture():
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
     if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
+        original_filename = secure_filename(file.filename)
+        extension = original_filename.rsplit('.', 1)[1].lower()
+        filename = f"{uuid.uuid4().hex}.{extension}"
         # Ensure the upload folder exists
         upload_path = os.path.join(current_app.root_path, UPLOAD_FOLDER)
         os.makedirs(upload_path, exist_ok=True)
@@ -123,18 +134,30 @@ def upload_profile_picture():
 def update_user_profile():
     data = request.get_json()
     phone = data.get("phone")
+    username = data.get("username")
     profile_picture_url = data.get("profile_picture_url")
 
-    if not phone or not profile_picture_url:
-        return jsonify({"error": "Phone number and profile picture URL are required"}), 400
+    if not profile_picture_url:
+        return jsonify({"error": "Profile picture URL is required"}), 400
+    if not phone and not username:
+        return jsonify({"error": "Phone number or username is required"}), 400
     
     # Authenticate user if necessary (e.g., check JWT token)
     # For simplicity, we'll assume the phone number is sufficient for this update
     
-    update_profile_picture(phone, profile_picture_url)
-    user = get_user_by_phone(phone) # Get updated user data
-    
+    if phone:
+        update_profile_picture(phone, profile_picture_url)
+        user = get_user_by_phone(phone)
+    else:
+        update_profile_picture_by_username(username, profile_picture_url)
+        user = get_user_by_username(username)
+
     return jsonify({
         "message": "Profile updated successfully",
-        "user": {"username": user["username"], "language": user["language"], "profile_picture_url": user["profile_picture_url"]}
+        "user": {
+            "username": user["username"],
+            "language": user["language"],
+            "phone": user["phone"],
+            "profile_picture_url": user["profile_picture_url"]
+        }
     }), 200

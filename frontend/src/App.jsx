@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'; // Added useNavigate
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'; // Added useNavigate
 import Login from './Login';
 import Users from './Users';
 import Chat from './Chat';
@@ -10,10 +10,11 @@ import { useTranslation } from 'react-i18next';
 import i18n from './i18n';
 import { Heart, MessageSquare } from 'lucide-react'; // Import icons for logo and mobile menu
 import ProfileSetup from './ProfileSetup'; // Import ProfileSetup component
+import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
+import { uploadProfilePicture, updateUserProfile } from './profileAPI';
 
 function App() {
   const { t } = useTranslation();
-  const location = useLocation(); // To check current path for layout adjustments
   const navigate = useNavigate(); // Initialize useNavigate
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('soultalk_user');
@@ -22,6 +23,7 @@ function App() {
   const [socket, setSocket] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showSidebarMobile, setShowSidebarMobile] = useState(false); // State for mobile sidebar
+  const [profileSetupError, setProfileSetupError] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -81,19 +83,52 @@ function App() {
   };
 
   const handleNavigateToProfileSetup = () => {
+    setProfileSetupError('');
     navigate('/profile-setup');
     setShowSidebarMobile(false); // Close sidebar on mobile when navigating
   };
 
-  const handleProfileSetupComplete = (croppedImageUrl) => {
-    // In a real app, you would upload the croppedImageUrl to the server
-    // and update the user object. For now, we just navigate.
-    console.log('Profile setup complete with image:', croppedImageUrl);
-    navigate('/users');
+  const handleProfileSetupComplete = async (croppedImageUrl) => {
+    setProfileSetupError('');
+
+    if (!croppedImageUrl || !user) {
+      navigate('/users');
+      return;
+    }
+
+    try {
+      const blobResponse = await fetch(croppedImageUrl);
+      const imageBlob = await blobResponse.blob();
+      const formData = new FormData();
+      formData.append('profile_picture', imageBlob, 'profile.jpeg');
+
+      const { res: uploadRes, data: uploadData } = await uploadProfilePicture(formData);
+      if (!uploadRes.ok) {
+        setProfileSetupError(uploadData.error || 'Failed to upload profile picture.');
+        return;
+      }
+
+      const { res: updateRes, data: updateData } = await updateUserProfile(
+        { phone: user.phone, username: user.username },
+        uploadData.profile_picture_url
+      );
+
+      if (!updateRes.ok) {
+        setProfileSetupError(updateData.error || 'Failed to save profile picture URL.');
+        return;
+      }
+
+      const updatedUser = { ...user, ...updateData.user };
+      setUser(updatedUser);
+      localStorage.setItem('soultalk_user', JSON.stringify(updatedUser));
+      navigate('/users');
+    } catch (error) {
+      setProfileSetupError('Error while saving profile picture.');
+      console.error('Error while saving profile picture:', error);
+    }
   };
 
-  // Determine if the current route is one that should show the main app layout (with sidebar)
-  const showMainAppLayout = user && (location.pathname === '/users' || location.pathname.startsWith('/chat/') || location.pathname === '/profile-setup');
+  const currentUserAvatarUrl = resolveProfilePictureUrl(user?.profile_picture_url);
 
   return (
     <div className="flex min-h-screen bg-soultalk-white">
@@ -143,13 +178,12 @@ function App() {
               </div>
             </div>
             {/* Right side: User menu/Profile picture (Desktop only for now, later can be a UserMenu component) */}
-            {user.profile_picture_url ? (
-              <img src={user.profile_picture_url} alt="Profile" className="w-10 h-10 rounded-full object-cover hidden md:block" />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-soultalk-dark-gray font-semibold hidden md:block">
-                {user.username.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <img
+              src={currentUserAvatarUrl}
+              alt="Profile"
+              className="w-10 h-10 rounded-full object-cover hidden md:block"
+              onError={(e) => { e.currentTarget.src = DEFAULT_PROFILE_IMAGE_URL; }}
+            />
           </nav>
         )}
 
@@ -169,7 +203,15 @@ function App() {
             />
             <Route 
               path="/profile-setup" 
-              element={user ? <ProfileSetup onProfileSetupComplete={handleProfileSetupComplete} onBack={() => navigate(-1)} /> : <Navigate to="/" />} 
+              element={
+                user
+                  ? <ProfileSetup
+                      onProfileSetupComplete={handleProfileSetupComplete}
+                      onBack={() => navigate(-1)}
+                      errorMessage={profileSetupError}
+                    />
+                  : <Navigate to="/" />
+              } 
             />
           </Routes>
         </main>

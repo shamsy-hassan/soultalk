@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getLanguageFlag, getLanguageName } from './i18n';
 import { ChevronDown, ChevronUp, LogOut, Settings, Globe } from 'lucide-react'; // Import icons
+import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
 
 const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }) => {
   const { t } = useTranslation();
@@ -48,6 +49,7 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
     { code: 'sw', name: 'Kiswahili' },
     { code: 'de', name: 'Deutsch' },
   ];
+  const currentUserAvatarUrl = resolveProfilePictureUrl(user?.profile_picture_url);
 
   return (
     <div className="relative" ref={menuRef}>
@@ -56,11 +58,12 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
         className="flex items-center space-x-3 mb-6 p-2 rounded-lg bg-soultalk-warm-gray w-full text-left cursor-pointer hover:bg-gray-200 transition-colors"
       >
         <div className="w-12 h-12 rounded-full bg-gradient-to-r from-soultalk-coral to-soultalk-teal flex items-center justify-center text-soultalk-white text-xl font-bold">
-          {user.profile_picture_url ? (
-            <img src={user.profile_picture_url} alt="Profile" className="w-full h-full rounded-full object-cover" />
-          ) : (
-            user.username.charAt(0).toUpperCase()
-          )}
+          <img
+            src={currentUserAvatarUrl}
+            alt="Profile"
+            className="w-full h-full rounded-full object-cover"
+            onError={(e) => { e.currentTarget.src = DEFAULT_PROFILE_IMAGE_URL; }}
+          />
         </div>
         <div className="flex-1">
           <p className="font-semibold text-soultalk-dark-gray">{user.username}</p>

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Send, ArrowLeft, Globe, Clock, User, Sparkles, Image as ImageIcon, Smile, Phone, Heart } from 'lucide-react'; // Added Phone icon for call, removed Mic
+import { Send, ArrowLeft, Clock, Sparkles, Image as ImageIcon, Smile, Phone, Heart } from 'lucide-react'; // Added Phone icon for call, removed Mic
 import { useTranslation } from 'react-i18next';
 import { getLanguageName, getLanguageFlag } from './i18n';
+import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
 
 const Chat = ({ user, socket }) => {
   const { t } = useTranslation();
@@ -165,6 +166,7 @@ const Chat = ({ user, socket }) => {
   };
 
   if (!targetUser) return null;
+  const targetUserProfileImageUrl = resolveProfilePictureUrl(targetUser.profile_picture_url);
 
   return (
     <div className="flex-1 flex flex-col bg-soultalk-white">
@@ -178,11 +180,12 @@ const Chat = ({ user, socket }) => {
             <ArrowLeft className="w-5 h-5 text-soultalk-dark-gray" />
           </button>
           <div className="relative">
-            <div className="w-10 h-10 bg-gradient-to-r from-soultalk-coral to-soultalk-teal rounded-full flex items-center justify-center">
-              <span className="text-lg font-bold text-soultalk-white">
-                {targetUser.username.charAt(0).toUpperCase()}
-              </span>
-            </div>
+            <img
+              src={targetUserProfileImageUrl}
+              alt={targetUser.username}
+              className="w-10 h-10 rounded-full object-cover"
+              onError={(e) => { e.currentTarget.src = DEFAULT_PROFILE_IMAGE_URL; }}
+            />
             {/* Soul Status Indicator for target user */}
             <div className="absolute -bottom-1 -right-1 w-4 h-4 text-soultalk-coral animate-pulse" title="Connected soul">
                 <Heart className="w-full h-full fill-current" />

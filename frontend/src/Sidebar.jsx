@@ -5,6 +5,7 @@ import UserMenu from './UserMenu'; // Import the new UserMenu component
 import { Users as UsersIcon, MessageSquare, Heart } from 'lucide-react'; // Import Users, MessageSquare, Heart icons
 import { NavLink, useNavigate } from 'react-router-dom'; // Import NavLink and useNavigate
 import axios from 'axios'; // Import axios
+import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
 
 const Sidebar = ({ user, socket, onLogout, onChangeLanguage, onNavigateToProfileSetup }) => { 
   const { t } = useTranslation();
@@ -86,18 +87,21 @@ const Sidebar = ({ user, socket, onLogout, onChangeLanguage, onNavigateToProfile
         <h3 className="text-lg font-semibold text-soultalk-dark-gray mb-4">{t('conversations')}</h3>
         <div className="space-y-3">
           {users.length > 0 ? (
-            users.map((targetUser) => (
+            users.map((targetUser) => {
+              const targetUserAvatarUrl = resolveProfilePictureUrl(targetUser.profile_picture_url);
+              return (
               <div
                 key={targetUser.id}
                 className="flex items-center space-x-3 p-2 rounded-lg hover:bg-soultalk-warm-gray transition-colors cursor-pointer"
                 onClick={() => startChat(targetUser)}
               >
                 <div className="relative">
-                  <div className="w-10 h-10 bg-gradient-to-r from-soultalk-coral to-soultalk-teal rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold text-soultalk-white">
-                      {targetUser.username.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
+                  <img
+                    src={targetUserAvatarUrl}
+                    alt={targetUser.username}
+                    className="w-10 h-10 rounded-full object-cover"
+                    onError={(e) => { e.currentTarget.src = DEFAULT_PROFILE_IMAGE_URL; }}
+                  />
                   {onlineUsers.includes(targetUser.username) && (
                     <div className="absolute -bottom-1 -right-1 w-4 h-4 text-soultalk-coral animate-pulse" title="Connected soul">
                       <Heart className="w-full h-full fill-current" />
@@ -110,7 +114,8 @@ const Sidebar = ({ user, socket, onLogout, onChangeLanguage, onNavigateToProfile
                 </div>
                 <MessageSquare className="w-5 h-5 text-soultalk-medium-gray" />
               </div>
-            ))
+              );
+            })
           ) : (
             <p className="text-soultalk-medium-gray text-sm text-center">{t('no_conversations_yet')}</p>
           )}

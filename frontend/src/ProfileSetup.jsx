@@ -60,13 +60,12 @@ function centerAspectCrop(
 }
 
 
-export default function ProfileSetup({ onProfileSetupComplete, onBack }) {
+export default function ProfileSetup({ onProfileSetupComplete, onBack, errorMessage = '' }) {
   const { t } = useTranslation();
   const imgRef = useRef(null);
   const [upImg, setUpImg] = useState(); // Holds the original image selected by user
   const [crop, setCrop] = useState(); // Holds the crop dimensions
   const [completedCrop, setCompletedCrop] = useState(); // Holds the completed crop to draw
-  const [croppedImageUrl, setCroppedImageUrl] = useState(null); // URL of the cropped image
 
   const onSelectFile = (e) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -102,6 +101,9 @@ export default function ProfileSetup({ onProfileSetupComplete, onBack }) {
   return (
     <div className="space-y-4 text-center p-4">
       <h2 className="text-xl font-semibold mb-4 text-soultalk-dark-gray">{t('setup_profile_picture')}</h2>
+      {errorMessage && (
+        <p className="text-sm text-red-500">{errorMessage}</p>
+      )}
 
       <input type="file" accept="image/*" onChange={onSelectFile} className="block w-full text-sm text-soultalk-medium-gray file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-soultalk-warm-gray file:text-soultalk-dark-gray hover:file:bg-gray-300" />
       {!upImg && (
