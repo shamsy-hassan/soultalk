@@ -122,11 +122,52 @@ def get_messages_between(user1, user2):
     conn.close()
     return [dict(row) for row in messages]
 
+
+def get_chat_partners(username):
+    """Returns users that have message history with the provided username."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        '''
+        SELECT
+            u.id,
+            u.username,
+            u.language,
+            u.online,
+            u.phone,
+            u.email,
+            u.profile_picture_url,
+            MAX(m.timestamp) as last_message_at
+        FROM messages m
+        JOIN users u
+          ON u.username = CASE
+              WHEN m.from_user = ? THEN m.to_user
+              ELSE m.from_user
+          END
+        WHERE m.from_user = ? OR m.to_user = ?
+        GROUP BY u.id, u.username, u.language, u.online, u.phone, u.email, u.profile_picture_url
+        ORDER BY last_message_at DESC
+        ''',
+        (username, username, username)
+    )
+    partners = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in partners]
+
 def update_user_status(username, online):
     """Updates the online status of a user in the database."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('UPDATE users SET online = ? WHERE username = ?', (online, username))
+    conn.commit()
+    conn.close()
+
+
+def reset_all_user_statuses():
+    """Marks all users offline. Useful on server start to clear stale presence."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE users SET online = 0')
     conn.commit()
     conn.close()
 

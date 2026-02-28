@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getLanguageFlag, getLanguageName } from './i18n';
-import { ChevronDown, ChevronUp, LogOut, Settings, Globe } from 'lucide-react'; // Import icons
+import { ChevronDown, ChevronUp, LogOut, Settings, Globe, Shield } from 'lucide-react'; // Import icons
 import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
 import { getLanguages } from './api';
 
@@ -9,20 +9,29 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [availableLanguages, setAvailableLanguages] = useState([]);
+  const [showLanguageOptions, setShowLanguageOptions] = useState(false);
+  const [showAccountActions, setShowAccountActions] = useState(false);
   const menuRef = useRef(null);
 
   const toggleMenu = () => {
-    setIsOpen(!isOpen);
+    const nextOpen = !isOpen;
+    setIsOpen(nextOpen);
+    if (!nextOpen) {
+      setShowLanguageOptions(false);
+      setShowAccountActions(false);
+    }
   };
 
   const handleLanguageChange = (lang) => {
     onChangeLanguage(lang);
+    setShowLanguageOptions(false);
     setIsOpen(false); // Close menu after selection
   };
 
   const handleLogout = () => {
     onLogout();
     setIsOpen(false); // Close menu after logout
+    setShowAccountActions(false);
   };
 
   const handleProfileClick = () => {
@@ -35,6 +44,8 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setIsOpen(false);
+        setShowLanguageOptions(false);
+        setShowAccountActions(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -82,42 +93,66 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 mt-2 w-full bg-soultalk-white rounded-lg shadow-xl z-10 py-2 border border-gray-100">
+        <div className="absolute left-0 mt-2 w-full bg-soultalk-white rounded-xl shadow-xl z-10 p-2 border border-gray-100 space-y-2">
           <button
             onClick={handleProfileClick}
-            className="flex items-center w-full px-4 py-2 text-sm text-soultalk-dark-gray hover:bg-soultalk-warm-gray transition-colors"
+            className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-soultalk-dark-gray hover:bg-soultalk-warm-gray rounded-lg transition-colors"
           >
-            <Settings className="w-4 h-4 mr-2" />
-            {t('profile_setup')}
+            <span className="inline-flex items-center">
+              <Settings className="w-4 h-4 mr-2" />
+              {t('profile_setup')}
+            </span>
           </button>
-          
-          <div className="border-t border-gray-100 my-1"></div> {/* Separator */}
-
-          <div className="px-4 py-2 text-xs font-semibold text-soultalk-medium-gray flex items-center">
-            <Globe className="w-3 h-3 mr-2" />
-            {t('change_language')}
-          </div>
-          {availableLanguages.map((lang) => (
-            <button
-              key={lang.code}
-              onClick={() => handleLanguageChange(lang.code)}
-              className={`flex items-center w-full px-4 py-2 text-sm ${
-                user.language === lang.code ? 'bg-soultalk-lavender text-soultalk-white' : 'text-soultalk-dark-gray hover:bg-soultalk-warm-gray'
-              } transition-colors`}
-            >
-              {lang.flag || getLanguageFlag(lang.code)} {t(`language_${lang.code}`, { defaultValue: lang.nativeName || lang.name || lang.code })}
-            </button>
-          ))}
-
-          <div className="border-t border-gray-100 my-1"></div> {/* Separator */}
 
           <button
-            onClick={handleLogout}
-            className="flex items-center w-full px-4 py-2 text-sm text-soultalk-dark-gray hover:bg-soultalk-coral hover:text-soultalk-white rounded-b-lg transition-colors"
+            onClick={() => setShowLanguageOptions((prev) => !prev)}
+            className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-soultalk-dark-gray hover:bg-soultalk-warm-gray rounded-lg transition-colors"
           >
-            <LogOut className="w-4 h-4 mr-2" />
-            {t('logout')}
+            <span className="inline-flex items-center">
+              <Globe className="w-4 h-4 mr-2" />
+              {t('change_language')}
+            </span>
+            <span className="text-xs text-soultalk-medium-gray">
+              {getLanguageFlag(user.language)} {getLanguageName(user.language)}
+            </span>
           </button>
+
+          {showLanguageOptions && (
+            <div className="rounded-lg border border-gray-100 overflow-hidden">
+              {availableLanguages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => handleLanguageChange(lang.code)}
+                  className={`flex items-center w-full px-3 py-2 text-sm ${
+                    user.language === lang.code ? 'bg-soultalk-lavender text-soultalk-white' : 'text-soultalk-dark-gray hover:bg-soultalk-warm-gray'
+                  } transition-colors`}
+                >
+                  {lang.flag || getLanguageFlag(lang.code)} {t(`language_${lang.code}`, { defaultValue: lang.nativeName || lang.name || lang.code })}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <button
+            onClick={() => setShowAccountActions((prev) => !prev)}
+            className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-soultalk-medium-gray hover:bg-soultalk-warm-gray rounded-lg transition-colors"
+          >
+            <span className="inline-flex items-center">
+              <Shield className="w-4 h-4 mr-2" />
+              {t('account_actions')}
+            </span>
+            {showAccountActions ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+
+          {showAccountActions && (
+            <button
+              onClick={handleLogout}
+              className="flex items-center w-full px-3 py-2 text-sm text-soultalk-dark-gray hover:bg-soultalk-coral hover:text-soultalk-white rounded-lg transition-colors"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              {t('logout')}
+            </button>
+          )}
         </div>
       )}
     </div>

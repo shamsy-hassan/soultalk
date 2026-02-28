@@ -10,9 +10,10 @@ def create_app():
     load_dotenv()
 
     # Initialize the database and run migrations
-    from database import init_db, run_migrations
+    from database import init_db, run_migrations, reset_all_user_statuses
     init_db()
     run_migrations()
+    reset_all_user_statuses()
 
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'soultalk-secret-key-2024')

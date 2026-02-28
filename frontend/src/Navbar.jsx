@@ -1,15 +1,17 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Heart, Menu, Sparkles } from 'lucide-react';
 import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
 
 function Navbar({ user, onMenuClick, isScrolled }) {
+  const { t } = useTranslation();
   const location = useLocation();
 
   const getPageTitle = () => {
-    if (location.pathname === '/users') return 'Discover Souls';
-    if (location.pathname.startsWith('/chat/')) return 'Chat';
-    if (location.pathname === '/profile-setup') return 'Profile Setup';
+    if (location.pathname === '/users') return t('discover_souls');
+    if (location.pathname.startsWith('/chat/')) return t('chat');
+    if (location.pathname === '/profile-setup') return t('change_profile_picture');
     return '';
   };
   const currentUserAvatarUrl = resolveProfilePictureUrl(user?.profile_picture_url);
@@ -38,7 +40,7 @@ function Navbar({ user, onMenuClick, isScrolled }) {
               <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 SoulTalk
               </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Connect across languages</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t('connect_across_cultures')}</p>
             </div>
           </div>
 

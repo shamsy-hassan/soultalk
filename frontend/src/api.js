@@ -36,3 +36,21 @@ export const updateUserLanguage = async (username, language) => {
   });
   return response.data;
 };
+
+export const getChatPartners = async (currentUsername) => {
+  const response = await axios.get(`${BACKEND_BASE_URL}/api/chats`, {
+    params: { current_user: currentUsername }
+  });
+  return response.data;
+};
+
+export const submitFeedback = async ({ username, email, category, message, language }) => {
+  const response = await axios.post(`${BACKEND_BASE_URL}/api/feedback`, {
+    username,
+    email,
+    category,
+    message,
+    language
+  });
+  return response.data;
+};

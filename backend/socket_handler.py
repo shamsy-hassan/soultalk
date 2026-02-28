@@ -1,8 +1,28 @@
 from flask_socketio import emit, join_room, leave_room, SocketIO
-from database import add_message, get_user, get_messages_between
+from flask import request
+from database import add_message, get_user, get_messages_between, update_user_status
 from translate import translate_text
 
 def init_sockets(socketio: SocketIO):
+    sid_to_user = {}
+    user_connection_counts = {}
+
+    def set_user_online(username):
+        update_user_status(username, True)
+        emit('user_status', {'username': username, 'online': True}, broadcast=True)
+
+    def set_user_offline(username):
+        update_user_status(username, False)
+        emit('user_status', {'username': username, 'online': False}, broadcast=True)
+
+    def decrement_connection(username):
+        current_count = user_connection_counts.get(username, 0) - 1
+        if current_count <= 0:
+            user_connection_counts.pop(username, None)
+            set_user_offline(username)
+        else:
+            user_connection_counts[username] = current_count
+
     @socketio.on('connect')
     def handle_connect():
         print('Client connected')
@@ -10,29 +30,44 @@ def init_sockets(socketio: SocketIO):
 
     @socketio.on('disconnect')
     def handle_disconnect():
+        sid = request.sid
+        username = sid_to_user.pop(sid, None)
+        if username:
+            decrement_connection(username)
         print('Client disconnected')
 
     @socketio.on('join')
     def handle_join(data):
         username = data.get('username')
-        if username:
-            join_room(username)
-            # Update user status
-            user = get_user(username)
-            # The get_user function from database.py returns a sqlite3.Row object
-            # which can be accessed like a dictionary.
-            # However, direct assignment like user['online'] = True won't persist
-            # changes to the database. We need a separate function for that.
-            # For now, we'll just emit the status.
-            emit('user_status', {'username': username, 'online': True}, broadcast=True)
+        sid = request.sid
+        if not username:
+            return
+
+        previous_username = sid_to_user.get(sid)
+        if previous_username and previous_username != username:
+            decrement_connection(previous_username)
+
+        sid_to_user[sid] = username
+        join_room(username)
+
+        current_count = user_connection_counts.get(username, 0) + 1
+        user_connection_counts[username] = current_count
+        if current_count == 1:
+            set_user_online(username)
 
     @socketio.on('leave')
     def handle_leave(data):
-        username = data.get('username')
-        if username:
-            leave_room(username)
-            # Update user status (similar to join, need a db function for persistence)
-            emit('user_status', {'username': username, 'online': False}, broadcast=True)
+        sid = request.sid
+        username = data.get('username') or sid_to_user.get(sid)
+        if not username:
+            return
+
+        leave_room(username)
+
+        if sid_to_user.get(sid) == username:
+            sid_to_user.pop(sid, None)
+
+        decrement_connection(username)
 
     @socketio.on('send_message')
     def handle_message(data):

@@ -108,22 +108,22 @@ const Users = ({ user, socket }) => {
   }
 
   return (
-    <div className="flex flex-col h-full p-4"> {/* Full height to allow scrolling */}
-      <div className="mb-4">
-        <h1 className="text-xl font-bold text-soultalk-dark-gray mb-2">{t('find_souls')}</h1>
+    <div className="flex flex-col h-full"> {/* Full height to allow scrolling */}
+      <div className="mb-5 surface-panel p-4 md:p-5">
+        <h1 className="text-2xl font-bold tracking-tight text-soultalk-dark-gray mb-2">{t('find_souls')}</h1>
         <p className="text-soultalk-medium-gray text-sm">
           {t('connect_with_people_description')}
         </p>
       </div>
 
       <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-soultalk-medium-gray w-5 h-5" />
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-soultalk-medium-gray w-5 h-5" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('search_souls_placeholder')}
-          className="input-field pl-10 bg-soultalk-white" // Card background is warm-gray, input field inside it should be white
+          className="input-field pl-11 bg-soultalk-white shadow-sm"
         />
       </div>
 
@@ -138,7 +138,7 @@ const Users = ({ user, socket }) => {
               setShowLanguageFilters(true);
             }
           }}
-          className={`px-3 py-1 text-sm rounded-full transition-colors ${
+          className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
             !selectedLanguageFilter
               ? 'bg-soultalk-lavender text-soultalk-white'
               : 'bg-soultalk-warm-gray text-soultalk-medium-gray hover:bg-gray-200'
@@ -151,7 +151,7 @@ const Users = ({ user, socket }) => {
           <button
             key={lang.code}
             onClick={() => setSelectedLanguageFilter(lang.code)}
-            className={`px-3 py-1 text-sm rounded-full transition-colors ${
+            className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
               selectedLanguageFilter === lang.code
                 ? 'bg-soultalk-lavender text-soultalk-white'
                 : 'bg-soultalk-warm-gray text-soultalk-medium-gray hover:bg-gray-200'
@@ -167,14 +167,14 @@ const Users = ({ user, socket }) => {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-soultalk-lavender"></div>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto pr-2 -mr-2"> {/* Custom scrollbar area */}
+        <div className="flex-1 overflow-y-auto subtle-scrollbar pr-2 -mr-2"> {/* Custom scrollbar area */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             {filteredUsers.map((targetUser) => {
               const targetUserAvatarUrl = resolveProfilePictureUrl(targetUser.profile_picture_url);
               return (
               <div
                 key={targetUser.id}
-                className="group card p-4 rounded-[2rem] hover:border-soultalk-lavender hover:shadow-md transition-all duration-300 cursor-pointer h-full flex flex-col"
+                className="group card p-4 rounded-3xl hover:border-soultalk-lavender hover:shadow-md transition-all duration-300 cursor-pointer h-full flex flex-col"
                 onClick={() => startChat(targetUser)}
               >
                 <div className="flex items-start justify-between">
@@ -197,21 +197,24 @@ const Users = ({ user, socket }) => {
                       )}
                     </div>
                     <div>
-                      <h4 className="font-semibold text-soultalk-dark-gray">{targetUser.username}</h4>
+                      <h4 className="font-semibold text-soultalk-dark-gray tracking-tight">{targetUser.username}</h4>
+                      <p className={`text-xs font-medium ${onlineUsers.includes(targetUser.username) ? 'text-soultalk-coral' : 'text-soultalk-medium-gray'}`}>
+                        {onlineUsers.includes(targetUser.username) ? t('online') : t('offline')}
+                      </p>
                       <p className="text-xs text-soultalk-medium-gray">
                         {t('speaks')}: {getLanguageNameAndFlag(targetUser.language)}
                       </p>
                       <p className="text-xs text-soultalk-medium-gray">
-                        Country: {getCountryFromPhone(targetUser.phone)}
+                        {t('country')}: {getCountryFromPhone(targetUser.phone)}
                       </p>
-                      <p className="text-xs text-soultalk-medium-gray line-clamp-2">
-                        About: {targetUser.bio || targetUser.about || 'No bio yet'}
+                      <p className="text-xs text-soultalk-medium-gray line-clamp-2 leading-relaxed">
+                        {t('about')}: {targetUser.bio || targetUser.about || t('no_bio_yet')}
                       </p>
                     </div>
                   </div>
                   <MessageSquare className="w-5 h-5 text-soultalk-medium-gray group-hover:text-soultalk-coral transition-colors" />
                 </div>
-                <button className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white font-semibold py-2.5 px-4 hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 transition-all duration-300">
+                <button className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white font-semibold py-2.5 px-4 hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 transition-all duration-300 shadow-sm">
                   <MessageSquare className="w-4 h-4" />
                   {t('connect')}
                 </button>

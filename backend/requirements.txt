@@ -10,3 +10,4 @@ python-dotenv
 PyJWT
 gevent
 greenlet
+googletrans==4.0.0rc1
