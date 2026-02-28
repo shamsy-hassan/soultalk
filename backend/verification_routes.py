@@ -9,8 +9,10 @@ import uuid
 from werkzeug.utils import secure_filename # Add secure_filename
 from otp_phone_manager import (
     generate_otp, verify_otp, get_user_by_phone, get_user_by_username,
-    register_number, send_otp_email, update_profile_picture, update_profile_picture_by_username
+    register_number, send_otp_email, update_profile_picture, update_profile_picture_by_username,
+    update_language_by_username
 )
+from languages_catalog import list_languages
 
 bp = Blueprint("verification", __name__, url_prefix="/api")
 
@@ -154,6 +156,43 @@ def update_user_profile():
 
     return jsonify({
         "message": "Profile updated successfully",
+        "user": {
+            "username": user["username"],
+            "language": user["language"],
+            "phone": user["phone"],
+            "profile_picture_url": user["profile_picture_url"]
+        }
+    }), 200
+
+
+@bp.route("/languages", methods=["GET"])
+def get_languages():
+    country_code = request.args.get("country")
+    ui_only_raw = request.args.get("ui_only", "false").lower()
+    ui_only = ui_only_raw in ("1", "true", "yes")
+
+    languages = list_languages(country_code=country_code, ui_only=ui_only)
+    return jsonify({"languages": languages}), 200
+
+
+@bp.route("/update-user-language", methods=["POST"])
+def update_user_language():
+    data = request.get_json()
+    username = data.get("username")
+    language = data.get("language")
+
+    if not username or not language:
+        return jsonify({"error": "Username and language are required"}), 400
+
+    user = get_user_by_username(username)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    update_language_by_username(username, language)
+    user = get_user_by_username(username)
+
+    return jsonify({
+        "message": "Language updated successfully",
         "user": {
             "username": user["username"],
             "language": user["language"],

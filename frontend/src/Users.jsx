@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { getLanguageName, getLanguageFlag } from './i18n';
 import EmptyChatState from './EmptyChatState'; // Import EmptyChatState
 import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
+import { getLanguages } from './api';
+import { countryCodes } from './countryCodes';
 
 const Users = ({ user, socket }) => {
   const { t } = useTranslation();
@@ -16,7 +18,9 @@ const Users = ({ user, socket }) => {
   const navigate = useNavigate();
 
   // Temporary state for filter (will be implemented later)
-  const [selectedLanguageFilter, setSelectedLanguageFilter] = useState('All Languages');
+  const [selectedLanguageFilter, setSelectedLanguageFilter] = useState(null);
+  const [languageFilters, setLanguageFilters] = useState([]);
+  const [showLanguageFilters, setShowLanguageFilters] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -42,6 +46,19 @@ const Users = ({ user, socket }) => {
     };
   }, [socket]);
 
+  useEffect(() => {
+    const loadLanguageFilters = async () => {
+      try {
+        const data = await getLanguages();
+        setLanguageFilters(data.languages || []);
+      } catch (error) {
+        console.error('Error fetching language filters:', error);
+      }
+    };
+
+    loadLanguageFilters();
+  }, []);
+
   const fetchUsers = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/users', {
@@ -62,13 +79,23 @@ const Users = ({ user, socket }) => {
 
   const filteredUsers = users.filter(u =>
     u.username.toLowerCase().includes(search.toLowerCase()) && 
-    (selectedLanguageFilter === 'All Languages' || u.language === selectedLanguageFilter)
+    (!selectedLanguageFilter || u.language === selectedLanguageFilter)
   );
 
   const getLanguageNameAndFlag = (code) => {
     const name = getLanguageName(code);
     const flag = getLanguageFlag(code);
     return `${name} ${flag}`;
+  };
+
+  const getCountryFromPhone = (phone) => {
+    if (!phone) {
+      return 'Unknown';
+    }
+
+    const sortedCountryCodes = [...countryCodes].sort((a, b) => b.code.length - a.code.length);
+    const matchedCountry = sortedCountryCodes.find((country) => phone.startsWith(country.code));
+    return matchedCountry ? matchedCountry.name : 'Unknown';
   };
 
   const startChat = (targetUser) => {
@@ -102,17 +129,35 @@ const Users = ({ user, socket }) => {
 
       {/* Filter Chips - Placeholder */}
       <div className="flex flex-wrap gap-2 mb-4">
-        {['All Languages', 'en', 'es', 'fr', 'am', 'sw'].map(lang => (
+        <button
+          onClick={() => {
+            if (showLanguageFilters) {
+              setShowLanguageFilters(false);
+              setSelectedLanguageFilter(null);
+            } else {
+              setShowLanguageFilters(true);
+            }
+          }}
+          className={`px-3 py-1 text-sm rounded-full transition-colors ${
+            !selectedLanguageFilter
+              ? 'bg-soultalk-lavender text-soultalk-white'
+              : 'bg-soultalk-warm-gray text-soultalk-medium-gray hover:bg-gray-200'
+          }`}
+        >
+          {t('all_languages')}
+        </button>
+
+        {showLanguageFilters && languageFilters.map((lang) => (
           <button
-            key={lang}
-            onClick={() => setSelectedLanguageFilter(lang)}
+            key={lang.code}
+            onClick={() => setSelectedLanguageFilter(lang.code)}
             className={`px-3 py-1 text-sm rounded-full transition-colors ${
-              selectedLanguageFilter === lang
+              selectedLanguageFilter === lang.code
                 ? 'bg-soultalk-lavender text-soultalk-white'
                 : 'bg-soultalk-warm-gray text-soultalk-medium-gray hover:bg-gray-200'
             }`}
           >
-            {lang === 'All Languages' ? t('all_languages') : getLanguageFlag(lang)} {lang !== 'All Languages' && getLanguageName(lang)}
+            {lang.flag || getLanguageFlag(lang.code)} {getLanguageName(lang.code)}
           </button>
         ))}
       </div>
@@ -123,13 +168,13 @@ const Users = ({ user, socket }) => {
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto pr-2 -mr-2"> {/* Custom scrollbar area */}
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             {filteredUsers.map((targetUser) => {
               const targetUserAvatarUrl = resolveProfilePictureUrl(targetUser.profile_picture_url);
               return (
               <div
                 key={targetUser.id}
-                className="group card p-3 hover:border-soultalk-lavender hover:shadow-md transition-all duration-300 cursor-pointer" // card already has warm-gray bg
+                className="group card p-4 rounded-[2rem] hover:border-soultalk-lavender hover:shadow-md transition-all duration-300 cursor-pointer h-full flex flex-col"
                 onClick={() => startChat(targetUser)}
               >
                 <div className="flex items-start justify-between">
@@ -156,19 +201,18 @@ const Users = ({ user, socket }) => {
                       <p className="text-xs text-soultalk-medium-gray">
                         {t('speaks')}: {getLanguageNameAndFlag(targetUser.language)}
                       </p>
-                      {/* Learning language placeholder */}
                       <p className="text-xs text-soultalk-medium-gray">
-                        {t('learning')}: {getLanguageNameAndFlag('en')} {/* Placeholder */}
+                        Country: {getCountryFromPhone(targetUser.phone)}
+                      </p>
+                      <p className="text-xs text-soultalk-medium-gray line-clamp-2">
+                        About: {targetUser.bio || targetUser.about || 'No bio yet'}
                       </p>
                     </div>
                   </div>
                   <MessageSquare className="w-5 h-5 text-soultalk-medium-gray group-hover:text-soultalk-coral transition-colors" />
                 </div>
-                {/* Bio snippet placeholder */}
-                <p className="text-sm text-soultalk-medium-gray mt-2 line-clamp-2">
-                  {t('bio_snippet_placeholder')}
-                </p>
-                <button className="btn-primary btn-sm w-full mt-3">
+                <button className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white font-semibold py-2.5 px-4 hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 transition-all duration-300">
+                  <MessageSquare className="w-4 h-4" />
                   {t('connect')}
                 </button>
               </div>
@@ -177,11 +221,6 @@ const Users = ({ user, socket }) => {
           </div>
         </div>
       )}
-
-      {/* Random Soul Button */}
-      <button className="btn-secondary w-full mt-4">
-        {t('random_soul')}
-      </button>
 
       {!loading && filteredUsers.length === 0 && search !== '' && ( // Only show if no users found WITH a search term
         <div className="text-center py-12">

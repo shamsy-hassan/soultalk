@@ -140,3 +140,12 @@ def update_profile_picture_by_username(username, profile_picture_url):
     cursor.execute("UPDATE users SET profile_picture_url = ? WHERE username = ?", (profile_picture_url, username))
     conn.commit()
     conn.close()
+
+
+def update_language_by_username(username, language):
+    """Update a user's preferred language using username."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET language = ? WHERE username = ?", (language, username))
+    conn.commit()
+    conn.close()

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { getLanguageFlag } from './i18n';
 import UserMenu from './UserMenu'; // Import the new UserMenu component
 import { Users as UsersIcon, MessageSquare, Heart } from 'lucide-react'; // Import Users, MessageSquare, Heart icons
-import { NavLink, useNavigate } from 'react-router-dom'; // Import NavLink and useNavigate
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'; // Import NavLink and useNavigate
 import axios from 'axios'; // Import axios
 import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
 
@@ -11,7 +11,9 @@ const Sidebar = ({ user, socket, onLogout, onChangeLanguage, onNavigateToProfile
   const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [unreadCounts, setUnreadCounts] = useState({});
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     fetchUsers();
@@ -28,14 +30,41 @@ const Sidebar = ({ user, socket, onLogout, onChangeLanguage, onNavigateToProfile
           return Array.from(newOnline);
         });
       });
+
+      socket.on('receive_message', (data) => {
+        const activeChatUser = location.pathname.startsWith('/chat/')
+          ? decodeURIComponent(location.pathname.split('/chat/')[1] || '')
+          : null;
+
+        if (!data?.from || data.from === activeChatUser) {
+          return;
+        }
+
+        setUnreadCounts((prev) => ({
+          ...prev,
+          [data.from]: (prev[data.from] || 0) + 1
+        }));
+      });
     }
 
     return () => {
       if (socket) {
         socket.off('user_status');
+        socket.off('receive_message');
       }
     };
-  }, [socket]);
+  }, [socket, location.pathname]);
+
+  useEffect(() => {
+    if (!location.pathname.startsWith('/chat/')) return;
+    const activeChatUser = decodeURIComponent(location.pathname.split('/chat/')[1] || '');
+    if (!activeChatUser) return;
+
+    setUnreadCounts((prev) => ({
+      ...prev,
+      [activeChatUser]: 0
+    }));
+  }, [location.pathname]);
 
   const fetchUsers = async () => {
     try {
@@ -54,6 +83,10 @@ const Sidebar = ({ user, socket, onLogout, onChangeLanguage, onNavigateToProfile
   };
 
   const startChat = (targetUser) => {
+    setUnreadCounts((prev) => ({
+      ...prev,
+      [targetUser.username]: 0
+    }));
     navigate(`/chat/${targetUser.username}`);
   };
 
@@ -110,7 +143,13 @@ const Sidebar = ({ user, socket, onLogout, onChangeLanguage, onNavigateToProfile
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold text-soultalk-dark-gray">{targetUser.username}</p>
-                  <p className="text-sm text-soultalk-medium-gray">{t('online')}</p> {/* Placeholder for last message or online status */}
+                  {unreadCounts[targetUser.username] > 0 ? (
+                    <p className="text-xs text-soultalk-coral font-medium">
+                      {unreadCounts[targetUser.username]} new message{unreadCounts[targetUser.username] > 1 ? 's' : ''}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-soultalk-medium-gray">{t('online')}</p>
+                  )}
                 </div>
                 <MessageSquare className="w-5 h-5 text-soultalk-medium-gray" />
               </div>

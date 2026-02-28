@@ -12,6 +12,7 @@ import { Heart, MessageSquare } from 'lucide-react'; // Import icons for logo an
 import ProfileSetup from './ProfileSetup'; // Import ProfileSetup component
 import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
 import { uploadProfilePicture, updateUserProfile } from './profileAPI';
+import { updateUserLanguage } from './api';
 
 function App() {
   const { t } = useTranslation();
@@ -73,13 +74,24 @@ function App() {
     setShowLogoutConfirm(false);
   };
 
-  const handleChangeLanguage = (newLang) => {
+  const handleChangeLanguage = async (newLang) => {
+    const username = user?.username;
+    if (!username) {
+      return;
+    }
+
     i18n.changeLanguage(newLang);
     setUser(prevUser => {
       const updatedUser = { ...prevUser, language: newLang };
       localStorage.setItem('soultalk_user', JSON.stringify(updatedUser));
       return updatedUser;
     });
+
+    try {
+      await updateUserLanguage(username, newLang);
+    } catch (error) {
+      console.error('Failed to persist language change:', error);
+    }
   };
 
   const handleNavigateToProfileSetup = () => {

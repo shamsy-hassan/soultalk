@@ -3,10 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { getLanguageFlag, getLanguageName } from './i18n';
 import { ChevronDown, ChevronUp, LogOut, Settings, Globe } from 'lucide-react'; // Import icons
 import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
+import { getLanguages } from './api';
 
 const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [availableLanguages, setAvailableLanguages] = useState([]);
   const menuRef = useRef(null);
 
   const toggleMenu = () => {
@@ -41,14 +43,19 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
     };
   }, [menuRef]);
 
-  // List of available languages (adjust as needed, ideally fetched from i18n config)
-  const availableLanguages = [
-    { code: 'en', name: 'English' },
-    { code: 'fr', name: 'Français' },
-    { code: 'am', name: 'አማርኛ' },
-    { code: 'sw', name: 'Kiswahili' },
-    { code: 'de', name: 'Deutsch' },
-  ];
+  useEffect(() => {
+    const loadLanguages = async () => {
+      try {
+        const data = await getLanguages({ uiOnly: true });
+        setAvailableLanguages(data.languages || []);
+      } catch (error) {
+        console.error('Failed to fetch language options:', error);
+      }
+    };
+
+    loadLanguages();
+  }, []);
+
   const currentUserAvatarUrl = resolveProfilePictureUrl(user?.profile_picture_url);
 
   return (
@@ -98,7 +105,7 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
                 user.language === lang.code ? 'bg-soultalk-lavender text-soultalk-white' : 'text-soultalk-dark-gray hover:bg-soultalk-warm-gray'
               } transition-colors`}
             >
-              {getLanguageFlag(lang.code)} {lang.name}
+              {lang.flag || getLanguageFlag(lang.code)} {t(`language_${lang.code}`, { defaultValue: lang.nativeName || lang.name || lang.code })}
             </button>
           ))}
 

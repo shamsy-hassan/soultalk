@@ -40,6 +40,7 @@ def init_sockets(socketio: SocketIO):
             from_user = data.get('from')
             to_user = data.get('to')
             message = data.get('message')
+            message_id = data.get('messageId')
             
             # Get sender and receiver info
             sender = get_user(from_user)
@@ -68,6 +69,8 @@ def init_sockets(socketio: SocketIO):
             # Send translated message to receiver
             emit('receive_message', {
                 'from': from_user,
+                'to': to_user,
+                'messageId': message_id,
                 'message': translated_message, # Receiver gets translated message
                 'originalMessage': message,
                 'timestamp': 'now'
@@ -75,10 +78,19 @@ def init_sockets(socketio: SocketIO):
             
             # Send original message to sender
             emit('message_sent', {
+                'from': from_user,
                 'to': to_user,
+                'messageId': message_id,
                 'message': message, # Sender sees their original message
                 'translatedMessage': translated_message, # But also gets the translated version for context
                 'timestamp': 'now'
+            }, room=from_user)
+
+            # If receiver got the payload via socket, mark as delivered for sender UI.
+            emit('message_delivered', {
+                'from': from_user,
+                'to': to_user,
+                'messageId': message_id
             }, room=from_user)
             
         except Exception as e:
@@ -110,5 +122,22 @@ def init_sockets(socketio: SocketIO):
             # Emit messages back to the requesting user (user1)
             emit('message_history', {'messages': messages, 'chatPartner': user2}, room=user1)
             
+        except Exception as e:
+            emit('error', {'message': str(e)})
+
+    @socketio.on('mark_messages_read')
+    def handle_mark_messages_read(data):
+        try:
+            reader = data.get('reader')
+            sender = data.get('sender')
+            if not reader or not sender:
+                emit('error', {'message': 'reader and sender are required for read receipts'})
+                return
+
+            # Notify the original sender that their messages to `reader` were seen.
+            emit('message_read', {
+                'reader': reader,
+                'sender': sender
+            }, room=sender)
         except Exception as e:
             emit('error', {'message': str(e)})

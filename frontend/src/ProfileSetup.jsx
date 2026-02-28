@@ -99,67 +99,91 @@ export default function ProfileSetup({ onProfileSetupComplete, onBack, errorMess
   };
 
   return (
-    <div className="space-y-4 text-center p-4">
-      <h2 className="text-xl font-semibold mb-4 text-soultalk-dark-gray">{t('setup_profile_picture')}</h2>
-      {errorMessage && (
-        <p className="text-sm text-red-500">{errorMessage}</p>
-      )}
-
-      <input type="file" accept="image/*" onChange={onSelectFile} className="block w-full text-sm text-soultalk-medium-gray file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-soultalk-warm-gray file:text-soultalk-dark-gray hover:file:bg-gray-300" />
-      {!upImg && (
-        <button
-          onClick={() => onProfileSetupComplete()}
-          className="w-full bg-soultalk-warm-gray text-soultalk-dark-gray font-bold py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out mt-2"
-        >
-          {t('skip_for_now')}
-        </button>
-      )}
-
-      {upImg && (
-        <div className="flex justify-center my-4">
-          <ReactCrop
-            crop={crop}
-            onChange={(_, percentCrop) => setCrop(percentCrop)}
-            onComplete={onCropComplete}
-            aspect={1} // 1:1 aspect ratio for profile picture
-            minWidth={100}
-            minHeight={100}
-            circularCrop
-          >
-            <img
-              ref={imgRef}
-              alt="Crop me"
-              src={upImg}
-              onLoad={onImageLoad}
-              className="max-w-full h-auto block"
-            />
-          </ReactCrop>
+    <div className="w-full max-w-xl mx-auto p-4 md:p-6">
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-5 md:p-6">
+        <div className="text-center">
+          <h2 className="text-xl md:text-2xl font-semibold text-soultalk-dark-gray">
+            {t('setup_profile_picture')}
+          </h2>
+          <p className="text-sm text-soultalk-medium-gray mt-2">
+            Adjust the crop to choose how your photo appears.
+          </p>
         </div>
-      )}
 
-      {completedCrop && (
-        <>
+        {errorMessage && (
+          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600 text-center">
+            {errorMessage}
+          </div>
+        )}
+
+        <div className="mt-5">
+          <label
+            htmlFor="profile-image-upload"
+            className="inline-flex items-center justify-center w-full px-4 py-3 rounded-lg bg-soultalk-warm-gray text-soultalk-dark-gray font-semibold cursor-pointer hover:bg-gray-200 transition-colors"
+          >
+            {upImg ? 'Change photo' : 'Choose photo'}
+          </label>
+          <input
+            id="profile-image-upload"
+            type="file"
+            accept="image/*"
+            onChange={onSelectFile}
+            className="hidden"
+          />
+        </div>
+
+        {upImg && (
+          <div className="mt-5 p-3 md:p-4 rounded-xl border border-gray-100 bg-soultalk-warm-gray/40">
+            <div className="flex justify-center">
+              <ReactCrop
+                crop={crop}
+                onChange={(_, percentCrop) => setCrop(percentCrop)}
+                onComplete={onCropComplete}
+                aspect={1}
+                minWidth={100}
+                minHeight={100}
+                circularCrop
+              >
+                <img
+                  ref={imgRef}
+                  alt="Crop me"
+                  src={upImg}
+                  onLoad={onImageLoad}
+                  className="max-w-full h-auto block rounded-lg"
+                />
+              </ReactCrop>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-6 space-y-3">
           <button
             onClick={onSaveProfilePicture}
-            className="w-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white font-bold py-3 px-4 rounded-lg hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out"
+            disabled={!completedCrop}
+            className={`w-full py-3 px-4 rounded-lg font-bold transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender ${
+              completedCrop
+                ? 'bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90'
+                : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+            }`}
           >
             {t('save_profile_picture')}
           </button>
+
           <button
             onClick={() => onProfileSetupComplete()}
-            className="w-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white font-bold py-3 px-4 rounded-lg hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out"
+            className="w-full py-2 px-4 rounded-lg font-semibold bg-soultalk-warm-gray text-soultalk-dark-gray hover:bg-gray-300 transition-colors"
           >
-            {t('done')}
+            {t('skip_for_now')}
           </button>
-        </>
-      )}
 
-      <button
-        onClick={onBack}
-        className="w-full bg-transparent border border-gray-300 text-soultalk-medium-gray font-bold py-2 px-4 rounded-lg hover:bg-soultalk-warm-gray focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out mt-2"
-      >
-        {t('back')}
-      </button>
+          <button
+            onClick={onBack}
+            className="w-full py-2 px-4 rounded-lg border border-gray-300 text-soultalk-medium-gray font-semibold hover:bg-soultalk-warm-gray transition-colors"
+          >
+            {t('back')}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

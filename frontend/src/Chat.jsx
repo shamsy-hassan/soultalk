@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Send, ArrowLeft, Clock, Sparkles, Image as ImageIcon, Smile, Phone, Heart } from 'lucide-react'; // Added Phone icon for call, removed Mic
+import { Send, ArrowLeft, Clock, Sparkles, Image as ImageIcon, Smile, Phone, Heart, Check, CheckCheck } from 'lucide-react'; // Added Phone icon for call, removed Mic
 import { useTranslation } from 'react-i18next';
 import { getLanguageName, getLanguageFlag } from './i18n';
 import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
@@ -24,6 +24,8 @@ const Chat = ({ user, socket }) => {
 
     socket.on('receive_message', handleReceiveMessage);
     socket.on('message_sent', handleMessageSent);
+    socket.on('message_delivered', handleMessageDelivered);
+    socket.on('message_read', handleMessageRead);
     socket.on('user_typing', handleUserTyping);
     socket.on('error', handleError);
     socket.on('message_history', handleMessageHistory); 
@@ -33,6 +35,8 @@ const Chat = ({ user, socket }) => {
     return () => {
       socket.off('receive_message');
       socket.off('message_sent');
+      socket.off('message_delivered');
+      socket.off('message_read');
       socket.off('user_typing');
       socket.off('error');
       socket.off('message_history'); 
@@ -62,6 +66,14 @@ const Chat = ({ user, socket }) => {
   }, [targetUser, user, socket, username]);
 
   useEffect(() => {
+    if (!socket || !user || !username) return;
+    socket.emit('mark_messages_read', {
+      reader: user.username,
+      sender: username
+    });
+  }, [socket, user, username, messages.length]);
+
+  useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
@@ -71,7 +83,7 @@ const Chat = ({ user, socket }) => {
 
   const handleReceiveMessage = (data) => {
     const message = {
-      id: `${Date.now()}-${data.from}-${user.username}`,
+      id: data.messageId || `${Date.now()}-${data.from}-${user.username}`,
       from: data.from,
       to: user.username,
       originalText: data.originalMessage || data.message,
@@ -82,21 +94,67 @@ const Chat = ({ user, socket }) => {
       isReceived: true
     };
     setMessages(prev => [...prev, message]);
+
+    if (data.from === username && socket) {
+      socket.emit('mark_messages_read', {
+        reader: user.username,
+        sender: data.from
+      });
+    }
   };
 
   const handleMessageSent = (data) => {
-    const message = {
-      id: `${Date.now()}-${user.username}-${data.to}`,
-      from: user.username,
-      to: data.to,
-      originalText: data.message,
-      translatedText: data.translatedMessage,
-      fromLanguage: user.language,
-      toLanguage: targetUser?.language || 'en',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isSent: true
-    };
-    setMessages(prev => [...prev, message]);
+    setMessages((prev) => {
+      const alreadyExists = prev.some((msg) => msg.id === data.messageId);
+      if (alreadyExists) {
+        return prev.map((msg) =>
+          msg.id === data.messageId
+            ? {
+                ...msg,
+                translatedText: data.translatedMessage || msg.translatedText,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                status: 'sent'
+              }
+            : msg
+        );
+      }
+
+      const message = {
+        id: data.messageId || `${Date.now()}-${user.username}-${data.to}`,
+        from: user.username,
+        to: data.to,
+        originalText: data.message,
+        translatedText: data.translatedMessage,
+        fromLanguage: user.language,
+        toLanguage: targetUser?.language || 'en',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isSent: true,
+        status: 'sent'
+      };
+      return [...prev, message];
+    });
+  };
+
+  const handleMessageDelivered = (data) => {
+    if (data.to !== username) return;
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === data.messageId
+          ? { ...msg, status: 'delivered' }
+          : msg
+      )
+    );
+  };
+
+  const handleMessageRead = (data) => {
+    if (data.reader !== username) return;
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.from === user.username && msg.to === data.reader
+          ? { ...msg, status: 'read' }
+          : msg
+      )
+    );
   };
 
   const handleUserTyping = (data) => {
@@ -124,6 +182,7 @@ const Chat = ({ user, socket }) => {
         timestamp: new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         isSent: isSent,
         isReceived: isReceived,
+        status: isSent ? 'delivered' : undefined,
       };
     });
     setMessages(history);
@@ -131,11 +190,28 @@ const Chat = ({ user, socket }) => {
 
   const handleSend = () => {
     if (!newMessage.trim() || !socket) return;
+    const messageId = `${Date.now()}-${user.username}-${username}-${Math.random().toString(36).slice(2, 8)}`;
+
+    const optimisticMessage = {
+      id: messageId,
+      from: user.username,
+      to: username,
+      originalText: newMessage,
+      translatedText: newMessage,
+      fromLanguage: user.language,
+      toLanguage: targetUser?.language || 'en',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isSent: true,
+      status: 'sent'
+    };
+
+    setMessages((prev) => [...prev, optimisticMessage]);
 
     socket.emit('send_message', {
       from: user.username,
       to: username,
-      message: newMessage
+      message: newMessage,
+      messageId
     });
 
     setTyping(false);
@@ -259,7 +335,11 @@ const Chat = ({ user, socket }) => {
                 <Clock className="w-3 h-3 mr-1" />
                 <span>{msg.timestamp}</span>
                 {msg.from === user.username && (
-                  <span className="ml-1">❤️❤️</span> // Double heart read receipt
+                  <span className="ml-1 inline-flex items-center">
+                    {msg.status === 'read' && <CheckCheck className="w-3.5 h-3.5 text-sky-200" />}
+                    {msg.status === 'delivered' && <CheckCheck className="w-3.5 h-3.5 text-soultalk-white/70" />}
+                    {(!msg.status || msg.status === 'sent') && <Check className="w-3.5 h-3.5 text-soultalk-white/70" />}
+                  </span>
                 )}
               </div>
             </div>

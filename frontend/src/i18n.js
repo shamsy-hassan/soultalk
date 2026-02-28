@@ -43,22 +43,10 @@ const resources = {
 };
 
 export const getLanguageName = (code) => {
-  const languages = {
-    'en': i18n.t('language_english'),
-    'sw': i18n.t('language_swahili'),
-    'am': i18n.t('language_amharic'),
-    'fr': i18n.t('language_french'),
-    'ar': i18n.t('language_arabic'),
-    'es': i18n.t('language_spanish'),
-    'pt': i18n.t('language_portuguese'),
-    'yo': i18n.t('language_yoruba'),
-    'ha': i18n.t('language_hausa'),
-    'zu': i18n.t('language_zulu'),
-    'rw': i18n.t('language_kinyarwanda'),
-    'rn': i18n.t('language_kirundi'),
-    'so': i18n.t('language_somali')
-  };
-  return languages[code] || code;
+  if (!code) {
+    return '';
+  }
+  return i18n.t(`language_${code}`, { defaultValue: code });
 };
 
 export const getLanguageFlag = (code) => {
@@ -68,9 +56,20 @@ export const getLanguageFlag = (code) => {
     'am': '🇪🇹',
     'fr': '🇫🇷',
     'ar': '🇸🇦',
+    'de': '🇩🇪',
+    'es': '🇪🇸',
+    'pt': '🇵🇹',
+    'yo': '🇳🇬',
+    'ha': '🇳🇬',
+    'zu': '🇿🇦',
     'rw': '🇷🇼', // Rwanda
     'rn': '🇧🇮', // Burundi
-    'so': '🇸🇴'  // Somalia
+    'so': '🇸🇴',  // Somalia
+    'lg': '🇺🇬',
+    'aa': '🇩🇯',
+    'ti': '🇪🇷',
+    'mg': '🇲🇬',
+    'it': '🇮🇹'
   };
   return flags[code] || '🌐';
 };

@@ -1,12 +1,13 @@
 // frontend/src/VerifyFlow.jsx
 // Parent component to handle the multi-step phone verification and user onboarding flow
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PhoneVerification from "./PhoneVerification";
 import OtpVerification from "./OtpVerification";
 import { useTranslation } from "react-i18next";
-import { countryLanguages, countryCodes } from './countryCodes';
+import { countryCodes } from './countryCodes';
 import ProfileSetup from "./ProfileSetup"; // Import ProfileSetup
+import { getLanguages } from "./api";
 
 // This component manages the full phone verification and onboarding flow
 export default function VerifyFlow({ onLogin }) {
@@ -31,6 +32,7 @@ export default function VerifyFlow({ onLogin }) {
 
   // User data after successful verification
   const [verifiedUser, setVerifiedUser] = useState(null);
+  const [availableLanguages, setAvailableLanguages] = useState([]);
 
   // --- Step Handlers ---
 
@@ -198,9 +200,21 @@ export default function VerifyFlow({ onLogin }) {
     return matchedCode;
   };
 
-  // Determine available languages based on currentPhone's country code
   const currentCountryCode = getCountryCodeFromPhone(currentPhone);
-  const availableLanguages = countryLanguages[currentCountryCode] || countryLanguages.default;
+
+  useEffect(() => {
+    const loadLanguages = async () => {
+      try {
+        const data = await getLanguages({ countryCode: currentCountryCode });
+        setAvailableLanguages(data.languages || []);
+      } catch (error) {
+        console.error("Failed to load available languages:", error);
+        setAvailableLanguages([]);
+      }
+    };
+
+    loadLanguages();
+  }, [currentCountryCode]);
 
 
   return (
@@ -261,8 +275,10 @@ export default function VerifyFlow({ onLogin }) {
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
           >
             <option value="">{t('select_language')}</option>
-            {availableLanguages.map(langCode => (
-              <option key={langCode} value={langCode}>{t(`language_${langCode}`)}</option>
+            {availableLanguages.map(lang => (
+              <option key={lang.code} value={lang.code}>
+                {t(`language_${lang.code}`, { defaultValue: lang.nativeName || lang.name || lang.code })}
+              </option>
             ))}
           </select>
           <button
