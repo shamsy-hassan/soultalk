@@ -37,10 +37,8 @@ function App() {
   const toastTimeoutRef = useRef(null);
 
   useEffect(() => {
-    if (user) {
+    if (user?.language) {
       i18n.changeLanguage(resolveUiLanguage(user.language));
-    } else {
-      i18n.changeLanguage('en');
     }
   }, [user]);
 
@@ -228,7 +226,7 @@ function App() {
 
       {/* Sidebar - Desktop always visible, mobile as drawer */}
       {user && (
-        <div className={`fixed inset-y-0 left-0 z-40 w-[300px] bg-soultalk-white shadow-lg transform ${
+        <div className={`fixed inset-y-0 left-0 z-40 w-[86vw] max-w-[300px] bg-soultalk-white shadow-lg transform ${
             showSidebarMobile ? 'translate-x-0' : '-translate-x-full'
           } md:translate-x-0 md:shadow-none transition-transform duration-300 ease-in-out overflow-y-auto`}>
           <Sidebar 
@@ -251,11 +249,11 @@ function App() {
       )}
 
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col ${user ? 'md:ml-[300px]' : ''}`}> {/* Adjust margin for desktop sidebar when user is logged in */}
+      <div className={`flex-1 flex flex-col min-w-0 ${user ? 'md:ml-[300px]' : ''}`}> {/* Adjust margin for desktop sidebar when user is logged in */}
         {user && (
-          <nav className={`${theme === 'dark' ? 'bg-[#111827]/90 border-gray-800' : 'bg-soultalk-white/90 border-gray-100'} backdrop-blur-sm px-4 py-3 md:px-6 shadow-sm flex items-center justify-between z-20 sticky top-0 border-b`}>
+          <nav className={`${theme === 'dark' ? 'bg-[#111827]/90 border-gray-800' : 'bg-soultalk-white/90 border-gray-100'} backdrop-blur-sm px-3 py-3 sm:px-4 md:px-6 shadow-sm flex items-center justify-between z-20 sticky top-0 border-b safe-pt safe-px`}>
             {/* Left side: App Logo/Name and Mobile Sidebar Toggle */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
               {/* Mobile Sidebar Toggle - only on small screens */}
               <button
                 className="md:hidden p-2 rounded-lg bg-soultalk-warm-gray shadow-md"
@@ -264,23 +262,23 @@ function App() {
               >
                 <MessageSquare className="w-6 h-6 text-soultalk-dark-gray" />
               </button>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 min-w-0">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-soultalk-coral to-soultalk-teal flex items-center justify-center shadow-sm">
                   <Heart className="w-5 h-5 text-soultalk-white" />
                 </div>
-                <div>
-                  <h1 className={`text-xl font-bold tracking-tight ${theme === 'dark' ? 'text-gray-100' : 'text-soultalk-dark-gray'}`}>SoulTalk</h1>
+                <div className="min-w-0">
+                  <h1 className={`text-lg sm:text-xl font-bold tracking-tight truncate ${theme === 'dark' ? 'text-gray-100' : 'text-soultalk-dark-gray'}`}>SoulTalk</h1>
                   <p className={`text-xs hidden md:block ${theme === 'dark' ? 'text-gray-400' : 'text-soultalk-medium-gray'}`}>{pageTitle}</p>
                 </div>
               </div>
             </div>
 
             {/* Right side: quick links + user context */}
-            <div className="flex items-center gap-2 md:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
               <NavLink
                 to="/chats"
                 className={({ isActive }) =>
-                  `inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                  `inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full text-sm border transition-colors ${
                     isActive ? 'bg-soultalk-lavender text-soultalk-white' : 'bg-soultalk-warm-gray text-soultalk-dark-gray hover:bg-gray-200'
                   }`
                 }
@@ -341,7 +339,7 @@ function App() {
               <button
                 type="button"
                 onClick={handleToggleTheme}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm bg-soultalk-warm-gray text-soultalk-dark-gray hover:bg-gray-200 transition-colors"
+                className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full text-sm bg-soultalk-warm-gray border border-gray-200 text-soultalk-dark-gray hover:bg-gray-200 transition-colors"
               >
                 {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                 <span className="hidden md:inline">{theme === 'dark' ? t('light') : t('dark')}</span>
@@ -363,7 +361,7 @@ function App() {
           </nav>
         )}
 
-        <main className="flex-1 overflow-y-auto subtle-scrollbar p-4 md:p-6"> {/* Adjusted padding */}
+        <main className="flex-1 overflow-y-auto subtle-scrollbar p-3 sm:p-4 md:p-6 safe-px"> {/* Adjusted padding */}
           <Routes>
             <Route 
               path="/" 
@@ -408,7 +406,7 @@ function App() {
           </Routes>
         </main>
 
-        <footer className={`${theme === 'dark' ? 'border-gray-800 text-gray-400' : 'border-gray-200 text-soultalk-medium-gray'} py-6 border-t text-center text-sm`}>
+        <footer className={`${theme === 'dark' ? 'border-gray-800 text-gray-400' : 'border-gray-200 text-soultalk-medium-gray'} py-6 border-t text-center text-sm safe-pb safe-px`}>
           <p>{t('soultalk_footer')}</p>
           <p className="text-xs mt-2">{t('made_with_love')}</p>
         </footer>
@@ -416,8 +414,8 @@ function App() {
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity50 flex items-center justify-center z-50">
-          <div className="bg-soultalk-white p-6 rounded-lg shadow-xl max-w-sm w-full">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 safe-px safe-pb">
+          <div className="bg-soultalk-white p-5 sm:p-6 rounded-lg shadow-xl max-w-sm w-full max-h-[90dvh] overflow-y-auto">
             <h2 className="text-xl font-semibold mb-4 text-soultalk-dark-gray">{t('logout_confirm_title')}</h2>
             <p className="text-soultalk-medium-gray mb-6">{t('logout_confirm_message')}</p>
             <div className="flex justify-end space-x-3">
@@ -439,7 +437,7 @@ function App() {
       )}
 
       {showProfilePreview && user && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 safe-px safe-pb">
           <div className={`w-full max-w-md rounded-2xl overflow-hidden shadow-2xl ${
             theme === 'dark' ? 'bg-[#111827] border border-gray-800' : 'bg-white border border-gray-100'
           }`}>
@@ -462,7 +460,7 @@ function App() {
                 <img
                   src={currentUserAvatarUrl}
                   alt={`${user.username} profile`}
-                  className="w-56 h-56 rounded-2xl object-cover shadow-lg"
+                  className="w-full max-w-[224px] aspect-square rounded-2xl object-cover shadow-lg"
                   onError={(e) => { e.currentTarget.src = DEFAULT_PROFILE_IMAGE_URL; }}
                 />
                 <p className={`mt-3 font-medium ${theme === 'dark' ? 'text-gray-100' : 'text-soultalk-dark-gray'}`}>
@@ -506,7 +504,7 @@ function App() {
             navigate(`/chat/${messageToast.from}`);
             setMessageToast(null);
           }}
-          className={`fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-[340px] z-50 rounded-xl shadow-xl p-4 text-left ${
+          className={`fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-[340px] z-50 rounded-xl shadow-xl p-4 text-left safe-pb ${
             theme === 'dark' ? 'bg-gray-100 text-soultalk-dark-gray' : 'bg-soultalk-dark-gray text-soultalk-white'
           }`}
         >

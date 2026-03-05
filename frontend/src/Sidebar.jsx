@@ -14,7 +14,7 @@ const Sidebar = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup, t
     }`;
 
   return (
-    <aside className="w-[300px] bg-soultalk-white/95 backdrop-blur-sm border-r border-gray-100 flex flex-col h-screen p-4 shadow-sm">
+    <aside className="w-full max-w-[300px] bg-soultalk-white/95 backdrop-blur-sm border-r border-gray-100 flex flex-col h-[100dvh] p-4 shadow-[0_18px_40px_-34px_rgba(30,41,59,0.6)] safe-pt safe-pb safe-px">
       {user && (
         <UserMenu
           user={user}

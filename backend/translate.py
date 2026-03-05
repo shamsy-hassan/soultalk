@@ -1,17 +1,18 @@
-# This file will contain code for translation services.
-from googletrans import Translator
+# This file contains code for translation services.
+from deep_translator import GoogleTranslator
 
 def translate_text(text, from_lang, to_lang):
     """Translate text between languages"""
-    
+
     # If same language, return original
     if from_lang == to_lang:
         return text
-    
+
     try:
-        translator = Translator()
-        translated = translator.translate(text, src=from_lang, dest=to_lang)
-        return translated.text
+        source_lang = (from_lang or 'auto').strip() or 'auto'
+        target_lang = (to_lang or 'en').strip() or 'en'
+        translator = GoogleTranslator(source=source_lang, target=target_lang)
+        return translator.translate(text)
     except Exception as e:
         print(f"Error during translation: {e}")
         return f"[{text}] (translation not available)"

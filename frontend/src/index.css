@@ -5,6 +5,7 @@
 @layer base {
   body {
     @apply bg-soultalk-white min-h-screen text-soultalk-dark-gray antialiased;
+    overflow-x: hidden;
   }
 }
 
@@ -19,6 +20,18 @@
   
   .card {
     @apply bg-soultalk-warm-gray rounded-2xl shadow-sm p-6 border border-gray-100;
+  }
+
+  .card-elevated {
+    @apply rounded-2xl border border-gray-100 bg-white/90 backdrop-blur-sm shadow-[0_18px_45px_-32px_rgba(30,41,59,0.55)];
+  }
+
+  .hero-panel {
+    @apply relative overflow-hidden rounded-3xl border border-soultalk-lavender/20 bg-gradient-to-br from-white via-[#fff8f0] to-[#f3f7ff];
+  }
+
+  .section-title {
+    @apply text-2xl md:text-3xl font-bold tracking-tight text-soultalk-dark-gray;
   }
   
   .input-field {
@@ -41,6 +54,10 @@
     @apply bg-soultalk-white/90 backdrop-blur-sm border border-gray-100 rounded-2xl shadow-sm;
   }
 
+  .pill {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs sm:text-sm border border-gray-100 bg-white/90 text-soultalk-dark-gray;
+  }
+
   .subtle-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: #d7d3f6 transparent;
@@ -58,6 +75,19 @@
   .subtle-scrollbar::-webkit-scrollbar-thumb {
     background: #d7d3f6;
     border-radius: 999px;
+  }
+
+  .safe-pt {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-pb {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-px {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }
 

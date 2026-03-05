@@ -245,10 +245,10 @@ const Chat = ({ user, socket }) => {
   const targetUserProfileImageUrl = resolveProfilePictureUrl(targetUser.profile_picture_url);
 
   return (
-    <div className="flex-1 flex flex-col bg-gradient-to-b from-soultalk-white to-soultalk-warm-gray/30 rounded-2xl overflow-hidden border border-gray-100">
+    <div className="flex-1 flex flex-col bg-gradient-to-b from-soultalk-white to-soultalk-warm-gray/30 rounded-2xl overflow-hidden border border-gray-100 shadow-[0_20px_48px_-36px_rgba(30,41,59,0.55)]">
       {/* Chat Header */}
-      <div className="sticky top-0 z-20 bg-soultalk-white/95 backdrop-blur-sm p-4 border-b border-gray-100 flex items-center justify-between shadow-sm">
-        <div className="flex items-center space-x-3">
+      <div className="sticky top-0 z-20 bg-soultalk-white/95 backdrop-blur-sm p-3 sm:p-4 border-b border-gray-100 flex items-center justify-between shadow-sm safe-pt safe-px">
+        <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
           <button
             onClick={() => navigate(-1)} // Changed to navigate to previous page
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors md:hidden" // Show back button only on mobile
@@ -267,9 +267,9 @@ const Chat = ({ user, socket }) => {
                 <Heart className="w-full h-full fill-current" />
             </div>
           </div>
-          <div>
-            <h2 className="text-lg font-bold text-soultalk-dark-gray">{username}</h2>
-            <div className="flex items-center space-x-1 text-xs text-soultalk-medium-gray">
+          <div className="min-w-0">
+            <h2 className="text-base sm:text-lg font-bold text-soultalk-dark-gray truncate">{username}</h2>
+            <div className="flex items-center space-x-1 text-xs text-soultalk-medium-gray truncate">
               {t('speaking')}: {getLanguageName(targetUser.language)} {getLanguageFlag(targetUser.language)}
             </div>
           </div>
@@ -286,7 +286,7 @@ const Chat = ({ user, socket }) => {
 
       {/* Language Bridge Indicator (Full for desktop, compact for mobile) */}
       <div className="bg-soultalk-warm-gray/70 p-3 text-center border-b border-gray-100 hidden md:block"> {/* Hidden on mobile */}
-        <div className="inline-flex items-center space-x-2 text-sm text-soultalk-medium-gray bg-soultalk-white rounded-full px-4 py-2 shadow-sm">
+        <div className="inline-flex items-center space-x-2 text-sm text-soultalk-medium-gray bg-soultalk-white rounded-full px-4 py-2 shadow-sm max-w-full overflow-x-auto subtle-scrollbar">
           <span>{getLanguageFlag(user.language)} {t('language_you_speak', { language: getLanguageName(user.language) })}</span>
           <span className="text-soultalk-medium-gray">—</span>
           <Sparkles className="w-4 h-4 text-soultalk-lavender" /> {/* Small bridge icon */}
@@ -306,13 +306,13 @@ const Chat = ({ user, socket }) => {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto subtle-scrollbar p-4 md:p-5 bg-transparent">
+      <div className="flex-1 overflow-y-auto subtle-scrollbar p-3 sm:p-4 md:p-5 bg-transparent">
         {messages.map((msg) => (
           <div
             key={msg.id}
             className={`mb-4 flex ${msg.from === user.username ? 'justify-end' : 'justify-start'}`}
           >
-            <div className={`relative max-w-[78%] lg:max-w-[56%] p-4 shadow-sm ring-1 rounded-2xl ${
+            <div className={`group relative max-w-[86%] sm:max-w-[78%] lg:max-w-[56%] p-3.5 sm:p-4 shadow-sm ring-1 rounded-2xl ${
               msg.from === user.username
                 ? 'bg-gradient-to-tr from-soultalk-coral to-soultalk-coral text-soultalk-white rounded-br-none ring-soultalk-coral/20' // Sent bubble
                 : 'bg-gradient-to-tl from-soultalk-teal to-soultalk-teal text-soultalk-dark-gray rounded-bl-none ring-soultalk-teal/20' // Received bubble
@@ -363,7 +363,7 @@ const Chat = ({ user, socket }) => {
       </div>
 
       {/* Input Area */}
-      <div className="sticky bottom-0 z-10 bg-soultalk-white/95 backdrop-blur-sm border-t border-gray-100 p-4"> {/* Added sticky bottom-0 */}
+      <div className="sticky bottom-0 z-10 bg-soultalk-white/95 backdrop-blur-sm border-t border-gray-100 p-3 sm:p-4 safe-pb safe-px"> {/* Added sticky bottom-0 */}
         {/* Soul Translator Bar above input */}
         <div className="mb-3 p-2 bg-soultalk-warm-gray rounded-lg flex items-center justify-center space-x-2 text-sm text-soultalk-medium-gray hidden md:flex"> {/* Hidden on mobile */}
           <span>{t('you')}: {getLanguageFlag(user.language)} {getLanguageName(user.language)}</span>
@@ -371,9 +371,9 @@ const Chat = ({ user, socket }) => {
           <span>{t('them')}: {getLanguageFlag(targetUser.language)} {getLanguageName(targetUser.language)}</span>
         </div>
 
-        <div className="flex items-end space-x-3">
+        <div className="flex items-end gap-2 sm:gap-3">
           <div className="flex-1">
-            <div className="flex space-x-2 mb-2">
+            <div className="flex flex-wrap gap-2 mb-2">
               <button className="p-2 hover:bg-soultalk-warm-gray rounded-lg transition-colors">
                 <ImageIcon className="w-5 h-5 text-soultalk-medium-gray" />
               </button>
@@ -403,7 +403,7 @@ const Chat = ({ user, socket }) => {
           <button
             onClick={handleSend}
             disabled={!newMessage.trim()}
-            className={`p-4 rounded-xl flex items-center justify-center ${
+            className={`p-3 sm:p-4 rounded-xl flex items-center justify-center shrink-0 ${
               newMessage.trim()
                 ? 'bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white hover:opacity-90'
                 : 'bg-soultalk-warm-gray text-soultalk-medium-gray'

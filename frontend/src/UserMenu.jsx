@@ -73,7 +73,7 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
     <div className="relative" ref={menuRef}>
       <button
         onClick={toggleMenu}
-        className="flex items-center space-x-3 mb-6 p-2 rounded-lg bg-soultalk-warm-gray w-full text-left cursor-pointer hover:bg-gray-200 transition-colors"
+        className="flex items-center space-x-3 mb-6 p-2.5 rounded-xl bg-soultalk-warm-gray border border-gray-200 w-full text-left cursor-pointer hover:bg-gray-200 transition-colors"
       >
         <div className="w-12 h-12 rounded-full bg-gradient-to-r from-soultalk-coral to-soultalk-teal flex items-center justify-center text-soultalk-white text-xl font-bold">
           <img
@@ -93,7 +93,7 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 mt-2 w-full bg-soultalk-white rounded-xl shadow-xl z-10 p-2 border border-gray-100 space-y-2">
+        <div className="absolute left-0 mt-2 w-full bg-soultalk-white/98 backdrop-blur-sm rounded-xl shadow-xl z-10 p-2 border border-gray-100 space-y-2">
           <button
             onClick={handleProfileClick}
             className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-soultalk-dark-gray hover:bg-soultalk-warm-gray rounded-lg transition-colors"
@@ -118,7 +118,7 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
           </button>
 
           {showLanguageOptions && (
-            <div className="rounded-lg border border-gray-100 overflow-hidden">
+            <div className="rounded-lg border border-gray-100 overflow-hidden bg-white">
               {availableLanguages.map((lang) => (
                 <button
                   key={lang.code}

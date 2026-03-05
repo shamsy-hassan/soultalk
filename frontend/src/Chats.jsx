@@ -37,7 +37,7 @@ const Chats = ({ user }) => {
 
   if (chats.length === 0) {
     return (
-      <div className="surface-panel p-6 text-center">
+      <div className="hero-panel p-6 text-center">
         <h2 className="text-xl font-semibold text-soultalk-dark-gray">{t('your_chats')}</h2>
         <p className="text-sm text-soultalk-medium-gray mt-2">{t('no_chats_yet_hint')}</p>
       </div>
@@ -46,8 +46,8 @@ const Chats = ({ user }) => {
 
   return (
     <div className="space-y-4">
-      <div className="surface-panel p-5">
-        <h1 className="text-2xl font-bold tracking-tight text-soultalk-dark-gray">{t('your_chats')}</h1>
+      <div className="hero-panel p-5 md:p-6">
+        <h1 className="section-title">{t('your_chats')}</h1>
         <p className="text-sm text-soultalk-medium-gray mt-1">{t('only_people_you_messaged')}</p>
       </div>
 
@@ -57,7 +57,7 @@ const Chats = ({ user }) => {
             key={partner.id || partner.username}
             type="button"
             onClick={() => navigate(`/chat/${partner.username}`)}
-            className="card p-4 rounded-2xl text-left hover:border-soultalk-lavender hover:shadow-md transition-all duration-200"
+            className="card-elevated p-4 rounded-2xl text-left hover:border-soultalk-lavender hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">

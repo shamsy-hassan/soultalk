@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { countryCodes } from './countryCodes';
 import ProfileSetup from "./ProfileSetup"; // Import ProfileSetup
 import { getLanguages } from "./api";
+import i18n, { resolveUiLanguage } from "./i18n";
 
 // This component manages the full phone verification and onboarding flow
 export default function VerifyFlow({ onLogin }) {
@@ -20,7 +21,7 @@ export default function VerifyFlow({ onLogin }) {
 
   const [userEmail, setUserEmail] = useState(""); // For new or confirmed registered users
   const [userUsername, setUserUsername] = useState(""); // For new or confirmed registered users
-  const [selectedLanguage, setSelectedLanguage] = useState(""); // For new users
+  const [selectedLanguage, setSelectedLanguage] = useState(resolveUiLanguage(i18n.language)); // For new users
 
   // Profile picture will be handled in a later step
   const [profilePicture, setProfilePicture] = useState(null); // File object or base64
@@ -52,6 +53,7 @@ export default function VerifyFlow({ onLogin }) {
     } else {
       // If new, proceed to collect new details
       setMessage(""); // Clear any previous message
+      setSelectedLanguage((prev) => prev || resolveUiLanguage(i18n.language));
       setStep("details");
     }
   };
@@ -67,7 +69,7 @@ export default function VerifyFlow({ onLogin }) {
   const handleEnterNewDetails = () => {
     setUserEmail(""); // Clear email for new details
     setUserUsername(""); // Clear username for new details
-    setSelectedLanguage(""); // Clear language for new details
+    setSelectedLanguage(resolveUiLanguage(i18n.language)); // Default to currently selected UI language
     setStep("details");
   };
 
@@ -218,10 +220,14 @@ export default function VerifyFlow({ onLogin }) {
 
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-soultalk-warm-gray rounded-xl shadow-lg">
-      {message && <p className={`mb-4 text-center ${message.toLowerCase().includes("error") ? "text-red-500" : "text-soultalk-medium-gray"}`}>{message}</p>}
+    <div className="w-full max-w-md mx-auto p-4 sm:p-6 card-elevated overflow-hidden">
+      {message && (
+        <p className={`mb-4 text-center break-words text-sm sm:text-base rounded-lg border px-3 py-2 ${message.toLowerCase().includes("error") ? "text-red-500 border-red-200 bg-red-50" : "text-soultalk-medium-gray border-gray-100 bg-soultalk-warm-gray/50"}`}>
+          {message}
+        </p>
+      )}
 
-      {step !== "phone" && <button onClick={handleBack} className="mb-4 text-soultalk-dark-gray hover:text-soultalk-coral">{t('back')}</button>}
+      {step !== "phone" && <button onClick={handleBack} className="mb-4 inline-flex items-center gap-1 text-soultalk-dark-gray hover:text-soultalk-coral text-sm sm:text-base">{t('back')}</button>}
 
       {step === "phone" && (
         <PhoneVerification onCheckPhoneSuccess={handleCheckPhoneSuccess} />
@@ -230,7 +236,7 @@ export default function VerifyFlow({ onLogin }) {
       {step === "confirm_registered" && (
         <div className="text-center">
           <h2 className="text-xl font-semibold mb-4 text-soultalk-dark-gray">{t('number_registered_title')}</h2>
-          <p className="text-lg text-soultalk-medium-gray mb-4">{t('number_registered_message', { username: existingUsername, email: existingEmail })}</p>
+          <p className="text-base sm:text-lg text-soultalk-medium-gray mb-4 break-words rounded-lg bg-soultalk-warm-gray/50 border border-gray-100 px-3 py-2">{t('number_registered_message', { username: existingUsername, email: existingEmail })}</p>
           <button
             onClick={handleConfirmRegistered}
             className="w-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white font-bold py-2 px-4 rounded-lg hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out mb-2"
@@ -239,7 +245,7 @@ export default function VerifyFlow({ onLogin }) {
           </button>
           <button
             onClick={handleEnterNewDetails}
-            className="w-full bg-soultalk-warm-gray text-soultalk-dark-gray font-bold py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out"
+            className="w-full bg-soultalk-warm-gray text-soultalk-dark-gray font-bold py-2 px-4 rounded-lg border border-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out"
           >
             {t('no_use_different_number')}
           </button>
@@ -257,7 +263,7 @@ export default function VerifyFlow({ onLogin }) {
             value={userEmail}
             onChange={(e) => setUserEmail(e.target.value)}
             required
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
+            className="w-full p-3 border border-gray-200 rounded-lg bg-white/95 focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
           />
           <input
             type="text"
@@ -265,14 +271,14 @@ export default function VerifyFlow({ onLogin }) {
             value={userUsername}
             onChange={(e) => setUserUsername(e.target.value)}
             required
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
+            className="w-full p-3 border border-gray-200 rounded-lg bg-white/95 focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
           />
           {/* Language selector will go here, dynamically filtered */}
           <select
             value={selectedLanguage}
             onChange={(e) => setSelectedLanguage(e.target.value)}
             required
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
+            className="w-full p-3 border border-gray-200 rounded-lg bg-white/95 focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
           >
             <option value="">{t('select_language')}</option>
             {availableLanguages.map(lang => (
@@ -307,8 +313,8 @@ export default function VerifyFlow({ onLogin }) {
 
       {step === "done" && (
         <div className="text-center mt-8">
-          <h2 className="text-2xl font-bold text-soultalk-teal mb-4">✅ {t('phone_verified_successfully')}!</h2>
-          <p className="text-lg text-soultalk-dark-gray mb-6">{t('welcome_username', { username: verifiedUser?.username })}</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-soultalk-teal mb-4">✅ {t('phone_verified_successfully')}!</h2>
+          <p className="text-base sm:text-lg text-soultalk-dark-gray mb-6 break-words">{t('welcome_username', { username: verifiedUser?.username })}</p>
           <button
             onClick={handleStartChatting}
             className="w-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white font-bold py-3 px-4 rounded-lg hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out"

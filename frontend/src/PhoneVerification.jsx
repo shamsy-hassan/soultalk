@@ -50,9 +50,9 @@ export default function PhoneVerification({ onCheckPhoneSuccess }) { // Renamed 
   return (
     <div className="space-y-4">
       {/* Country Code Selector */}
-      <div className="flex items-center space-x-2">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
         <select
-          className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
+          className="w-full sm:w-auto sm:max-w-[240px] p-2.5 border border-gray-200 rounded-lg bg-white/95 focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
           value={selectedCountryCode}
           onChange={(e) => setSelectedCountryCode(e.target.value)}
           disabled={checking}
@@ -70,7 +70,7 @@ export default function PhoneVerification({ onCheckPhoneSuccess }) { // Renamed 
           placeholder={t('phone_placeholder')}
           onChange={(e) => setNationalNumber(e.target.value)}
           disabled={checking}
-          className="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
+          className="w-full min-w-0 flex-grow p-2.5 border border-gray-200 rounded-lg bg-white/95 focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
         />
       </div>
       
@@ -82,7 +82,7 @@ export default function PhoneVerification({ onCheckPhoneSuccess }) { // Renamed 
         {checking ? t('processing') : t('continue')}
       </button>
 
-      {message && <p className={`mt-2 text-sm ${message.toLowerCase().includes("error") ? "text-red-500" : "text-soultalk-medium-gray"}`}>{message}</p>}
+      {message && <p className={`mt-2 text-sm rounded-lg border px-3 py-2 ${message.toLowerCase().includes("error") ? "text-red-500 border-red-200 bg-red-50" : "text-soultalk-medium-gray border-gray-100 bg-soultalk-warm-gray/50"}`}>{message}</p>}
     </div>
   );
 }

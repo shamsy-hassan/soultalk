@@ -109,8 +109,10 @@ const Users = ({ user, socket }) => {
 
   return (
     <div className="flex flex-col h-full"> {/* Full height to allow scrolling */}
-      <div className="mb-5 surface-panel p-4 md:p-5">
-        <h1 className="text-2xl font-bold tracking-tight text-soultalk-dark-gray mb-2">{t('find_souls')}</h1>
+      <div className="mb-5 hero-panel p-4 md:p-6">
+        <div className="pointer-events-none absolute -right-10 -top-14 h-36 w-36 rounded-full bg-soultalk-lavender/20 blur-2xl" />
+        <div className="pointer-events-none absolute -left-10 -bottom-14 h-36 w-36 rounded-full bg-soultalk-coral/15 blur-2xl" />
+        <h1 className="section-title mb-2 relative">{t('find_souls')}</h1>
         <p className="text-soultalk-medium-gray text-sm">
           {t('connect_with_people_description')}
         </p>
@@ -123,7 +125,7 @@ const Users = ({ user, socket }) => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('search_souls_placeholder')}
-          className="input-field pl-11 bg-soultalk-white shadow-sm"
+          className="input-field pl-11 bg-soultalk-white/95 shadow-sm border-gray-200 focus:shadow-md"
         />
       </div>
 
@@ -138,10 +140,10 @@ const Users = ({ user, socket }) => {
               setShowLanguageFilters(true);
             }
           }}
-          className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
+          className={`px-3 py-1.5 text-sm rounded-full transition-colors border ${
             !selectedLanguageFilter
-              ? 'bg-soultalk-lavender text-soultalk-white'
-              : 'bg-soultalk-warm-gray text-soultalk-medium-gray hover:bg-gray-200'
+              ? 'bg-soultalk-lavender text-soultalk-white border-soultalk-lavender'
+              : 'bg-soultalk-warm-gray text-soultalk-medium-gray hover:bg-gray-200 border-gray-200'
           }`}
         >
           {t('all_languages')}
@@ -151,10 +153,10 @@ const Users = ({ user, socket }) => {
           <button
             key={lang.code}
             onClick={() => setSelectedLanguageFilter(lang.code)}
-            className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
+            className={`px-3 py-1.5 text-sm rounded-full transition-colors border ${
               selectedLanguageFilter === lang.code
-                ? 'bg-soultalk-lavender text-soultalk-white'
-                : 'bg-soultalk-warm-gray text-soultalk-medium-gray hover:bg-gray-200'
+                ? 'bg-soultalk-lavender text-soultalk-white border-soultalk-lavender'
+                : 'bg-soultalk-warm-gray text-soultalk-medium-gray hover:bg-gray-200 border-gray-200'
             }`}
           >
             {lang.flag || getLanguageFlag(lang.code)} {getLanguageName(lang.code)}
@@ -174,7 +176,7 @@ const Users = ({ user, socket }) => {
               return (
               <div
                 key={targetUser.id}
-                className="group card p-4 rounded-3xl hover:border-soultalk-lavender hover:shadow-md transition-all duration-300 cursor-pointer h-full flex flex-col"
+                className="group card-elevated p-4 rounded-3xl hover:border-soultalk-lavender hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer h-full flex flex-col"
                 onClick={() => startChat(targetUser)}
               >
                 <div className="flex items-start justify-between">
@@ -196,15 +198,15 @@ const Users = ({ user, socket }) => {
                         </div>
                       )}
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <h4 className="font-semibold text-soultalk-dark-gray tracking-tight">{targetUser.username}</h4>
                       <p className={`text-xs font-medium ${onlineUsers.includes(targetUser.username) ? 'text-soultalk-coral' : 'text-soultalk-medium-gray'}`}>
                         {onlineUsers.includes(targetUser.username) ? t('online') : t('offline')}
                       </p>
-                      <p className="text-xs text-soultalk-medium-gray">
+                      <p className="text-xs text-soultalk-medium-gray truncate">
                         {t('speaks')}: {getLanguageNameAndFlag(targetUser.language)}
                       </p>
-                      <p className="text-xs text-soultalk-medium-gray">
+                      <p className="text-xs text-soultalk-medium-gray truncate">
                         {t('country')}: {getCountryFromPhone(targetUser.phone)}
                       </p>
                       <p className="text-xs text-soultalk-medium-gray line-clamp-2 leading-relaxed">

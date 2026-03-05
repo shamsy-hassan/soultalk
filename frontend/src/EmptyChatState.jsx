@@ -8,7 +8,7 @@ const EmptyChatState = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 text-center h-full">
+    <div className="hero-panel flex flex-col items-center justify-center p-6 text-center h-full min-h-[420px] border border-gray-100">
       {/* Central Illustration: Two abstract souls connecting */}
       <div className="relative w-40 h-40 mb-8">
         {/* Outer soul */}
@@ -28,8 +28,8 @@ const EmptyChatState = () => {
         </div>
       </div>
 
-      <h2 className="text-2xl font-bold text-soultalk-dark-gray mb-3">{t('empty_chat_heading')}</h2>
-      <p className="text-soultalk-medium-gray mb-6">{t('empty_chat_subheading')}</p>
+      <h2 className="text-2xl md:text-3xl font-bold text-soultalk-dark-gray mb-3">{t('empty_chat_heading')}</h2>
+      <p className="text-soultalk-medium-gray mb-6 max-w-xl">{t('empty_chat_subheading')}</p>
 
       <div className="space-y-4 w-full max-w-xs">
         <button

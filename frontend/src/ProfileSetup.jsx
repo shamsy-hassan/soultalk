@@ -100,7 +100,9 @@ export default function ProfileSetup({ onProfileSetupComplete, onBack, errorMess
 
   return (
     <div className="w-full max-w-xl mx-auto p-4 md:p-6">
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-5 md:p-6">
+      <div className="hero-panel p-5 md:p-6">
+        <div className="pointer-events-none absolute -right-10 -top-14 h-32 w-32 rounded-full bg-soultalk-lavender/20 blur-2xl" />
+        <div className="pointer-events-none absolute -left-10 -bottom-14 h-32 w-32 rounded-full bg-soultalk-coral/15 blur-2xl" />
         <div className="text-center">
           <h2 className="text-xl md:text-2xl font-semibold text-soultalk-dark-gray">
             {t('setup_profile_picture')}
@@ -119,7 +121,7 @@ export default function ProfileSetup({ onProfileSetupComplete, onBack, errorMess
         <div className="mt-5">
           <label
             htmlFor="profile-image-upload"
-            className="inline-flex items-center justify-center w-full px-4 py-3 rounded-lg bg-soultalk-warm-gray text-soultalk-dark-gray font-semibold cursor-pointer hover:bg-gray-200 transition-colors"
+            className="inline-flex items-center justify-center w-full px-4 py-3 rounded-lg bg-soultalk-warm-gray text-soultalk-dark-gray border border-gray-200 font-semibold cursor-pointer hover:bg-gray-200 transition-colors"
           >
             {upImg ? 'Change photo' : 'Choose photo'}
           </label>
@@ -133,7 +135,7 @@ export default function ProfileSetup({ onProfileSetupComplete, onBack, errorMess
         </div>
 
         {upImg && (
-          <div className="mt-5 p-3 md:p-4 rounded-xl border border-gray-100 bg-soultalk-warm-gray/40">
+          <div className="mt-5 p-3 md:p-4 rounded-xl border border-gray-100 bg-soultalk-warm-gray/45">
             <div className="flex justify-center">
               <ReactCrop
                 crop={crop}
@@ -171,7 +173,7 @@ export default function ProfileSetup({ onProfileSetupComplete, onBack, errorMess
 
           <button
             onClick={() => onProfileSetupComplete()}
-            className="w-full py-2 px-4 rounded-lg font-semibold bg-soultalk-warm-gray text-soultalk-dark-gray hover:bg-gray-300 transition-colors"
+            className="w-full py-2 px-4 rounded-lg font-semibold bg-soultalk-warm-gray text-soultalk-dark-gray border border-gray-200 hover:bg-gray-300 transition-colors"
           >
             {t('skip_for_now')}
           </button>

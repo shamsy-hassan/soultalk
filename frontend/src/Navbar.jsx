@@ -17,7 +17,7 @@ function Navbar({ user, onMenuClick, isScrolled }) {
   const currentUserAvatarUrl = resolveProfilePictureUrl(user?.profile_picture_url);
 
   return (
-    <header className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 transition-all duration-300 ${
+    <header className={`sticky top-0 z-30 bg-white/85 dark:bg-gray-900/85 backdrop-blur-lg border-b border-gray-200/60 dark:border-gray-700/50 transition-all duration-300 ${
       isScrolled ? 'shadow-md' : ''
     }`}>
       <div className="px-4 py-3 flex items-center justify-between">
@@ -25,7 +25,7 @@ function Navbar({ user, onMenuClick, isScrolled }) {
           {/* Mobile Menu Button */}
           <button
             onClick={onMenuClick}
-            className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all duration-200 active:scale-95"
+            className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-200 active:scale-95"
             aria-label="Toggle sidebar"
           >
             <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300" />
@@ -33,11 +33,11 @@ function Navbar({ user, onMenuClick, isScrolled }) {
 
           {/* Logo - Desktop */}
           <div className="hidden lg:flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 bg-gradient-to-r from-soultalk-coral to-soultalk-teal rounded-xl flex items-center justify-center shadow-lg">
               <Heart className="w-5 h-5 text-white fill-current" />
             </div>
             <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-soultalk-coral to-soultalk-teal bg-clip-text text-transparent">
                 SoulTalk
               </h1>
               <p className="text-xs text-gray-500 dark:text-gray-400">{t('connect_across_cultures')}</p>
@@ -54,14 +54,14 @@ function Navbar({ user, onMenuClick, isScrolled }) {
 
         {/* User Menu Trigger (Avatar) */}
         <div className="relative group">
-          <button className="flex items-center space-x-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all duration-200">
+          <button className="flex items-center space-x-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-200">
             <img
               src={currentUserAvatarUrl}
               alt="Profile"
-              className="w-9 h-9 rounded-xl object-cover ring-2 ring-indigo-100 dark:ring-indigo-900"
+              className="w-9 h-9 rounded-xl object-cover ring-2 ring-soultalk-coral/20"
               onError={(e) => { e.currentTarget.src = DEFAULT_PROFILE_IMAGE_URL; }}
             />
-            <Sparkles className="w-4 h-4 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Sparkles className="w-4 h-4 text-soultalk-lavender opacity-0 group-hover:opacity-100 transition-opacity" />
           </button>
         </div>
       </div>

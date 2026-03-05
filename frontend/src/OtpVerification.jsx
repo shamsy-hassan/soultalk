@@ -55,14 +55,14 @@ export default function OtpVerification({ phone, email, username, language, onVe
 
   return (
     <div className="space-y-4">
-      <h2>{t('enter_6_digit_code', { email })}</h2>
+      <h2 className="text-base sm:text-lg text-soultalk-dark-gray break-words">{t('enter_6_digit_code', { email })}</h2>
       <input
         type="text"
         value={otp}
         placeholder={t('enter_otp')}
         onChange={(e) => setOtp(e.target.value)}
         maxLength={6}
-        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-soultalk-lavender text-center tracking-widest"
+        className="w-full p-3 border border-gray-200 rounded-lg bg-white/95 focus:outline-none focus:ring-2 focus:ring-soultalk-lavender text-center tracking-widest"
         disabled={loading}
       />
       <button 
@@ -72,12 +72,16 @@ export default function OtpVerification({ phone, email, username, language, onVe
       >
         {loading ? t('verifying') : t('verify_otp')}
       </button>
-      {message && <p style={{ color: message.toLowerCase().includes("error") || message.toLowerCase().includes("fail") || message.toLowerCase().includes("invalid") ? "red" : "green", marginTop: 12 }}>{message}</p>}
+      {message && (
+        <p className="mt-3 break-words text-sm sm:text-base rounded-lg border px-3 py-2" style={{ color: message.toLowerCase().includes("error") || message.toLowerCase().includes("fail") || message.toLowerCase().includes("invalid") ? "red" : "green", borderColor: "#e5e7eb", backgroundColor: "#fafafa" }}>
+          {message}
+        </p>
+      )}
       {(message.includes(t("invalid_or_expired_otp")) || message.includes(t("failed_to_verify_otp"))) && (
         <button 
           onClick={handleResendOtp} 
           disabled={resending} 
-          className="w-full bg-soultalk-warm-gray text-soultalk-dark-gray font-bold py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out"
+          className="w-full bg-soultalk-warm-gray text-soultalk-dark-gray font-bold py-2 px-4 rounded-lg border border-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out"
         >
           {resending ? t('resending') : t('resend_otp')}
         </button>

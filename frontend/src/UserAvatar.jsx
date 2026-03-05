@@ -10,7 +10,7 @@ const UserAvatar = ({ targetUser, isOnline }) => {
       <img 
         src={profilePictureUrl}
         alt={targetUser.username}
-        className="w-12 h-12 rounded-xl object-cover"
+        className="w-12 h-12 rounded-xl object-cover ring-2 ring-white shadow-sm"
         onError={(e) => {
           console.log("Failed to load image for user:", targetUser.username, profilePictureUrl);
           e.currentTarget.src = DEFAULT_PROFILE_IMAGE_URL;
@@ -26,7 +26,7 @@ const UserAvatar = ({ targetUser, isOnline }) => {
       </div>
       {/* Soul Connection Badge (for mutual connections) */}
       {Math.random() > 0.5 && ( // Keep Math.random for now as per original code
-        <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-amber-400 to-pink-500 rounded-full flex items-center justify-center border-2 border-white">
+        <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-soultalk-coral to-soultalk-lavender rounded-full flex items-center justify-center border-2 border-white shadow-sm">
           <Heart className="w-2.5 h-2.5 text-white fill-current" />
         </div>
       )}
