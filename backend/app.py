@@ -17,12 +17,13 @@ def create_app():
 
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'soultalk-secret-key-2024')
+    cors_origins = os.getenv('CORS_ORIGINS', 'http://localhost:5173')
 
     # Configure CORS
-    CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
+    CORS(app, resources={r"/*": {"origins": cors_origins}})
 
     # Initialize SocketIO
-    socketio = SocketIO(app, cors_allowed_origins="http://localhost:5173", async_mode="threading")
+    socketio = SocketIO(app, cors_allowed_origins=cors_origins)
 
     # Import and register blueprints
     from routes import bp as main_bp
@@ -45,4 +46,6 @@ def create_app():
 if __name__ == '__main__':
     app, socketio = create_app()
     print("Starting server...")
-    socketio.run(app, debug=True, port=5000)
+    debug = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+    port = int(os.getenv('PORT', '5000'))
+    socketio.run(app, host='0.0.0.0', port=port, debug=debug)
