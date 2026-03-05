@@ -18,6 +18,7 @@ import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileIm
 import { uploadProfilePicture, updateUserProfile } from './profileAPI';
 import { updateUserLanguage } from './api';
 import { getLanguageFlag, getLanguageName, resolveUiLanguage } from './i18n';
+import { SOCKET_URL } from './config';
 
 function App() {
   const { t } = useTranslation();
@@ -49,7 +50,9 @@ function App() {
 
   useEffect(() => {
     if (user && !socket) {
-      const newSocket = io('http://localhost:5000');
+      const newSocket = io(SOCKET_URL, {
+        transports: ['websocket', 'polling'],
+      });
       setSocket(newSocket);
 
       newSocket.emit('join', { username: user.username });

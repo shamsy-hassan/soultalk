@@ -5,6 +5,7 @@ import { Send, ArrowLeft, Clock, Sparkles, Image as ImageIcon, Smile, Phone, Hea
 import { useTranslation } from 'react-i18next';
 import { getLanguageName, getLanguageFlag } from './i18n';
 import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
+import { BACKEND_BASE_URL } from './config';
 
 const Chat = ({ user, socket }) => {
   const { t } = useTranslation();
@@ -48,7 +49,7 @@ const Chat = ({ user, socket }) => {
 
     const fetchTargetUser = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/user/${username}`);
+        const response = await axios.get(`${BACKEND_BASE_URL}/api/user/${username}`);
         setTargetUser(response.data);
       } catch (error) {
         console.error('Chat.jsx: Error fetching target user:', error);

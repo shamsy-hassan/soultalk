@@ -9,6 +9,7 @@ import { countryCodes } from './countryCodes';
 import ProfileSetup from "./ProfileSetup"; // Import ProfileSetup
 import { getLanguages } from "./api";
 import i18n, { resolveUiLanguage } from "./i18n";
+import { BACKEND_BASE_URL } from "./config";
 
 // This component manages the full phone verification and onboarding flow
 export default function VerifyFlow({ onLogin }) {
@@ -84,7 +85,7 @@ export default function VerifyFlow({ onLogin }) {
   const handleRequestOtp = async (phone, email) => {
     setMessage("");
     try {
-      const res = await fetch("/api/request-otp", {
+      const res = await fetch(`${BACKEND_BASE_URL}/api/request-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: phone, email: email }),
@@ -124,7 +125,7 @@ export default function VerifyFlow({ onLogin }) {
           formData.append("profile_picture", imageBlob, "profile.jpeg");
 
           // 3. Upload the image to the backend
-          const uploadRes = await fetch("/api/upload-profile-picture", {
+          const uploadRes = await fetch(`${BACKEND_BASE_URL}/api/upload-profile-picture`, {
               method: "POST",
               body: formData, // No Content-Type header needed; browser sets it for FormData
           });
@@ -138,7 +139,7 @@ export default function VerifyFlow({ onLogin }) {
           const permanentProfilePictureUrl = uploadData.profile_picture_url;
 
           // 4. Update the user's profile with the permanent URL
-          const updateRes = await fetch("/api/update-user-profile", {
+          const updateRes = await fetch(`${BACKEND_BASE_URL}/api/update-user-profile`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({

@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { countryCodes } from './countryCodes'; // Import countryCodes
+import { BACKEND_BASE_URL } from "./config";
 
 // Helper function to format phone number (now more generic)
 function formatPhoneNumber(countryCode, nationalNumber) {
@@ -29,7 +30,7 @@ export default function PhoneVerification({ onCheckPhoneSuccess }) { // Renamed 
     const fullPhoneNumber = formatPhoneNumber(selectedCountryCode, nationalNumber);
     
     try {
-      const res = await fetch("/api/check-phone", {
+      const res = await fetch(`${BACKEND_BASE_URL}/api/check-phone`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: fullPhoneNumber }),

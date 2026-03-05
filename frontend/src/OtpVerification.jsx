@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { BACKEND_BASE_URL } from "./config";
 
 export default function OtpVerification({ phone, email, username, language, onVerified, onBack }) {
   const { t } = useTranslation();
@@ -16,7 +17,7 @@ export default function OtpVerification({ phone, email, username, language, onVe
     setLoading(true);
     setMessage("");
     try {
-      const res = await fetch("/api/verify-otp", {
+      const res = await fetch(`${BACKEND_BASE_URL}/api/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, otp, username, language, email }),
@@ -39,7 +40,7 @@ export default function OtpVerification({ phone, email, username, language, onVe
     setResending(true);
     setMessage("");
     try {
-      const res = await fetch("/api/request-otp", {
+      const res = await fetch(`${BACKEND_BASE_URL}/api/request-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, email }),

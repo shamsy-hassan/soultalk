@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Search, MessageSquare, UserPlus, Heart } from 'lucide-react'; // Import Heart icon
 import { useTranslation } from 'react-i18next';
 import { getLanguageName, getLanguageFlag } from './i18n';
 import EmptyChatState from './EmptyChatState'; // Import EmptyChatState
 import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
-import { getLanguages } from './api';
+import { getLanguages, getUsers } from './api';
 import { countryCodes } from './countryCodes';
 
 const Users = ({ user, socket }) => {
@@ -61,12 +60,10 @@ const Users = ({ user, socket }) => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/users', {
-        params: { current_user: user.username }
-      });
-      setUsers(response.data.users);
+      const data = await getUsers(user.username);
+      setUsers(data.users);
       
-      const online = response.data.users
+      const online = data.users
         .filter(u => u.online)
         .map(u => u.username);
       setOnlineUsers(online);

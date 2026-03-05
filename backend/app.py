@@ -17,7 +17,11 @@ def create_app():
 
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'soultalk-secret-key-2024')
-    cors_origins = os.getenv('CORS_ORIGINS', 'http://localhost:5173')
+    cors_origins_env = os.getenv(
+        'CORS_ORIGINS',
+        'https://soultalk-liard.vercel.app,http://localhost:5173'
+    )
+    cors_origins = [origin.strip() for origin in cors_origins_env.split(',') if origin.strip()]
 
     # Configure CORS
     CORS(app, resources={r"/*": {"origins": cors_origins}})
