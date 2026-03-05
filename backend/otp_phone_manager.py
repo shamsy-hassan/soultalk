@@ -42,12 +42,14 @@ def send_otp_email(to_email, otp_code):
 
     try:
         if EMAIL_PORT == 587: # Use STARTTLS for port 587
-            with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
+            with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=10) as server:
+                server.ehlo()
                 server.starttls(context=context)
+                server.ehlo()
                 server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
                 server.send_message(msg)
         elif EMAIL_PORT == 465: # Use SMTP_SSL for port 465
-            with smtplib.SMTP_SSL(EMAIL_HOST, EMAIL_PORT, context=context) as server:
+            with smtplib.SMTP_SSL(EMAIL_HOST, EMAIL_PORT, context=context, timeout=10) as server:
                 server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
                 server.send_message(msg)
         else: # Fallback for other ports or if port is not specified correctly
