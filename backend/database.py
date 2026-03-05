@@ -58,6 +58,22 @@ def init_db():
         ''')
         conn.commit()
         print("'messages' table created successfully.")
+
+    # Check if the 'otp_codes' table exists
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='otp_codes'")
+    otp_table_exists = cursor.fetchone()
+
+    if not otp_table_exists:
+        print("Creating 'otp_codes' table as it doesn't exist.")
+        cursor.execute('''
+            CREATE TABLE otp_codes (
+                phone TEXT PRIMARY KEY,
+                otp TEXT NOT NULL,
+                expires_at INTEGER NOT NULL
+            )
+        ''')
+        conn.commit()
+        print("'otp_codes' table created successfully.")
     
     conn.close()
 
@@ -239,6 +255,26 @@ def run_migrations():
     except sqlite3.OperationalError:
         # If the messages table doesn't exist, init_db will create it with the new schema.
         pass
+
+    # Migration for 'otp_codes' table
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='otp_codes'")
+    otp_table_exists = cursor.fetchone()
+    if not otp_table_exists:
+        print("Applying migration: Creating 'otp_codes' table.")
+        try:
+            cursor.execute(
+                '''
+                CREATE TABLE otp_codes (
+                    phone TEXT PRIMARY KEY,
+                    otp TEXT NOT NULL,
+                    expires_at INTEGER NOT NULL
+                )
+                '''
+            )
+            conn.commit()
+            print("Migration for 'otp_codes' table successful.")
+        except sqlite3.OperationalError as e:
+            print(f"Error creating 'otp_codes' table: {e}")
 
     # Close the connection
     conn.close()

@@ -8,15 +8,36 @@ import smtplib, ssl
 from email.message import EmailMessage
 from config import DB_PATH, OTP_EXPIRY_SECONDS, OTP_EXPIRY_MINUTES, EMAIL_HOST, EMAIL_PORT, EMAIL_ADDRESS, EMAIL_PASSWORD
 
-# Temporary store for OTPs: {phone_number: (otp, expiry_time)}
-otp_store = {}
-
 # ------------------- OTP Functions ------------------- #
+def _cleanup_expired_otps(conn):
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM otp_codes WHERE expires_at <= ?", (int(time.time()),))
+    conn.commit()
+
+
 def generate_otp(phone_number):
-    """Generate a 6-digit OTP and store it temporarily"""
+    """Generate a 6-digit OTP and store it in the database."""
     otp = str(random.randint(100000, 999999))
-    expiry_time = time.time() + OTP_EXPIRY_SECONDS
-    otp_store[phone_number] = (otp, expiry_time)
+    expires_at = int(time.time()) + OTP_EXPIRY_SECONDS
+
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        _cleanup_expired_otps(conn)
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            INSERT INTO otp_codes (phone, otp, expires_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT(phone) DO UPDATE SET
+                otp = excluded.otp,
+                expires_at = excluded.expires_at
+            """,
+            (phone_number, otp, expires_at),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
     return otp
 
 def send_otp_email(to_email, otp_code):
@@ -63,16 +84,35 @@ def send_otp_email(to_email, otp_code):
         return False
 
 def verify_otp(phone_number, otp_input):
-    """Verify OTP: returns True if correct and not expired"""
-    if phone_number in otp_store:
-        otp, expiry = otp_store[phone_number]
-        if time.time() > expiry:
-            del otp_store[phone_number]
-            return False  # OTP expired
+    """Verify OTP from database and delete it if expired or verified."""
+    now = int(time.time())
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        cursor = conn.cursor()
+        _cleanup_expired_otps(conn)
+
+        cursor.execute(
+            "SELECT otp, expires_at FROM otp_codes WHERE phone = ?",
+            (phone_number,),
+        )
+        row = cursor.fetchone()
+        if not row:
+            return False
+
+        otp, expires_at = row
+        if now >= int(expires_at):
+            cursor.execute("DELETE FROM otp_codes WHERE phone = ?", (phone_number,))
+            conn.commit()
+            return False
+
         if otp_input == otp:
-            del otp_store[phone_number]
+            cursor.execute("DELETE FROM otp_codes WHERE phone = ?", (phone_number,))
+            conn.commit()
             return True
-    return False
+
+        return False
+    finally:
+        conn.close()
 
 # ---------------- Phone Database Functions ---------------- #
 def get_user_by_phone(phone_number):
