@@ -46,7 +46,12 @@ export default function OtpVerification({ phone, email, username, language, onVe
         body: JSON.stringify({ phone, email }),
       });
       const data = await res.json();
-      setMessage(data.message || t('otp_resent_message'));
+      if (res.ok) {
+        setMessage(data.message || t('otp_resent_message'));
+      } else {
+        const details = data?.details ? ` (${data.details})` : "";
+        setMessage(`${data.error || t('failed_to_resend_otp')}${details}`);
+      }
     } catch (err) {
       setMessage(t('failed_to_resend_otp'));
     } finally {

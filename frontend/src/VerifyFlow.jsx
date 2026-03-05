@@ -95,7 +95,8 @@ export default function VerifyFlow({ onLogin }) {
         setMessage(data.message);
         setStep("otp");
       } else {
-        setMessage(data.error || t("error_requesting_otp"));
+        const details = data?.details ? ` (${data.details})` : "";
+        setMessage(`${data.error || t("error_requesting_otp")}${details}`);
       }
     } catch (err) {
       setMessage(t("failed_to_request_otp"));

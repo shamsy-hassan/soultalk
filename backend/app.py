@@ -1,5 +1,5 @@
 import os
-from flask import Flask, send_from_directory # Import send_from_directory
+from flask import Flask, jsonify, send_from_directory # Import send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from dotenv import load_dotenv
@@ -35,6 +35,14 @@ def create_app():
 
     from verification_routes import bp as verification_bp
     app.register_blueprint(verification_bp)
+
+    @app.route('/')
+    def root():
+        return jsonify({"message": "SoulTalk backend is running"}), 200
+
+    @app.route('/healthz')
+    def healthz():
+        return jsonify({"status": "ok"}), 200
 
     # Serve uploaded profile pictures statically
     @app.route(f'/{UPLOAD_FOLDER}/<filename>')
