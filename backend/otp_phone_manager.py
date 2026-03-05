@@ -44,7 +44,7 @@ def send_otp_email(to_email, otp_code):
     """Sends the OTP via email using Gmail SMTP."""
     if not EMAIL_HOST or not EMAIL_PORT or not EMAIL_ADDRESS or not EMAIL_PASSWORD:
         print("Email credentials not fully set. Email sending will be disabled.")
-        return False
+        return False, "Email credentials not fully set"
 
     msg = EmailMessage()
     msg['From'] = EMAIL_ADDRESS
@@ -61,27 +61,35 @@ def send_otp_email(to_email, otp_code):
 
     context = ssl.create_default_context()
 
-    try:
-        if EMAIL_PORT == 587: # Use STARTTLS for port 587
-            with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=10) as server:
-                server.ehlo()
-                server.starttls(context=context)
-                server.ehlo()
-                server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-                server.send_message(msg)
-        elif EMAIL_PORT == 465: # Use SMTP_SSL for port 465
-            with smtplib.SMTP_SSL(EMAIL_HOST, EMAIL_PORT, context=context, timeout=10) as server:
-                server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-                server.send_message(msg)
-        else: # Fallback for other ports or if port is not specified correctly
-            print(f"Unsupported SMTP port {EMAIL_PORT}. Please use 465 or 587.")
-            return False
+    ports_to_try = [EMAIL_PORT]
+    for fallback_port in (587, 465):
+        if fallback_port not in ports_to_try:
+            ports_to_try.append(fallback_port)
 
-        print(f"OTP email sent to {to_email}.")
-        return True
-    except Exception as e:
-        print(f"Error sending OTP email to {to_email}: {e}")
-        return False
+    last_error = None
+    for port in ports_to_try:
+        try:
+            if port == 587: # Use STARTTLS for port 587
+                with smtplib.SMTP(EMAIL_HOST, port, timeout=10) as server:
+                    server.ehlo()
+                    server.starttls(context=context)
+                    server.ehlo()
+                    server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+                    server.send_message(msg)
+            elif port == 465: # Use SMTP_SSL for port 465
+                with smtplib.SMTP_SSL(EMAIL_HOST, port, context=context, timeout=10) as server:
+                    server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+                    server.send_message(msg)
+            else:
+                continue
+
+            print(f"OTP email sent to {to_email} using port {port}.")
+            return True, None
+        except Exception as e:
+            last_error = str(e)
+            print(f"Error sending OTP email to {to_email} via {EMAIL_HOST}:{port}: {e}")
+
+    return False, (last_error or "SMTP delivery failed")
 
 def verify_otp(phone_number, otp_input):
     """Verify OTP from database and delete it if expired or verified."""

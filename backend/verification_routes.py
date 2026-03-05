@@ -60,9 +60,12 @@ def request_otp():
     otp = generate_otp(phone)
     
     if email:
-        sent = send_otp_email(email, otp)
+        sent, error_reason = send_otp_email(email, otp)
         if not sent:
-            return jsonify({"error": "Failed to send OTP email. Please try again."}), 503
+            return jsonify({
+                "error": "Failed to send OTP email. Please try again.",
+                "details": error_reason
+            }), 503
         return jsonify({"message": f"OTP sent to {email} successfully"}), 200
     else:
         print(f"OTP for {phone}: {otp}")

@@ -13,6 +13,6 @@ OTP_EXPIRY_MINUTES = int(os.getenv("OTP_EXPIRY_MINUTES", 5)) # Use this for emai
 # Email configuration
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
-EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
-EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+EMAIL_ADDRESS = (os.getenv("EMAIL_ADDRESS") or "").strip()
+EMAIL_PASSWORD = (os.getenv("EMAIL_PASSWORD") or "").strip()
 FEEDBACK_TO_EMAIL = os.getenv("FEEDBACK_TO_EMAIL", "shamsyhassan254@gmail.com")
