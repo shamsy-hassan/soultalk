@@ -5,8 +5,19 @@ import random
 import time
 import sqlite3
 import smtplib, ssl
+import requests
 from email.message import EmailMessage
-from config import DB_PATH, OTP_EXPIRY_SECONDS, OTP_EXPIRY_MINUTES, EMAIL_HOST, EMAIL_PORT, EMAIL_ADDRESS, EMAIL_PASSWORD
+from config import (
+    DB_PATH,
+    OTP_EXPIRY_SECONDS,
+    OTP_EXPIRY_MINUTES,
+    EMAIL_HOST,
+    EMAIL_PORT,
+    EMAIL_ADDRESS,
+    EMAIL_PASSWORD,
+    RESEND_API_KEY,
+    RESEND_FROM_EMAIL,
+)
 
 # ------------------- OTP Functions ------------------- #
 def _cleanup_expired_otps(conn):
@@ -41,22 +52,57 @@ def generate_otp(phone_number):
     return otp
 
 def send_otp_email(to_email, otp_code):
-    """Sends the OTP via email using Gmail SMTP."""
-    if not EMAIL_HOST or not EMAIL_PORT or not EMAIL_ADDRESS or not EMAIL_PASSWORD:
-        print("Email credentials not fully set. Email sending will be disabled.")
-        return False, "Email credentials not fully set"
-
-    msg = EmailMessage()
-    msg['From'] = EMAIL_ADDRESS
-    msg['To'] = to_email
-    msg['Subject'] = "SoulTalk OTP Verification"
-
+    """Send OTP email using Resend API (preferred) or SMTP fallback."""
     body = f"""
     Your One-Time Password (OTP) for SoulTalk is: {otp_code}
 
     This OTP is valid for {OTP_EXPIRY_MINUTES} minutes.
     If you did not request this, please ignore this email.
     """
+
+    # Prefer HTTP email delivery because some free hosting tiers block outbound SMTP.
+    if RESEND_API_KEY and RESEND_FROM_EMAIL:
+        try:
+            response = requests.post(
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {RESEND_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "from": RESEND_FROM_EMAIL,
+                    "to": [to_email],
+                    "subject": "SoulTalk OTP Verification",
+                    "text": body,
+                },
+                timeout=10,
+            )
+            if response.status_code in (200, 201):
+                print(f"OTP email sent to {to_email} via Resend.")
+                return True, None
+
+            error_reason = response.text
+            try:
+                payload = response.json()
+                message = payload.get("message") or payload.get("error")
+                if message:
+                    error_reason = str(message)
+            except Exception:
+                pass
+            print(f"Error sending OTP email via Resend: {error_reason}")
+            return False, error_reason
+        except Exception as e:
+            print(f"Resend request failed for {to_email}: {e}")
+            return False, str(e)
+
+    if not EMAIL_HOST or not EMAIL_PORT or not EMAIL_ADDRESS or not EMAIL_PASSWORD:
+        print("Resend not configured and SMTP credentials not fully set.")
+        return False, "Resend not configured and SMTP credentials not fully set"
+
+    msg = EmailMessage()
+    msg['From'] = EMAIL_ADDRESS
+    msg['To'] = to_email
+    msg['Subject'] = "SoulTalk OTP Verification"
     msg.set_content(body)
 
     context = ssl.create_default_context()

@@ -15,4 +15,8 @@ EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
 EMAIL_ADDRESS = (os.getenv("EMAIL_ADDRESS") or "").strip()
 EMAIL_PASSWORD = (os.getenv("EMAIL_PASSWORD") or "").strip()
+
+# Email API configuration (preferred on platforms that block SMTP on free tier)
+RESEND_API_KEY = (os.getenv("RESEND_API_KEY") or "").strip()
+RESEND_FROM_EMAIL = (os.getenv("RESEND_FROM_EMAIL") or "").strip()
 FEEDBACK_TO_EMAIL = os.getenv("FEEDBACK_TO_EMAIL", "shamsyhassan254@gmail.com")
