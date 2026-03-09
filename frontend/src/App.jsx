@@ -19,11 +19,13 @@ import { uploadProfilePicture, updateUserProfile } from './profileAPI';
 import { updateUserLanguage } from './api';
 import { getLanguageFlag, getLanguageName, resolveUiLanguage } from './i18n';
 import { SOCKET_URL } from './config';
+import LoadingSplash from './LoadingSplash';
 
 function App() {
   const { t } = useTranslation();
   const navigate = useNavigate(); // Initialize useNavigate
   const location = useLocation();
+  const [showSplash, setShowSplash] = useState(true);
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('soultalk_user');
     return savedUser ? JSON.parse(savedUser) : null;
@@ -34,7 +36,11 @@ function App() {
   const [profileSetupError, setProfileSetupError] = useState('');
   const [messageToast, setMessageToast] = useState(null);
   const [showProfilePreview, setShowProfilePreview] = useState(false);
-  const [theme, setTheme] = useState(() => localStorage.getItem('soultalk_theme') || 'light');
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = localStorage.getItem('soultalk_theme') || 'light';
+    document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+    return savedTheme;
+  });
   const toastTimeoutRef = useRef(null);
 
   useEffect(() => {
@@ -225,7 +231,7 @@ function App() {
 
   return (
     <div className={`flex min-h-screen ${theme === 'dark' ? 'bg-[#0f172a] text-gray-100' : 'bg-gradient-to-b from-soultalk-white via-soultalk-white to-soultalk-warm-gray/40'}`}>
-
+      {showSplash && <LoadingSplash onDone={() => setShowSplash(false)} />}
 
       {/* Sidebar - Desktop always visible, mobile as drawer */}
       {user && (

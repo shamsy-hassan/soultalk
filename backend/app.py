@@ -1,4 +1,16 @@
+try:
+    # If gevent is installed, patch standard library modules early so Socket.IO
+    # and any network I/O (translation, email, requests, etc.) behave correctly.
+    from gevent import monkey  # type: ignore
+
+    monkey.patch_all()
+except Exception:
+    pass
+
 import os
+import sys
+import argparse
+import subprocess
 from flask import Flask, jsonify, send_from_directory # Import send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
@@ -27,7 +39,13 @@ def create_app():
     CORS(app, resources={r"/*": {"origins": cors_origins}})
 
     # Initialize SocketIO
-    socketio = SocketIO(app, cors_allowed_origins=cors_origins)
+    socketio = SocketIO(
+        app,
+        cors_allowed_origins=cors_origins,
+        async_mode='gevent',
+        ping_interval=25,
+        ping_timeout=60,
+    )
 
     # Import and register blueprints
     from routes import bp as main_bp
@@ -56,8 +74,64 @@ def create_app():
     return app, socketio
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Run the SoulTalk backend server.")
+    parser.add_argument('--host', default=os.getenv('HOST', '0.0.0.0'))
+    parser.add_argument('--port', type=int, default=int(os.getenv('PORT', '5000')))
+    debug_default = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+    debug_group = parser.add_mutually_exclusive_group()
+    debug_group.add_argument('--debug', dest='debug', action='store_true', default=debug_default)
+    debug_group.add_argument('--no-debug', dest='debug', action='store_false')
+    parser.add_argument(
+        '--detach',
+        action='store_true',
+        help='Run in the background and return to the shell.',
+    )
+    parser.add_argument(
+        '--log-file',
+        default=os.getenv('SOULTALK_LOG_FILE', '/tmp/soultalk-backend.log'),
+        help='Log file path when using --detach.',
+    )
+    parser.add_argument(
+        '--log-connections',
+        action='store_true',
+        default=os.getenv('SOCKET_LOG_CONNECTIONS', 'false').lower() == 'true',
+        help='Log Socket.IO connect/disconnect events.',
+    )
+    args = parser.parse_args()
+
+    if args.detach and os.getenv('SOULTALK_DETACHED_CHILD') != '1':
+        env = os.environ.copy()
+        env['PYTHONUNBUFFERED'] = '1'
+        env['SOULTALK_DETACHED_CHILD'] = '1'
+        env['SOCKET_LOG_CONNECTIONS'] = 'true' if args.log_connections else 'false'
+
+        with open(args.log_file, 'ab', buffering=0) as log_fp:
+            proc = subprocess.Popen(
+                [
+                    sys.executable,
+                    os.path.abspath(__file__),
+                    '--host',
+                    args.host,
+                    '--port',
+                    str(args.port),
+                    '--debug' if args.debug else '--no-debug',
+                ],
+                stdin=subprocess.DEVNULL,
+                stdout=log_fp,
+                stderr=log_fp,
+                env=env,
+                cwd=os.getcwd(),
+                close_fds=True,
+                start_new_session=True,
+            )
+
+        print(f"Started SoulTalk backend in background (pid={proc.pid}).")
+        print(f"Tailing logs: tail -f {args.log_file}")
+        raise SystemExit(0)
+
+    if args.log_connections:
+        os.environ['SOCKET_LOG_CONNECTIONS'] = 'true'
+
     app, socketio = create_app()
     print("Starting server...")
-    debug = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
-    port = int(os.getenv('PORT', '5000'))
-    socketio.run(app, host='0.0.0.0', port=port, debug=debug)
+    socketio.run(app, host=args.host, port=args.port, debug=args.debug)

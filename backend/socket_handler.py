@@ -1,9 +1,12 @@
+import os
+
 from flask_socketio import emit, join_room, leave_room, SocketIO
 from flask import request
 from database import add_message, get_user, get_messages_between, update_user_status
 from translate import translate_text
 
 def init_sockets(socketio: SocketIO):
+    log_connections = os.getenv('SOCKET_LOG_CONNECTIONS', 'false').lower() == 'true'
     sid_to_user = {}
     user_connection_counts = {}
 
@@ -25,7 +28,8 @@ def init_sockets(socketio: SocketIO):
 
     @socketio.on('connect')
     def handle_connect():
-        print('Client connected')
+        if log_connections:
+            print('Client connected', request.sid)
         emit('connected', {'data': 'Connected to SoulTalk'})
 
     @socketio.on('disconnect')
@@ -34,7 +38,8 @@ def init_sockets(socketio: SocketIO):
         username = sid_to_user.pop(sid, None)
         if username:
             decrement_connection(username)
-        print('Client disconnected')
+        if log_connections:
+            print('Client disconnected', sid, username or '')
 
     @socketio.on('join')
     def handle_join(data):
