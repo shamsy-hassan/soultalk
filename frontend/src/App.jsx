@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation, NavLink } from 'react-router-dom'; // Added useNavigate
 import Login from './Login';
 import Users from './Users';
@@ -11,13 +11,12 @@ import Sidebar from './Sidebar'; // Import the new Sidebar component
 import { io } from 'socket.io-client';
 import './index.css';
 import { useTranslation } from 'react-i18next';
-import i18n from './i18n';
-import { Heart, MessageSquare, Compass, Globe2, Settings, ShieldCheck, MessageSquareText, Sun, Moon, X, Camera } from 'lucide-react'; // Import icons for logo and mobile menu
+import { setUiLanguage, hardReload, getLanguageFlag, getLanguageName, resolveUiLanguage } from './i18n';
+import { Heart, MessageSquare, Compass, Globe2, Settings, ShieldCheck, MessageSquareText, X, Camera } from 'lucide-react'; // Import icons for logo and mobile menu
 import ProfileSetup from './ProfileSetup'; // Import ProfileSetup component
 import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
 import { uploadProfilePicture, updateUserProfile } from './profileAPI';
 import { updateUserLanguage } from './api';
-import { getLanguageFlag, getLanguageName, resolveUiLanguage } from './i18n';
 import { SOCKET_URL } from './config';
 import LoadingSplash from './LoadingSplash';
 
@@ -35,24 +34,21 @@ function App() {
   const [showSidebarMobile, setShowSidebarMobile] = useState(false); // State for mobile sidebar
   const [profileSetupError, setProfileSetupError] = useState('');
   const [messageToast, setMessageToast] = useState(null);
+  const [unreadByUser, setUnreadByUser] = useState({});
   const [showProfilePreview, setShowProfilePreview] = useState(false);
-  const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('soultalk_theme') || 'light';
-    document.documentElement.classList.toggle('dark', savedTheme === 'dark');
-    return savedTheme;
-  });
   const toastTimeoutRef = useRef(null);
 
   useEffect(() => {
     if (user?.language) {
-      i18n.changeLanguage(resolveUiLanguage(user.language));
+      void setUiLanguage(user.language);
     }
   }, [user]);
 
-  useEffect(() => {
-    localStorage.setItem('soultalk_theme', theme);
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
+  useLayoutEffect(() => {
+    // Force light theme globally (no dark/black UI).
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('soultalk_theme', 'light');
+  }, []);
 
   useEffect(() => {
     if (user && !socket) {
@@ -93,6 +89,11 @@ function App() {
         return;
       }
 
+      setUnreadByUser((prev) => ({
+        ...prev,
+        [sender]: (prev[sender] || 0) + 1,
+      }));
+
       setMessageToast((prev) => {
         if (prev && prev.from === sender) {
           return { from: sender, count: prev.count + 1 };
@@ -114,10 +115,24 @@ function App() {
     };
   }, [socket, user, location.pathname]);
 
+  useEffect(() => {
+    if (!user) return;
+
+    if (location.pathname.startsWith('/chat/')) {
+      const activeChatUser = decodeURIComponent(location.pathname.replace('/chat/', ''));
+      setUnreadByUser((prev) => {
+        if (!prev[activeChatUser]) return prev;
+        const next = { ...prev };
+        delete next[activeChatUser];
+        return next;
+      });
+    }
+  }, [location.pathname, user]);
+
   const handleLogin = (userData) => {
     setUser(userData);
     localStorage.setItem('soultalk_user', JSON.stringify(userData));
-    i18n.changeLanguage(resolveUiLanguage(userData.language));
+    void setUiLanguage(userData.language);
   };
 
   const performLogout = () => {
@@ -126,9 +141,11 @@ function App() {
       socket.disconnect();
     }
     setUser(null);
+    setUnreadByUser({});
+    setMessageToast(null);
     localStorage.removeItem('soultalk_user');
     localStorage.removeItem('i18nextLng');
-    i18n.changeLanguage('en');
+    void setUiLanguage('en');
     setSocket(null);
     setShowLogoutConfirm(false);
   };
@@ -147,7 +164,7 @@ function App() {
       return;
     }
 
-    i18n.changeLanguage(resolveUiLanguage(newLang));
+    const { changed } = await setUiLanguage(newLang);
     setUser(prevUser => {
       const updatedUser = { ...prevUser, language: newLang };
       localStorage.setItem('soultalk_user', JSON.stringify(updatedUser));
@@ -158,6 +175,10 @@ function App() {
       await updateUserLanguage(username, newLang);
     } catch (error) {
       console.error('Failed to persist language change:', error);
+    } finally {
+      if (changed) {
+        hardReload();
+      }
     }
   };
 
@@ -165,10 +186,6 @@ function App() {
     setProfileSetupError('');
     navigate('/profile-setup');
     setShowSidebarMobile(false); // Close sidebar on mobile when navigating
-  };
-
-  const handleToggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
   const handleProfileSetupComplete = async (croppedImageUrl) => {
@@ -212,6 +229,7 @@ function App() {
   };
 
   const currentUserAvatarUrl = resolveProfilePictureUrl(user?.profile_picture_url);
+  const unreadCount = Object.values(unreadByUser).reduce((sum, value) => sum + value, 0);
   const path = location.pathname;
   const pageTitle = path === '/users'
     ? t('discover_souls')
@@ -230,29 +248,30 @@ function App() {
         : 'SoulTalk';
 
   return (
-    <div className={`flex min-h-screen ${theme === 'dark' ? 'bg-[#0f172a] text-gray-100' : 'bg-gradient-to-b from-soultalk-white via-soultalk-white to-soultalk-warm-gray/40'}`}>
+    <div className="flex min-h-screen bg-gradient-to-b from-soultalk-white via-soultalk-white to-soultalk-warm-gray/40 text-soultalk-dark-gray">
       {showSplash && <LoadingSplash onDone={() => setShowSplash(false)} />}
 
       {/* Sidebar - Desktop always visible, mobile as drawer */}
       {user && (
-        <div className={`fixed inset-y-0 left-0 z-40 w-[86vw] max-w-[300px] bg-soultalk-white shadow-lg transform ${
+        <div
+          className={`fixed inset-y-0 left-0 z-40 w-[86vw] max-w-[300px] shadow-lg transform ${
             showSidebarMobile ? 'translate-x-0' : '-translate-x-full'
-          } md:translate-x-0 md:shadow-none transition-transform duration-300 ease-in-out overflow-y-auto`}>
+          } md:translate-x-0 md:shadow-none transition-transform duration-300 ease-in-out overflow-y-auto bg-soultalk-white dark:bg-[#020617]`}
+        >
           <Sidebar 
             user={user} 
             socket={socket} 
             onLogout={handleLogoutClick} 
             onChangeLanguage={handleChangeLanguage}
             onNavigateToProfileSetup={handleNavigateToProfileSetup}
-            theme={theme}
-            onToggleTheme={handleToggleTheme}
+            unreadCount={unreadCount}
           />
         </div>
       )}
       {/* Mobile sidebar overlay */}
       {showSidebarMobile && user && (
         <div 
-          className="fixed inset-0 bg-black opacity-50 z-30 md:hidden"
+          className="fixed inset-0 z-30 md:hidden bg-gradient-to-br from-indigo-600/10 via-fuchsia-600/10 to-cyan-500/10 backdrop-blur-[1px]"
           onClick={() => setShowSidebarMobile(false)}
         ></div>
       )}
@@ -260,24 +279,24 @@ function App() {
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col min-w-0 ${user ? 'md:ml-[300px]' : ''}`}> {/* Adjust margin for desktop sidebar when user is logged in */}
         {user && (
-          <nav className={`${theme === 'dark' ? 'bg-[#111827]/90 border-gray-800' : 'bg-soultalk-white/90 border-gray-100'} backdrop-blur-sm px-3 py-3 sm:px-4 md:px-6 shadow-sm flex items-center justify-between z-20 sticky top-0 border-b safe-pt safe-px`}>
+          <nav className="backdrop-blur-sm px-3 py-3 sm:px-4 md:px-6 shadow-sm flex items-center justify-between z-20 sticky top-0 border-b safe-pt safe-px bg-soultalk-white/90 border-gray-100 dark:bg-slate-950/70 dark:border-white/10">
             {/* Left side: App Logo/Name and Mobile Sidebar Toggle */}
             <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
               {/* Mobile Sidebar Toggle - only on small screens */}
               <button
-                className="md:hidden p-2 rounded-lg bg-soultalk-warm-gray shadow-md"
+                className="md:hidden p-2 rounded-lg shadow-md bg-soultalk-warm-gray text-soultalk-dark-gray"
                 onClick={() => setShowSidebarMobile(!showSidebarMobile)}
                 aria-label="Toggle sidebar"
               >
-                <MessageSquare className="w-6 h-6 text-soultalk-dark-gray" />
+                <MessageSquare className="w-6 h-6" />
               </button>
               <div className="flex items-center space-x-2 min-w-0">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-soultalk-coral to-soultalk-teal flex items-center justify-center shadow-sm">
                   <Heart className="w-5 h-5 text-soultalk-white" />
                 </div>
                 <div className="min-w-0">
-                  <h1 className={`text-lg sm:text-xl font-bold tracking-tight truncate ${theme === 'dark' ? 'text-gray-100' : 'text-soultalk-dark-gray'}`}>SoulTalk</h1>
-                  <p className={`text-xs hidden md:block ${theme === 'dark' ? 'text-gray-400' : 'text-soultalk-medium-gray'}`}>{pageTitle}</p>
+                  <h1 className="text-lg sm:text-xl font-bold tracking-tight truncate text-soultalk-dark-gray">SoulTalk</h1>
+                  <p className="text-xs hidden md:block text-soultalk-medium-gray">{pageTitle}</p>
                 </div>
               </div>
             </div>
@@ -292,7 +311,14 @@ function App() {
                   }`
                 }
               >
-                <MessageSquare className="w-4 h-4" />
+                <span className="relative">
+                  <MessageSquare className="w-4 h-4" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-soultalk-coral text-soultalk-white text-[10px] font-semibold flex items-center justify-center">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </span>
                 <span className="hidden md:inline">{t('chats')}</span>
               </NavLink>
               <NavLink
@@ -345,15 +371,6 @@ function App() {
                 <span>{getLanguageFlag(user.language)} {getLanguageName(user.language)}</span>
               </div>
 
-              <button
-                type="button"
-                onClick={handleToggleTheme}
-                className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full text-sm bg-soultalk-warm-gray border border-gray-200 text-soultalk-dark-gray hover:bg-gray-200 transition-colors"
-              >
-                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                <span className="hidden md:inline">{theme === 'dark' ? t('light') : t('dark')}</span>
-              </button>
-
               <div className="hidden md:flex items-center gap-2 px-2 py-1 rounded-full bg-soultalk-warm-gray">
                 <span className="w-2 h-2 rounded-full bg-soultalk-coral animate-pulse"></span>
                 <span className="text-xs text-soultalk-medium-gray">{user.username}</span>
@@ -382,11 +399,11 @@ function App() {
             />
             <Route
               path="/chats"
-              element={user ? <Chats user={user} /> : <Navigate to="/" />}
+              element={user ? <Chats user={user} unreadByUser={unreadByUser} /> : <Navigate to="/" />}
             />
             <Route
               path="/settings"
-              element={user ? <SettingsPage theme={theme} onToggleTheme={handleToggleTheme} /> : <Navigate to="/" />}
+              element={user ? <SettingsPage /> : <Navigate to="/" />}
             />
             <Route
               path="/privacy"
@@ -415,7 +432,7 @@ function App() {
           </Routes>
         </main>
 
-        <footer className={`${theme === 'dark' ? 'border-gray-800 text-gray-400' : 'border-gray-200 text-soultalk-medium-gray'} py-6 border-t text-center text-sm safe-pb safe-px`}>
+        <footer className="py-6 border-t text-center text-sm safe-pb safe-px border-gray-200 text-soultalk-medium-gray">
           <p>{t('soultalk_footer')}</p>
           <p className="text-xs mt-2">{t('made_with_love')}</p>
         </footer>
@@ -447,11 +464,9 @@ function App() {
 
       {showProfilePreview && user && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 safe-px safe-pb">
-          <div className={`w-full max-w-md rounded-2xl overflow-hidden shadow-2xl ${
-            theme === 'dark' ? 'bg-[#111827] border border-gray-800' : 'bg-white border border-gray-100'
-          }`}>
+          <div className={`w-full max-w-md rounded-2xl overflow-hidden shadow-2xl bg-white border border-gray-100 dark:bg-[#111827] dark:border-gray-800`}>
             <div className="flex items-center justify-between p-4 border-b border-gray-200/50">
-              <h3 className={`font-semibold ${theme === 'dark' ? 'text-gray-100' : 'text-soultalk-dark-gray'}`}>
+              <h3 className={`font-semibold text-soultalk-dark-gray dark:text-gray-100`}>
                 {t('profile_photo')}
               </h3>
               <button
@@ -460,7 +475,7 @@ function App() {
                 className="p-2 rounded-lg hover:bg-gray-100/10 transition-colors"
                 aria-label={t('close_profile_preview')}
               >
-                <X className={`w-5 h-5 ${theme === 'dark' ? 'text-gray-300' : 'text-soultalk-medium-gray'}`} />
+                <X className={`w-5 h-5 text-soultalk-medium-gray dark:text-gray-300`} />
               </button>
             </div>
 
@@ -472,7 +487,7 @@ function App() {
                   className="w-full max-w-[224px] aspect-square rounded-2xl object-cover shadow-lg"
                   onError={(e) => { e.currentTarget.src = DEFAULT_PROFILE_IMAGE_URL; }}
                 />
-                <p className={`mt-3 font-medium ${theme === 'dark' ? 'text-gray-100' : 'text-soultalk-dark-gray'}`}>
+                <p className={`mt-3 font-medium text-soultalk-dark-gray dark:text-gray-100`}>
                   {user.username}
                 </p>
               </div>
@@ -492,11 +507,7 @@ function App() {
                 <button
                   type="button"
                   onClick={() => setShowProfilePreview(false)}
-                  className={`w-full rounded-xl py-2.5 px-4 font-medium transition-colors ${
-                    theme === 'dark'
-                      ? 'bg-gray-800 text-gray-200 hover:bg-gray-700'
-                      : 'bg-soultalk-warm-gray text-soultalk-dark-gray hover:bg-gray-200'
-                  }`}
+                  className={`w-full rounded-xl py-2.5 px-4 font-medium transition-colors bg-soultalk-warm-gray text-soultalk-dark-gray hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700`}
                 >
                   {t('close')}
                 </button>
@@ -513,16 +524,14 @@ function App() {
             navigate(`/chat/${messageToast.from}`);
             setMessageToast(null);
           }}
-          className={`fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-[340px] z-50 rounded-xl shadow-xl p-4 text-left safe-pb ${
-            theme === 'dark' ? 'bg-gray-100 text-soultalk-dark-gray' : 'bg-soultalk-dark-gray text-soultalk-white'
-          }`}
+          className="fixed top-20 left-4 right-4 md:top-4 md:left-auto md:right-4 md:w-[340px] z-50 rounded-xl shadow-xl p-4 text-left safe-pt safe-px bg-white/95 text-soultalk-dark-gray border border-gray-200 backdrop-blur dark:bg-slate-950/70 dark:text-gray-100 dark:border-white/10"
         >
           <p className="text-sm font-semibold">
             {messageToast.count > 1
               ? t('new_messages_from', { count: messageToast.count, username: messageToast.from })
-              : t('new_message_from', { username: messageToast.from })}
+              : t('new_message_from', { count: messageToast.count, username: messageToast.from })}
           </p>
-          <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-soultalk-white/70'}`}>{t('tap_to_open_chat')}</p>
+          <p className="text-xs mt-1 text-soultalk-medium-gray dark:text-gray-300">{t('tap_to_open_chat')}</p>
         </button>
       )}
     </div>

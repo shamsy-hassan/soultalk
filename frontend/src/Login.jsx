@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Sparkles, Users } from 'lucide-react';
+import { MessageSquare, Sparkles, Users, ArrowRight, Shield, Globe, Zap, ChevronRight, Phone, CheckCircle2 } from 'lucide-react';
 import VerifyFlow from './VerifyFlow';
 import LanguageCarousel from './LanguageCarousel';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-
 
 const Login = ({ onLogin }) => {
   const { t } = useTranslation();
@@ -22,105 +21,150 @@ const Login = ({ onLogin }) => {
   }, [location]);
 
   return (
-    <div className="relative min-h-[80vh] flex items-center justify-center px-3 py-6 sm:px-6 sm:py-10">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(255,123,84,0.14),transparent_34%),radial-gradient(circle_at_85%_12%,rgba(109,95,255,0.18),transparent_34%),radial-gradient(circle_at_50%_86%,rgba(22,163,153,0.1),transparent_32%)]" />
-      <div className="max-w-6xl w-full mx-auto relative">
+    <div className="relative min-h-screen st-combo1-bg flex items-center justify-center px-4 py-10 sm:py-14 overflow-hidden">
+      <div className="max-w-7xl w-full mx-auto relative">
         <LanguageCarousel />
 
-        <div className="text-center mb-8 sm:mb-12">
+        {/* Hero Section */}
+        <div className="text-center mb-12 lg:mb-16">
           {goodbyeMessage && (
-            <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg mb-4 break-words">
-              {goodbyeMessage}
+            <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-top-2 fade-in duration-300">
+              <div className="bg-white/95 text-soultalk-dark-gray px-6 py-3 rounded-full shadow-lg border border-gray-200 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-soultalk-teal" />
+                <span className="font-medium">{goodbyeMessage}</span>
+              </div>
             </div>
           )}
-          <div className="flex justify-center mb-5 sm:mb-6">
-            <div className="relative">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-soultalk-coral to-soultalk-teal rounded-2xl flex items-center justify-center">
-                <MessageSquare className="w-8 h-8 sm:w-10 sm:h-10 text-soultalk-white" />
+          
+          <div className="flex justify-center mb-6 lg:mb-8">
+            <div className="relative group">
+              <div className="absolute inset-0 rounded-2xl blur-xl opacity-30 group-hover:opacity-45 transition-opacity duration-300 bg-soultalk-lavender/30" />
+              <div className="relative w-20 h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-soultalk-gradient-start to-soultalk-gradient-end rounded-2xl flex items-center justify-center shadow-xl transform group-hover:scale-105 transition-transform duration-300">
+                <MessageSquare className="w-10 h-10 lg:w-12 lg:h-12 text-white" />
               </div>
-              <div className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 w-7 h-7 sm:w-8 sm:h-8 bg-soultalk-lavender rounded-full flex items-center justify-center">
-                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-soultalk-white" />
+              <div className="absolute -top-2 -right-2 lg:-top-3 lg:-right-3 w-8 h-8 lg:w-9 lg:h-9 bg-white rounded-full flex items-center justify-center shadow-lg border border-gray-200">
+                <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 text-soultalk-lavender" />
               </div>
             </div>
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-soultalk-dark-gray mb-3 sm:mb-4 leading-tight break-words">
+          
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 lg:mb-6 bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end bg-clip-text text-transparent">
             {t('login_to_soultalk')}
           </h1>
-          <p className="text-base sm:text-lg lg:text-xl text-soultalk-medium-gray mb-6 sm:mb-8 max-w-2xl mx-auto px-1 break-words">
+          <p className="text-lg sm:text-xl lg:text-2xl text-soultalk-medium-gray max-w-2xl mx-auto px-4">
             {t('soultalk_footer')}
           </p>
+          <div className="mt-6 flex justify-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/80 px-4 py-2 text-sm text-soultalk-dark-gray shadow-sm backdrop-blur-sm">
+              <span className="inline-flex h-2 w-2 rounded-full bg-soultalk-teal shadow-[0_0_0_4px_rgba(20,184,166,0.16)]" />
+              <span>Instant translation. No password.</span>
+              <ChevronRight className="h-4 w-4 opacity-70" />
+            </div>
+          </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-5 sm:gap-8 items-start">
-          <div className="card-elevated p-5 sm:p-7 space-y-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-soultalk-warm-gray rounded-lg">
-                <span role="img" aria-label="globe" className="text-2xl">🌍</span>
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+          {/* Left Column - Feature Showcase */}
+          <div className="space-y-6">
+            {/* How It Works Card */}
+            <div className="st-combo1-panel rounded-2xl p-6 lg:p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2.5 bg-white/80 rounded-xl border border-gray-100">
+                  <Globe className="w-6 h-6 text-soultalk-lavender" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-soultalk-dark-gray">{t('how_it_works')}</h3>
+                  <p className="text-sm text-soultalk-medium-gray">{t('real_time_translation_magic')}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-soultalk-dark-gray">{t('how_it_works')}</h3>
-                <p className="text-sm text-soultalk-medium-gray">{t('real_time_translation_magic')}</p>
+
+              <div className="space-y-6">
+                {[
+                  { step: "01", title: t('you_speak_your_language'), desc: t('type_naturally'), Icon: MessageSquare },
+                  { step: "02", title: t('we_translate_instantly'), desc: t('ai_powered_translation'), Icon: Zap },
+                  { step: "03", title: t('they_read_in_their_language'), desc: t('messages_arrive_translated'), Icon: Globe }
+                ].map((item, idx) => (
+                  <div key={idx} className="flex gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="w-12 h-12 bg-white/80 rounded-xl flex items-center justify-center border border-gray-100">
+                        <item.Icon className="w-5 h-5 text-soultalk-teal" />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-mono font-bold text-soultalk-teal">{item.step}</span>
+                        <h4 className="font-semibold text-soultalk-dark-gray">{item.title}</h4>
+                      </div>
+                      <p className="text-sm text-soultalk-medium-gray">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-soultalk-warm-gray text-soultalk-dark-gray rounded-full flex items-center justify-center text-sm font-bold">1</div>
-                <div>
-                  <h4 className="font-medium text-soultalk-dark-gray">{t('you_speak_your_language')}</h4>
-                  <p className="text-sm text-soultalk-medium-gray">{t('type_naturally')}</p>
+            {/* Live Example Card */}
+            <div className="st-combo1-panel rounded-2xl p-6 lg:p-8">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 bg-white/80 rounded-lg border border-gray-100">
+                  <Users className="w-5 h-5 text-soultalk-lavender" />
                 </div>
+                <span className="font-semibold text-soultalk-dark-gray">{t('live_example')}</span>
               </div>
-
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-soultalk-warm-gray text-soultalk-dark-gray rounded-full flex items-center justify-center text-sm font-bold">2</div>
-                <div>
-                  <h4 className="font-medium text-soultalk-dark-gray">{t('we_translate_instantly')}</h4>
-                  <p className="text-sm text-soultalk-medium-gray">{t('ai_powered_translation')}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-soultalk-warm-gray text-soultalk-dark-gray rounded-full flex items-center justify-center text-sm font-bold">3</div>
-                <div>
-                  <h4 className="font-medium text-soultalk-dark-gray">{t('they_read_in_their_language')}</h4>
-                  <p className="text-sm text-soultalk-medium-gray">{t('messages_arrive_translated')}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-gradient-to-r from-soultalk-warm-gray via-white to-[#fef6ee] rounded-xl border border-gray-100">
-              <div className="flex items-center space-x-2">
-                <Users className="w-5 h-5 text-soultalk-coral" />
-                <span className="font-medium text-soultalk-dark-gray">{t('live_example')}</span>
-              </div>
-              <p className="text-sm text-soultalk-medium-gray mt-2">
+              <p className="text-soultalk-medium-gray leading-relaxed">
                 {t('live_example_text')}
               </p>
+              <div className="mt-4 flex items-center gap-2 text-sm text-soultalk-dark-gray">
+                <span className="underline decoration-soultalk-teal/70 underline-offset-4">See how it works</span>
+                <ArrowRight className="w-4 h-4" />
+              </div>
             </div>
           </div>
 
-          <div className="card-elevated p-5 sm:p-7">
-            <h2 className="text-xl sm:text-2xl font-bold text-soultalk-dark-gray mb-4 sm:mb-6 break-words">{t('verify_phone_number')}</h2>
-            <VerifyFlow onLogin={onLogin} />
+          {/* Right Column - Verification Card */}
+          <div className="st-combo1-surface rounded-2xl overflow-hidden">
+            <div className="px-6 lg:px-8 py-5 bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-white">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/15 rounded-lg border border-white/20">
+                  <Phone className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-xl lg:text-2xl font-bold">
+                  {t('verify_phone_number')}
+                </h2>
+              </div>
+              <p className="text-white/90 text-sm mt-2">
+                Get started in seconds — no password needed
+              </p>
+            </div>
+            <div className="p-6 lg:p-8 st-combo1-flow">
+              <VerifyFlow onLogin={onLogin} />
+            </div>
           </div>
         </div>
 
-        <div className="mt-8 sm:mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-          <div className="text-center p-5 sm:p-6 bg-gradient-to-b from-white to-soultalk-warm-gray rounded-2xl shadow-[0_18px_40px_-30px_rgba(30,41,59,0.45)] border border-gray-100">
-            <div className="text-3xl mb-2">🌍</div>
-            <h4 className="font-semibold text-soultalk-dark-gray">{t('cross_cultural')}</h4>
-            <p className="text-sm text-soultalk-medium-gray mt-2">{t('connect_across_cultures')}</p>
-          </div>
-          <div className="text-center p-5 sm:p-6 bg-gradient-to-b from-white to-soultalk-warm-gray rounded-2xl shadow-[0_18px_40px_-30px_rgba(30,41,59,0.45)] border border-gray-100">
-            <div className="text-3xl mb-2">⚡</div>
-            <h4 className="font-semibold text-soultalk-dark-gray">{t('real_time')}</h4>
-            <p className="text-sm text-soultalk-medium-gray mt-2">{t('instant_translation')}</p>
-          </div>
-          <div className="text-center p-5 sm:p-6 bg-gradient-to-b from-white to-soultalk-warm-gray rounded-2xl shadow-[0_18px_40px_-30px_rgba(30,41,59,0.45)] border border-gray-100">
-            <div className="text-3xl mb-2">🔒</div>
-            <h4 className="font-semibold text-soultalk-dark-gray">{t('private')}</h4>
-            <p className="text-sm text-soultalk-medium-gray mt-2">{t('encrypted_conversations')}</p>
+        {/* Features Grid */}
+        <div className="mt-12 lg:mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { icon: "🌍", title: t('cross_cultural'), desc: t('connect_across_cultures') },
+            { icon: "⚡", title: t('real_time'), desc: t('instant_translation') },
+            { icon: "🔒", title: t('private'), desc: t('encrypted_conversations') }
+          ].map((feature, idx) => (
+            <div key={idx} className="st-combo1-panel rounded-2xl p-6 text-center">
+                <div className="text-4xl mb-3 transform group-hover:scale-110 transition-transform duration-300 inline-block">
+                  {feature.icon}
+                </div>
+                <h4 className="font-bold text-soultalk-dark-gray mb-2">{feature.title}</h4>
+                <p className="text-sm text-soultalk-medium-gray">{feature.desc}</p>
+                <div className="mt-4 w-12 h-1 bg-soultalk-teal rounded-full mx-auto" />
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom Decorative Element */}
+        <div className="mt-12 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-sm text-soultalk-dark-gray border border-gray-200">
+            <Shield className="w-4 h-4 text-soultalk-teal" />
+            <span>Secure & encrypted communication</span>
+            <ChevronRight className="w-4 h-4" />
           </div>
         </div>
       </div>

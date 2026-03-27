@@ -38,7 +38,7 @@
   "phone_placeholder": "k.m. +254700000000",
   "processing": "Inachakata...",
   "continue": "Endelea",
-  "number_registered_message": "Nambari hii tayari imesajiliwa kwa <strong>{{username}}</strong>. OTP itatumwa kwa <strong>{{email}}</strong>.",
+  "number_registered_message": "Nambari hii tayari imesajiliwa kwa {{username}}. OTP itatumwa kwa {{email}}.",
   "sending_otp": "Inatuma OTP...",
   "yes_continue": "Ndio, endelea",
   "no_use_different_number": "Hapana, tumia nambari tofauti",

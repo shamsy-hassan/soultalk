@@ -38,7 +38,7 @@
   "phone_placeholder": "tusaale: +254700000000",
   "processing": "Hawlgalin...",
   "continue": "Sii wad",
-  "number_registered_message": "Lambarkan wuxuu horey ugu diiwaangashan yahay <strong>{{username}}</strong>. OTP ayaa loo soo diri doonaa <strong>{{email}}</strong>.",
+  "number_registered_message": "Lambarkan wuxuu horey ugu diiwaangashan yahay {{username}}. OTP ayaa loo soo diri doonaa {{email}}.",
   "sending_otp": "OTP waa la dirayaa...",
   "yes_continue": "Haa, sii wad",
   "no_use_different_number": "Maya, isticmaal lambar kale",

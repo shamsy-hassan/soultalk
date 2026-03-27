@@ -11,6 +11,29 @@ import { getLanguages } from "./api";
 import i18n, { resolveUiLanguage } from "./i18n";
 import { BACKEND_BASE_URL } from "./config";
 
+const maskEmail = (email) => {
+  if (!email || typeof email !== "string") return "";
+  const atIndex = email.indexOf("@");
+  if (atIndex === -1) return email;
+
+  const local = email.slice(0, atIndex);
+  const domain = email.slice(atIndex + 1);
+  if (!domain) return email;
+
+  const prefixLen = Math.min(3, local.length);
+  const prefix = local.slice(0, prefixLen);
+  const suffix = local.length > prefixLen ? local.slice(-1) : "";
+  return `${prefix}***${suffix}@${domain}`;
+};
+
+const maskName = (name) => {
+  if (!name || typeof name !== "string") return "";
+  const trimmed = name.trim();
+  if (!trimmed) return "";
+  if (trimmed.length === 1) return `${trimmed[0]}***`;
+  return `${trimmed[0]}***${trimmed[trimmed.length - 1]}`;
+};
+
 // This component manages the full phone verification and onboarding flow
 export default function VerifyFlow({ onLogin }) {
   const { t } = useTranslation();
@@ -68,10 +91,15 @@ export default function VerifyFlow({ onLogin }) {
 
   // Called when user wants to enter new details (for new or choosing different number)
   const handleEnterNewDetails = () => {
-    setUserEmail(""); // Clear email for new details
-    setUserUsername(""); // Clear username for new details
-    setSelectedLanguage(resolveUiLanguage(i18n.language)); // Default to currently selected UI language
-    setStep("details");
+    setMessage("");
+    setCurrentPhone("");
+    setIsRegistered(false);
+    setExistingEmail("");
+    setExistingUsername("");
+    setUserEmail("");
+    setUserUsername("");
+    setSelectedLanguage(resolveUiLanguage(i18n.language));
+    setStep("phone");
   };
 
   // Called by DetailsInput component after collecting email, username, language
@@ -220,34 +248,129 @@ export default function VerifyFlow({ onLogin }) {
     loadLanguages();
   }, [currentCountryCode]);
 
+  const stepIndex = (() => {
+    switch (step) {
+      case "phone":
+        return 0;
+      case "confirm_registered":
+        return 1;
+      case "details":
+        return 1;
+      case "otp":
+        return 2;
+      case "profile_setup":
+        return 3;
+      case "done":
+        return 4;
+      default:
+        return 0;
+    }
+  })();
+
+  const steps = [
+    { id: "phone", label: t("step_phone", { defaultValue: "Phone" }) },
+    { id: "details", label: t("step_details", { defaultValue: "Details" }) },
+    { id: "otp", label: t("step_otp", { defaultValue: "Code" }) },
+    { id: "profile", label: t("step_profile", { defaultValue: "Photo" }) },
+    { id: "done", label: t("step_done", { defaultValue: "Done" }) },
+  ];
+
+  const messageLower = (message || "").toLowerCase();
+  const messageIsError =
+    messageLower.includes("error") ||
+    messageLower.includes("fail") ||
+    messageLower.includes("invalid");
 
   return (
-    <div className="w-full max-w-md mx-auto p-4 sm:p-6 card-elevated overflow-hidden">
+    <div className="w-full space-y-5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          {steps.map((s, idx) => {
+            const state =
+              idx < stepIndex ? "complete" : idx === stepIndex ? "current" : "upcoming";
+            const dotClass =
+              state === "complete"
+                ? "bg-emerald-500"
+                : state === "current"
+                  ? "bg-soultalk-lavender"
+                  : "bg-slate-200 dark:bg-white/10";
+            const textClass =
+              state === "current" ? "text-slate-900 dark:text-gray-100" : "text-slate-500 dark:text-gray-400";
+            return (
+              <div key={s.id} className="flex items-center">
+                <div className={`h-2.5 w-2.5 rounded-full ${dotClass}`} />
+                <span className={`ml-2 hidden sm:inline text-xs font-medium ${textClass}`}>
+                  {s.label}
+                </span>
+                {idx !== steps.length - 1 && (
+                  <div className="mx-3 h-px w-8 bg-slate-200 dark:bg-white/10 hidden sm:block" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {step !== "phone" && (
+          <button
+            type="button"
+            onClick={handleBack}
+            className="inline-flex items-center justify-center px-3 py-2 text-sm st-combo1-outline"
+          >
+            {t("back")}
+          </button>
+        )}
+      </div>
+
       {message && (
-        <p className={`mb-4 text-center break-words text-sm sm:text-base rounded-lg border px-3 py-2 ${message.toLowerCase().includes("error") ? "text-red-500 border-red-200 bg-red-50" : "text-soultalk-medium-gray border-gray-100 bg-soultalk-warm-gray/50"}`}>
+        <p
+          className={`text-center break-words text-sm sm:text-base rounded-xl border px-4 py-3 ${
+            messageIsError
+              ? "text-red-700 border-red-200 bg-red-50 dark:text-red-200 dark:border-red-500/30 dark:bg-red-500/10"
+              : "text-slate-700 border-slate-200 bg-slate-50 dark:text-gray-200 dark:border-white/10 dark:bg-white/5"
+          }`}
+        >
           {message}
         </p>
       )}
-
-      {step !== "phone" && <button onClick={handleBack} className="mb-4 inline-flex items-center gap-1 text-soultalk-dark-gray hover:text-soultalk-coral text-sm sm:text-base">{t('back')}</button>}
 
       {step === "phone" && (
         <PhoneVerification onCheckPhoneSuccess={handleCheckPhoneSuccess} />
       )}
 
       {step === "confirm_registered" && (
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-4 text-soultalk-dark-gray">{t('number_registered_title')}</h2>
-          <p className="text-base sm:text-lg text-soultalk-medium-gray mb-4 break-words rounded-lg bg-soultalk-warm-gray/50 border border-gray-100 px-3 py-2">{t('number_registered_message', { username: existingUsername, email: existingEmail })}</p>
+        <div className="text-center space-y-4">
+          <div>
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-gray-100">
+              {t("number_registered_title")}
+            </h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-gray-300">
+              {t("number_registered_subtitle", {
+                defaultValue: "Continue with the account linked to this phone number.",
+              })}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left dark:border-white/10 dark:bg-white/5">
+            <div className="text-xs font-medium text-slate-500 dark:text-gray-400">
+              {t("account_found", { defaultValue: "Account found" })}
+            </div>
+            <div className="mt-1 text-sm font-semibold text-slate-900 dark:text-gray-100 break-words">
+              {t("number_registered_message", {
+                username: maskName(existingUsername),
+                email: maskEmail(existingEmail),
+              })}
+            </div>
+          </div>
+
           <button
             onClick={handleConfirmRegistered}
-            className="w-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white font-bold py-2 px-4 rounded-lg hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out mb-2"
+            className="w-full st-combo1-button"
           >
             {t('yes_continue')}
           </button>
           <button
             onClick={handleEnterNewDetails}
-            className="w-full bg-soultalk-warm-gray text-soultalk-dark-gray font-bold py-2 px-4 rounded-lg border border-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out"
+            className="w-full st-combo1-outline"
           >
             {t('no_use_different_number')}
           </button>
@@ -257,41 +380,71 @@ export default function VerifyFlow({ onLogin }) {
       {step === "details" && (
         // DetailsInput component will be rendered here
         // For now, inline form until component is created
-        <form onSubmit={(e) => { e.preventDefault(); handleDetailsInputComplete(userEmail, userUsername, selectedLanguage); }} className="space-y-4">
-          <h2 className="text-xl font-semibold mb-4 text-soultalk-dark-gray">{t('enter_your_details')}</h2>
-          <input
-            type="email"
-            placeholder={t('email_for_otp')}
-            value={userEmail}
-            onChange={(e) => setUserEmail(e.target.value)}
-            required
-            className="w-full p-3 border border-gray-200 rounded-lg bg-white/95 focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
-          />
-          <input
-            type="text"
-            placeholder={t('username')}
-            value={userUsername}
-            onChange={(e) => setUserUsername(e.target.value)}
-            required
-            className="w-full p-3 border border-gray-200 rounded-lg bg-white/95 focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
-          />
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleDetailsInputComplete(userEmail, userUsername, selectedLanguage);
+          }}
+          className="space-y-4"
+        >
+          <div>
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-gray-100">{t("enter_your_details")}</h2>
+            <p className="mt-1 text-sm text-slate-600 dark:text-gray-300">
+              {t("details_help", {
+                defaultValue: "We use your email to deliver a one-time code. No passwords.",
+              })}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-700 dark:text-gray-200">{t("email", { defaultValue: "Email" })}</label>
+            <input
+              type="email"
+              placeholder={t("email_for_otp")}
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+              autoComplete="email"
+              required
+              className="input-field bg-white/95"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-700 dark:text-gray-200">{t("username", { defaultValue: "Username" })}</label>
+            <input
+              type="text"
+              placeholder={t("username")}
+              value={userUsername}
+              onChange={(e) => setUserUsername(e.target.value)}
+              autoComplete="username"
+              required
+              className="input-field bg-white/95"
+            />
+          </div>
           {/* Language selector will go here, dynamically filtered */}
-          <select
-            value={selectedLanguage}
-            onChange={(e) => setSelectedLanguage(e.target.value)}
-            required
-            className="w-full p-3 border border-gray-200 rounded-lg bg-white/95 focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
-          >
-            <option value="">{t('select_language')}</option>
-            {availableLanguages.map(lang => (
-              <option key={lang.code} value={lang.code}>
-                {t(`language_${lang.code}`, { defaultValue: lang.nativeName || lang.name || lang.code })}
-              </option>
-            ))}
-          </select>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-700 dark:text-gray-200">
+              {t("select_language", { defaultValue: "Preferred language" })}
+            </label>
+            <select
+              value={selectedLanguage}
+              onChange={(e) => setSelectedLanguage(e.target.value)}
+              required
+              className="input-field bg-white/95"
+            >
+              <option value="">{t("select_language")}</option>
+              {availableLanguages.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {t(`language_${lang.code}`, {
+                    defaultValue: lang.nativeName || lang.name || lang.code,
+                  })}
+                </option>
+              ))}
+            </select>
+          </div>
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white font-bold py-3 px-4 rounded-lg hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out"
+            className="w-full st-combo1-button"
           >
             {t('request_otp')}
           </button>
@@ -315,11 +468,11 @@ export default function VerifyFlow({ onLogin }) {
 
       {step === "done" && (
         <div className="text-center mt-8">
-          <h2 className="text-xl sm:text-2xl font-bold text-soultalk-teal mb-4">✅ {t('phone_verified_successfully')}!</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-soultalk-lavender mb-4">✅ {t('phone_verified_successfully')}!</h2>
           <p className="text-base sm:text-lg text-soultalk-dark-gray mb-6 break-words">{t('welcome_username', { username: verifiedUser?.username })}</p>
           <button
             onClick={handleStartChatting}
-            className="w-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white font-bold py-3 px-4 rounded-lg hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out"
+            className="w-full st-combo1-button"
           >
             {t('start_your_journey')}
           </button>

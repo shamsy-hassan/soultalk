@@ -11,10 +11,15 @@ from config import (
     DB_PATH,
     OTP_EXPIRY_SECONDS,
     OTP_EXPIRY_MINUTES,
+    EMAIL_TRANSPORT,
     EMAIL_HOST,
     EMAIL_PORT,
     EMAIL_ADDRESS,
+    EMAIL_FROM_ADDRESS,
     EMAIL_PASSWORD,
+    EMAIL_USE_SSL,
+    EMAIL_STARTTLS,
+    EMAIL_FALLBACK_PORTS,
     RESEND_API_KEY,
     RESEND_FROM_EMAIL,
 )
@@ -52,7 +57,7 @@ def generate_otp(phone_number):
     return otp
 
 def send_otp_email(to_email, otp_code):
-    """Send OTP email using Resend API (preferred) or SMTP fallback."""
+    """Send OTP email via Resend HTTP and/or SMTP (configurable)."""
     body = f"""
     Your One-Time Password (OTP) for SoulTalk is: {otp_code}
 
@@ -60,8 +65,11 @@ def send_otp_email(to_email, otp_code):
     If you did not request this, please ignore this email.
     """
 
-    # Prefer HTTP email delivery because some free hosting tiers block outbound SMTP.
-    if RESEND_API_KEY and RESEND_FROM_EMAIL:
+    subject = "SoulTalk OTP Verification"
+
+    def _send_via_resend_http():
+        if not (RESEND_API_KEY and RESEND_FROM_EMAIL):
+            return False, "Resend not configured"
         try:
             response = requests.post(
                 "https://api.resend.com/emails",
@@ -72,13 +80,13 @@ def send_otp_email(to_email, otp_code):
                 json={
                     "from": RESEND_FROM_EMAIL,
                     "to": [to_email],
-                    "subject": "SoulTalk OTP Verification",
+                    "subject": subject,
                     "text": body,
                 },
                 timeout=10,
             )
             if response.status_code in (200, 201):
-                print(f"OTP email sent to {to_email} via Resend.")
+                print(f"OTP email sent to {to_email} via Resend HTTP.")
                 return True, None
 
             error_reason = response.text
@@ -89,53 +97,76 @@ def send_otp_email(to_email, otp_code):
                     error_reason = str(message)
             except Exception:
                 pass
-            print(f"Error sending OTP email via Resend: {error_reason}")
+            print(f"Error sending OTP email via Resend HTTP: {error_reason}")
             return False, error_reason
         except Exception as e:
-            print(f"Resend request failed for {to_email}: {e}")
+            print(f"Resend HTTP request failed for {to_email}: {e}")
             return False, str(e)
 
-    if not EMAIL_HOST or not EMAIL_PORT or not EMAIL_ADDRESS or not EMAIL_PASSWORD:
-        print("Resend not configured and SMTP credentials not fully set.")
-        return False, "Resend not configured and SMTP credentials not fully set"
+    def _send_via_smtp():
+        if not EMAIL_HOST or not EMAIL_PORT or not EMAIL_ADDRESS:
+            return False, "SMTP not configured"
 
-    msg = EmailMessage()
-    msg['From'] = EMAIL_ADDRESS
-    msg['To'] = to_email
-    msg['Subject'] = "SoulTalk OTP Verification"
-    msg.set_content(body)
+        msg = EmailMessage()
+        msg["From"] = EMAIL_FROM_ADDRESS or EMAIL_ADDRESS
+        msg["To"] = to_email
+        msg["Subject"] = subject
+        msg.set_content(body)
 
-    context = ssl.create_default_context()
+        context = ssl.create_default_context()
 
-    ports_to_try = [EMAIL_PORT]
-    for fallback_port in (587, 465):
-        if fallback_port not in ports_to_try:
-            ports_to_try.append(fallback_port)
+        ports_to_try = [EMAIL_PORT]
+        for port in EMAIL_FALLBACK_PORTS:
+            if port not in ports_to_try:
+                ports_to_try.append(port)
+
+        last_error = None
+        for port in ports_to_try:
+            use_ssl = EMAIL_USE_SSL or port == 465
+            starttls = EMAIL_STARTTLS if EMAIL_STARTTLS is not None else (not use_ssl and port == 587)
+            try:
+                if use_ssl:
+                    with smtplib.SMTP_SSL(EMAIL_HOST, port, context=context, timeout=10) as server:
+                        if EMAIL_PASSWORD:
+                            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+                        server.send_message(msg)
+                else:
+                    with smtplib.SMTP(EMAIL_HOST, port, timeout=10) as server:
+                        server.ehlo()
+                        if starttls:
+                            server.starttls(context=context)
+                            server.ehlo()
+                        if EMAIL_PASSWORD:
+                            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+                        server.send_message(msg)
+
+                print(f"OTP email sent to {to_email} via SMTP ({EMAIL_HOST}:{port}).")
+                return True, None
+            except Exception as e:
+                last_error = str(e)
+                print(f"Error sending OTP email to {to_email} via SMTP ({EMAIL_HOST}:{port}): {e}")
+
+        return False, (last_error or "SMTP delivery failed")
+
+    transports = []
+    if EMAIL_TRANSPORT == "smtp":
+        transports = ["smtp"]
+    elif EMAIL_TRANSPORT == "resend_http":
+        transports = ["resend_http"]
+    else:
+        transports = ["resend_http", "smtp"]
 
     last_error = None
-    for port in ports_to_try:
-        try:
-            if port == 587: # Use STARTTLS for port 587
-                with smtplib.SMTP(EMAIL_HOST, port, timeout=10) as server:
-                    server.ehlo()
-                    server.starttls(context=context)
-                    server.ehlo()
-                    server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-                    server.send_message(msg)
-            elif port == 465: # Use SMTP_SSL for port 465
-                with smtplib.SMTP_SSL(EMAIL_HOST, port, context=context, timeout=10) as server:
-                    server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-                    server.send_message(msg)
-            else:
-                continue
-
-            print(f"OTP email sent to {to_email} using port {port}.")
+    for transport in transports:
+        if transport == "resend_http":
+            ok, err = _send_via_resend_http()
+        else:
+            ok, err = _send_via_smtp()
+        if ok:
             return True, None
-        except Exception as e:
-            last_error = str(e)
-            print(f"Error sending OTP email to {to_email} via {EMAIL_HOST}:{port}: {e}")
+        last_error = err
 
-    return False, (last_error or "SMTP delivery failed")
+    return False, (last_error or "Email delivery failed")
 
 def verify_otp(phone_number, otp_input):
     """Verify OTP from database and delete it if expired or verified."""

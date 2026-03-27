@@ -38,7 +38,7 @@
   "phone_placeholder": "e.g. +254700000000",
   "processing": "Processing...",
   "continue": "Continue",
-  "number_registered_message": "This number is already registered to <strong>{{username}}</strong>. An OTP will be sent to <strong>{{email}}</strong>.",
+  "number_registered_message": "This number is already registered to {{username}}. An OTP will be sent to {{email}}.",
   "sending_otp": "Sending OTP...",
   "yes_continue": "Yes, continue",
   "no_use_different_number": "No, use different number",
@@ -187,7 +187,7 @@
   "country": "Country",
   "no_bio_yet": "No bio yet",
   "chat_with_username": "Chat with {{username}}",
-  "new_message_from": "A new message from {{username}}",
+  "new_message_from": "New message from {{username}}",
   "new_messages_from": "{{count}} new messages from {{username}}",
   "sending": "Sending..."
 }

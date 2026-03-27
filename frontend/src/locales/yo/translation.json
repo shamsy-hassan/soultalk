@@ -38,7 +38,7 @@
   "phone_placeholder": "e.g. +254700000000",
   "processing": "Processing...",
   "continue": "Continue",
-  "number_registered_message": "This number is already registered to <strong>{{username}}</strong>. An OTP will be sent to <strong>{{email}}</strong>.",
+  "number_registered_message": "This number is already registered to {{username}}. An OTP will be sent to {{email}}.",
   "sending_otp": "Nfi OTP ranse...",
   "yes_continue": "Yes, continue",
   "no_use_different_number": "No, use different number",

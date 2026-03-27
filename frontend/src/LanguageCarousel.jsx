@@ -1,6 +1,6 @@
 import { useMemo, useRef, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Languages, Sparkles, Globe2 } from 'lucide-react';
-import i18n, { getLanguageFlag, resolveUiLanguage } from './i18n';
+import i18n, { getLanguageFlag, resolveUiLanguage, setUiLanguage, hardReload } from './i18n';
 
 const NATIVE_LANGUAGE_CONTENT = {
   en: {
@@ -107,7 +107,11 @@ export default function LanguageCarousel() {
 
   const handleLanguagePick = (languageCode) => {
     setSelectedLanguage(languageCode);
-    i18n.changeLanguage(languageCode);
+    void setUiLanguage(languageCode).then(({ changed }) => {
+      if (changed) {
+        hardReload();
+      }
+    });
   };
 
   useEffect(() => {
@@ -144,25 +148,25 @@ export default function LanguageCarousel() {
 
   return (
     <section className="mb-8 sm:mb-12">
-      <div className="hero-panel p-5 sm:p-7 shadow-[0_24px_64px_-44px_rgba(109,95,255,0.7)]">
+      <div className="hero-panel p-5 sm:p-7 shadow-[0_24px_64px_-44px_rgba(99,102,241,0.42)]">
         <div className="pointer-events-none absolute -right-10 -top-14 h-32 w-32 rounded-full bg-soultalk-lavender/20 blur-2xl" />
         <div className="pointer-events-none absolute -left-10 -bottom-14 h-36 w-36 rounded-full bg-soultalk-coral/20 blur-2xl" />
 
         <div className="relative flex flex-wrap items-start justify-between gap-4 mb-5">
           <div>
-            <p className="inline-flex items-center gap-2 text-soultalk-dark-gray font-semibold text-base sm:text-lg">
+            <p className="inline-flex items-center gap-2 text-soultalk-dark-gray font-semibold text-base sm:text-lg dark:text-soultalk-white">
               <Languages className="w-5 h-5" />
               Choose your language
             </p>
-            <p className="text-sm sm:text-base text-soultalk-medium-gray mt-1 max-w-2xl">
+            <p className="text-sm sm:text-base text-soultalk-medium-gray mt-1 max-w-2xl dark:text-gray-400">
               Each card stays in its native language. Tap one card to translate the onboarding content below.
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-soultalk-dark-gray border border-gray-100">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-soultalk-dark-gray border border-gray-100 dark:bg-transparent dark:text-soultalk-white dark:border-gray-700">
                 <Sparkles className="w-3.5 h-3.5 text-soultalk-coral" />
                 Real-time
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-soultalk-dark-gray border border-gray-100">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-soultalk-dark-gray border border-gray-100 dark:bg-transparent dark:text-soultalk-white dark:border-gray-700">
                 <Globe2 className="w-3.5 h-3.5 text-soultalk-teal" />
                 Multi-language onboarding
               </span>
@@ -172,7 +176,7 @@ export default function LanguageCarousel() {
             <button
               type="button"
               onClick={() => scrollRail('prev')}
-              className="p-2.5 rounded-xl bg-white/90 text-soultalk-dark-gray border border-gray-100 hover:bg-gray-100 transition-colors"
+              className="p-2.5 rounded-xl bg-white/90 text-soultalk-dark-gray border border-gray-100 hover:bg-gray-100 transition-colors dark:bg-white/5 dark:text-gray-100 dark:border-white/10 dark:hover:bg-white/10"
               aria-label="Scroll languages left"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -180,7 +184,7 @@ export default function LanguageCarousel() {
             <button
               type="button"
               onClick={() => scrollRail('next')}
-              className="p-2.5 rounded-xl bg-white/90 text-soultalk-dark-gray border border-gray-100 hover:bg-gray-100 transition-colors"
+              className="p-2.5 rounded-xl bg-white/90 text-soultalk-dark-gray border border-gray-100 hover:bg-gray-100 transition-colors dark:bg-white/5 dark:text-gray-100 dark:border-white/10 dark:hover:bg-white/10"
               aria-label="Scroll languages right"
             >
               <ChevronRight className="w-4 h-4" />
@@ -205,8 +209,8 @@ export default function LanguageCarousel() {
                 onClick={() => handleLanguagePick(lang.code)}
                 className={`snap-start shrink-0 w-[min(84vw,320px)] sm:w-[280px] lg:w-[320px] rounded-2xl border p-5 text-left transition-all ${
                   isActive
-                    ? 'border-soultalk-lavender bg-white shadow-md'
-                    : 'border-gray-200 bg-white/95 hover:border-soultalk-lavender/50 hover:shadow-md'
+                    ? 'border-soultalk-lavender bg-white shadow-md dark:bg-white/5 dark:border-white/10'
+                    : 'border-gray-200 bg-white/95 hover:border-soultalk-lavender/50 hover:shadow-md dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10'
                 }`}
               >
                 <div className="flex items-center justify-between">

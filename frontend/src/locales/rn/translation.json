@@ -38,7 +38,7 @@
   "phone_placeholder": "Urugero: +254700000000",
   "processing": "Ibirimo gukorwa...",
   "continue": "Komeza",
-  "number_registered_message": "Iyi numero yamaze kwandikwa kuri <strong>{{username}}</strong>. OTP izoherezwa kuri <strong>{{email}}</strong>.",
+  "number_registered_message": "Iyi numero yamaze kwandikwa kuri {{username}}. OTP izoherezwa kuri {{email}}.",
   "sending_otp": "OTP iriko irarungikwa...",
   "yes_continue": "Yego, komeza",
   "no_use_different_number": "Oya, koresha indi numero",

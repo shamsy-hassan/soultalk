@@ -38,7 +38,7 @@
   "phone_placeholder": "ለምሳሌ: +254700000000",
   "processing": "በሂደት ላይ...",
   "continue": "ይቀጥሉ",
-  "number_registered_message": "ይህ ቁጥር አስቀድሞ ለ<strong>{{username}}</strong> ተመዝግቧል። OTP ወደ <strong>{{email}}</strong> ይላካል።",
+  "number_registered_message": "ይህ ቁጥር አስቀድሞ ለ{{username}} ተመዝግቧል። OTP ወደ {{email}} ይላካል።",
   "sending_otp": "OTP በመላክ ላይ...",
   "yes_continue": "አዎ፣ ይቀጥሉ",
   "no_use_different_number": "አይ፣ ሌላ ቁጥር ይጠቀሙ",

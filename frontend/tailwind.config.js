@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -8,15 +9,15 @@ export default {
     extend: {
       colors: {
         'soultalk-white': '#FFFFFF',
-        'soultalk-warm-gray': '#F7F7F7',
-        'soultalk-coral': '#FF6B6B',
-        'soultalk-teal': '#4ECDC4',
-        'soultalk-lavender': '#9B87F5',
-        'soultalk-dark-gray': '#2D3436',
-        'soultalk-medium-gray': '#636E72',
+        'soultalk-warm-gray': '#F8FAFC',
+        'soultalk-coral': '#F43F5E',
+        'soultalk-teal': '#14B8A6',
+        'soultalk-lavender': '#4F46E5',
+        'soultalk-dark-gray': '#0F172A',
+        'soultalk-medium-gray': '#475569',
         // For primary gradient as specified:
-        'soultalk-gradient-start': '#FF6B6B',
-        'soultalk-gradient-end': '#4ECDC4',
+        'soultalk-gradient-start': '#6366F1',
+        'soultalk-gradient-end': '#14B8A6',
       }, // Correctly close the colors object here
       keyframes: {
         'pulse-slow': {

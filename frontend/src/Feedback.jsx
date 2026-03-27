@@ -40,7 +40,7 @@ const Feedback = ({ user }) => {
       </div>
 
       <form onSubmit={onSubmit} className="card-elevated p-5 rounded-2xl space-y-3">
-        <label className="block text-sm text-soultalk-dark-gray">
+        <label className="block text-sm text-soultalk-dark-gray dark:text-gray-100">
           {t('feedback_email_optional')}
           <input
             type="email"
@@ -51,7 +51,7 @@ const Feedback = ({ user }) => {
           />
         </label>
 
-        <label className="block text-sm text-soultalk-dark-gray">
+        <label className="block text-sm text-soultalk-dark-gray dark:text-gray-100">
           {t('feedback_category')}
           <select value={category} onChange={(e) => setCategory(e.target.value)} className="input-field mt-1 border-gray-200 bg-white/95">
             <option value="general">{t('feedback_category_general')}</option>
@@ -61,7 +61,7 @@ const Feedback = ({ user }) => {
           </select>
         </label>
 
-        <label className="block text-sm text-soultalk-dark-gray">
+        <label className="block text-sm text-soultalk-dark-gray dark:text-gray-100">
           {t('feedback_message')}
           <textarea
             value={message}
@@ -81,7 +81,7 @@ const Feedback = ({ user }) => {
           {sending ? t('sending') : t('send_feedback')}
         </button>
 
-        {status && <p className="text-sm text-soultalk-medium-gray rounded-lg bg-soultalk-warm-gray/60 px-3 py-2 border border-gray-100">{status}</p>}
+        {status && <p className="text-sm text-soultalk-medium-gray dark:text-gray-200 rounded-lg bg-soultalk-warm-gray/60 dark:bg-white/5 px-3 py-2 border border-gray-100 dark:border-white/10">{status}</p>}
       </form>
     </div>
   );

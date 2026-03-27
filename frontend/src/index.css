@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-soultalk-white min-h-screen text-soultalk-dark-gray antialiased;
+    @apply bg-soultalk-white min-h-screen text-soultalk-dark-gray antialiased dark:bg-soultalk-dark-gray dark:text-soultalk-white;
     overflow-x: hidden;
   }
 }
@@ -19,23 +19,23 @@
   }
   
   .card {
-    @apply bg-soultalk-warm-gray rounded-2xl shadow-sm p-6 border border-gray-100;
+    @apply bg-soultalk-warm-gray rounded-2xl shadow-sm p-6 border border-gray-100 dark:bg-soultalk-dark-gray/50 dark:border-white/10;
   }
 
   .card-elevated {
-    @apply rounded-2xl border border-gray-100 bg-white/90 backdrop-blur-sm shadow-[0_18px_45px_-32px_rgba(30,41,59,0.55)];
+    @apply rounded-2xl border border-gray-100 bg-white/90 backdrop-blur-sm shadow-[0_18px_45px_-32px_rgba(30,41,59,0.55)] dark:border-white/10 dark:bg-soultalk-dark-gray/50 dark:shadow-[0_18px_45px_-32px_rgba(255,255,255,0.15)];
   }
 
   .hero-panel {
-    @apply relative overflow-hidden rounded-3xl border border-soultalk-lavender/20 bg-gradient-to-br from-white via-[#fff8f0] to-[#f3f7ff];
+    @apply relative overflow-hidden rounded-3xl border border-soultalk-lavender/20 bg-gradient-to-br from-white via-[#eef2ff] to-[#f0fdfa] dark:border-white/10 dark:from-[#020617] dark:via-[#08122a] dark:to-[#0f172a];
   }
 
   .section-title {
-    @apply text-2xl md:text-3xl font-bold tracking-tight text-soultalk-dark-gray;
+    @apply text-2xl md:text-3xl font-bold tracking-tight text-soultalk-dark-gray dark:text-soultalk-white;
   }
   
   .input-field {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-soultalk-lavender focus:border-transparent outline-none transition-all duration-300;
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-soultalk-lavender focus:border-transparent outline-none transition-all duration-300 dark:bg-soultalk-dark-gray/40 dark:border-white/10 dark:text-soultalk-white dark:placeholder:text-gray-400;
   }
   
   .message-bubble {
@@ -51,16 +51,16 @@
   }
 
   .surface-panel {
-    @apply bg-soultalk-white/90 backdrop-blur-sm border border-gray-100 rounded-2xl shadow-sm;
+    @apply bg-soultalk-white/90 backdrop-blur-sm border border-gray-100 rounded-2xl shadow-sm dark:bg-soultalk-dark-gray/50 dark:border-white/10;
   }
 
   .pill {
-    @apply inline-flex items-center rounded-full px-3 py-1 text-xs sm:text-sm border border-gray-100 bg-white/90 text-soultalk-dark-gray;
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs sm:text-sm border border-gray-100 bg-white/90 text-soultalk-dark-gray dark:bg-white/5 dark:border-white/10 dark:text-gray-100;
   }
 
   .subtle-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: #d7d3f6 transparent;
+    scrollbar-color: #c7d2fe transparent;
   }
 
   .subtle-scrollbar::-webkit-scrollbar {
@@ -73,8 +73,16 @@
   }
 
   .subtle-scrollbar::-webkit-scrollbar-thumb {
-    background: #d7d3f6;
+    background: #c7d2fe;
     border-radius: 999px;
+  }
+
+  .dark .subtle-scrollbar {
+    scrollbar-color: #334155 transparent;
+  }
+
+  .dark .subtle-scrollbar::-webkit-scrollbar-thumb {
+    background: #334155;
   }
 
   .safe-pt {
@@ -88,6 +96,97 @@
   .safe-px {
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+  }
+
+  /* Login palette: White + Blue + Green (Combo 1) */
+  .st-combo1-bg {
+    --st-combo1-ink: #0f172a;
+    --st-combo1-muted: #475569;
+    --st-combo1-blue: #6366f1;
+    --st-combo1-green: #14b8a6;
+    color: var(--st-combo1-ink);
+    background:
+      radial-gradient(1200px 800px at 20% 20%, rgba(99, 102, 241, 0.16), transparent 60%),
+      radial-gradient(900px 700px at 80% 30%, rgba(20, 184, 166, 0.12), transparent 55%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+  }
+
+  .st-combo1-panel {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 18px 45px -38px rgba(15, 23, 42, 0.25);
+    backdrop-filter: blur(12px);
+  }
+
+  .st-combo1-surface {
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--st-combo1-ink);
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    box-shadow: 0 18px 45px -38px rgba(15, 23, 42, 0.22);
+  }
+
+  .st-combo1-color-info {
+    margin-top: 16px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.70);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 12px;
+    font-size: 0.95em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    color: var(--st-combo1-muted);
+  }
+
+  .st-combo1-button {
+    background: linear-gradient(90deg, var(--st-combo1-blue), var(--st-combo1-green));
+    color: #ffffff;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  }
+
+  .st-combo1-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 34px rgba(99, 102, 241, 0.20), 0 16px 34px rgba(20, 184, 166, 0.12);
+    filter: saturate(1.04) brightness(1.02);
+  }
+
+  .st-combo1-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .st-combo1-outline {
+    background: transparent;
+    color: var(--st-combo1-ink);
+    border: 1px solid rgba(99, 102, 241, 0.28);
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-weight: 700;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .st-combo1-outline:hover {
+    background: rgba(99, 102, 241, 0.06);
+    border-color: rgba(99, 102, 241, 0.40);
+  }
+
+  /* Make shared form controls match the surface when used in combo-1 sections */
+  .st-combo1-flow .input-field {
+    background: rgba(255, 255, 255, 0.96);
+    border-color: rgba(15, 23, 42, 0.14);
+    color: var(--st-combo1-ink);
+  }
+
+  .st-combo1-flow .input-field:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.25);
+    border-color: rgba(20, 184, 166, 0.55);
   }
 }
 
@@ -123,17 +222,17 @@
 
 .st-splash-bg {
   background:
-    radial-gradient(1200px 800px at 20% 20%, rgba(124, 58, 237, 0.18), transparent 60%),
-    radial-gradient(900px 700px at 80% 30%, rgba(236, 72, 153, 0.14), transparent 55%),
-    radial-gradient(900px 900px at 50% 90%, rgba(45, 212, 191, 0.10), transparent 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 248, 240, 0.96));
+    radial-gradient(1200px 800px at 20% 20%, rgba(99, 102, 241, 0.18), transparent 60%),
+    radial-gradient(900px 700px at 80% 30%, rgba(244, 63, 94, 0.12), transparent 55%),
+    radial-gradient(900px 900px at 50% 90%, rgba(20, 184, 166, 0.10), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
 }
 
 .dark .st-splash-bg {
   background:
-    radial-gradient(1200px 800px at 20% 20%, rgba(124, 58, 237, 0.26), transparent 60%),
-    radial-gradient(900px 700px at 80% 30%, rgba(236, 72, 153, 0.18), transparent 55%),
-    radial-gradient(900px 900px at 50% 90%, rgba(45, 212, 191, 0.12), transparent 60%),
+    radial-gradient(1200px 800px at 20% 20%, rgba(99, 102, 241, 0.30), transparent 60%),
+    radial-gradient(900px 700px at 80% 30%, rgba(244, 63, 94, 0.18), transparent 55%),
+    radial-gradient(900px 900px at 50% 90%, rgba(20, 184, 166, 0.14), transparent 60%),
     linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98));
 }
 

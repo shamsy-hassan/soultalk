@@ -50,10 +50,19 @@ export default function PhoneVerification({ onCheckPhoneSuccess }) { // Renamed 
 
   return (
     <div className="space-y-4">
+      <div>
+        <h3 className="text-base font-semibold text-soultalk-dark-gray">
+          {t("enter_phone", { defaultValue: "Enter your phone number" })}
+        </h3>
+        <p className="mt-1 text-sm text-soultalk-medium-gray">
+          {t("phone_help", { defaultValue: "We’ll send a one-time code to your email." })}
+        </p>
+      </div>
+
       {/* Country Code Selector */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
         <select
-          className="w-full sm:w-auto sm:max-w-[240px] p-2.5 border border-gray-200 rounded-lg bg-white/95 focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
+          className="w-full sm:w-auto sm:max-w-[260px] input-field bg-white/95 py-3"
           value={selectedCountryCode}
           onChange={(e) => setSelectedCountryCode(e.target.value)}
           disabled={checking}
@@ -71,19 +80,32 @@ export default function PhoneVerification({ onCheckPhoneSuccess }) { // Renamed 
           placeholder={t('phone_placeholder')}
           onChange={(e) => setNationalNumber(e.target.value)}
           disabled={checking}
-          className="w-full min-w-0 flex-grow p-2.5 border border-gray-200 rounded-lg bg-white/95 focus:outline-none focus:ring-2 focus:ring-soultalk-lavender"
+          inputMode="tel"
+          autoComplete="tel"
+          className="w-full min-w-0 flex-grow input-field bg-white/95"
         />
       </div>
       
       <button 
         onClick={handleCheckNumber} 
         disabled={checking || !nationalNumber} 
-        className="w-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white font-bold py-3 px-4 rounded-lg hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out"
+        className="w-full st-combo1-button"
       >
         {checking ? t('processing') : t('continue')}
       </button>
 
-      {message && <p className={`mt-2 text-sm rounded-lg border px-3 py-2 ${message.toLowerCase().includes("error") ? "text-red-500 border-red-200 bg-red-50" : "text-soultalk-medium-gray border-gray-100 bg-soultalk-warm-gray/50"}`}>{message}</p>}
+      {message && (
+        <p
+          className={`mt-2 break-words text-sm rounded-xl border px-4 py-3 ${
+            message.toLowerCase().includes("error") ||
+            message.toLowerCase().includes("fail")
+              ? "text-red-700 border-red-200 bg-red-50 dark:text-red-200 dark:border-red-500/30 dark:bg-red-500/10"
+              : "text-soultalk-dark-gray border-slate-200 bg-slate-50 dark:text-gray-200 dark:border-white/10 dark:bg-white/5"
+          }`}
+        >
+          {message}
+        </p>
+      )}
     </div>
   );
 }

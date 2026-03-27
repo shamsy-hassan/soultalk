@@ -8,10 +8,12 @@ const getPrefersReducedMotion = () => {
 
 export default function LoadingSplash({ onDone }) {
   const prefersReducedMotion = getPrefersReducedMotion();
-  // Total splash time (requested ~2s) for full page load/refresh.
-  const firstMs = prefersReducedMotion ? 250 : 900;
-  const gapMs = prefersReducedMotion ? 0 : 100;
-  const secondMs = prefersReducedMotion ? 250 : 850;
+  // Total splash time: 5s (2.5s per phase).
+  const totalMs = 5000;
+  const phaseMs = totalMs / 2;
+  const firstMs = phaseMs;
+  const gapMs = 0;
+  const secondMs = phaseMs;
   const fadeOutMs = prefersReducedMotion ? 0 : 150;
 
   const [phase, setPhase] = useState('first'); // first | second | done
@@ -30,14 +32,19 @@ export default function LoadingSplash({ onDone }) {
     timers.push(
       setTimeout(() => setPhase('second'), firstMs + gapMs)
     );
-    timers.push(
-      setTimeout(() => setIsFadingOut(true), firstMs + gapMs + secondMs)
-    );
+    if (fadeOutMs > 0) {
+      timers.push(
+        setTimeout(
+          () => setIsFadingOut(true),
+          Math.max(0, firstMs + gapMs + secondMs - fadeOutMs)
+        )
+      );
+    }
     timers.push(
       setTimeout(() => {
         setPhase('done');
         onDoneRef.current?.();
-      }, firstMs + gapMs + secondMs + fadeOutMs)
+      }, firstMs + gapMs + secondMs)
     );
     timersRef.current = timers;
 
@@ -68,7 +75,7 @@ export default function LoadingSplash({ onDone }) {
             phase === 'first' ? 'opacity-100' : 'opacity-0 pointer-events-none',
           ].join(' ')}
         >
-          <div className="st-heartbeat mb-5 rounded-3xl bg-white/75 px-7 py-7 shadow-[0_18px_60px_-40px_rgba(76,29,149,0.45)] backdrop-blur">
+          <div className="st-heartbeat mb-5 rounded-3xl bg-white/75 px-7 py-7 shadow-[0_18px_60px_-40px_rgba(99,102,241,0.38)] backdrop-blur">
             <Heart className="h-12 w-12 text-soultalk-lavender" fill="currentColor" />
           </div>
           <div className="text-center">
@@ -99,7 +106,7 @@ export default function LoadingSplash({ onDone }) {
           ].join(' ')}
         >
           <div className="mb-4 st-love-orbit relative">
-            <div className="st-love-core rounded-3xl bg-white/80 px-8 py-8 shadow-[0_18px_60px_-40px_rgba(124,58,237,0.45)] backdrop-blur">
+            <div className="st-love-core rounded-3xl bg-white/80 px-8 py-8 shadow-[0_18px_60px_-40px_rgba(99,102,241,0.36)] backdrop-blur">
               <Heart className="h-12 w-12 text-soultalk-gradient-end" fill="currentColor" />
             </div>
             <div className="st-orbit st-orbit-a">

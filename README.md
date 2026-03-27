@@ -17,6 +17,15 @@ This is a web application that allows users to chat with each other.
     npm run start
     ```
 
+## Email (OTP)
+
+Backend supports both Resend HTTP and SMTP. Configure `backend/.env` (see `backend/.env.example`):
+
+- Local development (Gmail / Mailpit / MailHog): set `EMAIL_TRANSPORT=smtp`
+- Deployed environments (often block outbound SMTP): set `EMAIL_TRANSPORT=resend_http` (or leave `auto`)
+
+If you use Resend without verifying a domain, Resend “test mode” can only deliver to your own Resend account email address; verify a domain and use a `RESEND_FROM_EMAIL` on that domain to email other recipients.
+
 
     ```````
     Country	Region / Area	Most Spoken Language	Foreign / Official Languages

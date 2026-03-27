@@ -1,9 +1,9 @@
 import React from 'react';
-import { Moon, Sun, ShieldCheck, MessageSquareText } from 'lucide-react';
+import { ShieldCheck, MessageSquareText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-const Settings = ({ theme, onToggleTheme }) => {
+const Settings = () => {
   const { t } = useTranslation();
 
   return (
@@ -11,18 +11,6 @@ const Settings = ({ theme, onToggleTheme }) => {
       <div className="hero-panel p-5 md:p-6">
         <h1 className="section-title">{t('settings_title')}</h1>
         <p className="text-sm text-soultalk-medium-gray mt-1">{t('settings_subtitle')}</p>
-      </div>
-
-      <div className="card-elevated p-5 rounded-2xl">
-        <h2 className="text-lg font-semibold text-soultalk-dark-gray mb-3">{t('appearance')}</h2>
-        <button
-          type="button"
-          onClick={onToggleTheme}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-soultalk-warm-gray text-soultalk-dark-gray border border-gray-200 hover:bg-gray-200 transition-colors"
-        >
-          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          {theme === 'dark' ? t('switch_to_light_mode') : t('switch_to_dark_mode')}
-        </button>
       </div>
 
       <div className="card-elevated p-5 rounded-2xl">

@@ -13,6 +13,13 @@ export default function OtpVerification({ phone, email, username, language, onVe
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
 
+  const messageLower = (message || "").toLowerCase();
+  const messageIsError =
+    messageLower.includes("error") ||
+    messageLower.includes("fail") ||
+    messageLower.includes("invalid") ||
+    messageLower.includes("expired");
+
   const handleVerifyOtp = async () => {
     setLoading(true);
     setMessage("");
@@ -61,33 +68,54 @@ export default function OtpVerification({ phone, email, username, language, onVe
 
   return (
     <div className="space-y-4">
-      <h2 className="text-base sm:text-lg text-soultalk-dark-gray break-words">{t('enter_6_digit_code', { email })}</h2>
+      <div>
+        <h2 className="text-base sm:text-lg font-semibold text-soultalk-dark-gray break-words">
+          {t("enter_6_digit_code", { email })}
+        </h2>
+        <p className="mt-1 text-sm text-soultalk-medium-gray">
+          {t("otp_help", { defaultValue: "Enter the 6-digit code to continue." })}
+        </p>
+      </div>
+
       <input
         type="text"
         value={otp}
         placeholder={t('enter_otp')}
         onChange={(e) => setOtp(e.target.value)}
         maxLength={6}
-        className="w-full p-3 border border-gray-200 rounded-lg bg-white/95 focus:outline-none focus:ring-2 focus:ring-soultalk-lavender text-center tracking-widest"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        autoComplete="one-time-code"
+        className="w-full input-field bg-white/95 text-center tracking-[0.35em] font-semibold"
         disabled={loading}
       />
       <button 
         onClick={handleVerifyOtp} 
         disabled={loading || otp.length !== 6} 
-        className="w-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white font-bold py-3 px-4 rounded-lg hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out"
+        className="w-full st-combo1-button"
       >
         {loading ? t('verifying') : t('verify_otp')}
       </button>
       {message && (
-        <p className="mt-3 break-words text-sm sm:text-base rounded-lg border px-3 py-2" style={{ color: message.toLowerCase().includes("error") || message.toLowerCase().includes("fail") || message.toLowerCase().includes("invalid") ? "red" : "green", borderColor: "#e5e7eb", backgroundColor: "#fafafa" }}>
+        <p
+          className={`mt-3 break-words text-sm sm:text-base rounded-xl border px-4 py-3 ${
+            messageIsError
+              ? "text-red-700 border-red-200 bg-red-50 dark:text-red-200 dark:border-red-500/30 dark:bg-red-500/10"
+              : "text-emerald-700 border-emerald-200 bg-emerald-50 dark:text-emerald-200 dark:border-emerald-500/30 dark:bg-emerald-500/10"
+          }`}
+        >
           {message}
         </p>
       )}
-      {(message.includes(t("invalid_or_expired_otp")) || message.includes(t("failed_to_verify_otp"))) && (
+      {(message.includes(t("invalid_or_expired_otp")) ||
+        message.includes(t("failed_to_verify_otp")) ||
+        messageLower.includes("invalid") ||
+        messageLower.includes("expired") ||
+        messageLower.includes("fail")) && (
         <button 
           onClick={handleResendOtp} 
           disabled={resending} 
-          className="w-full bg-soultalk-warm-gray text-soultalk-dark-gray font-bold py-2 px-4 rounded-lg border border-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out"
+          className="w-full st-combo1-outline"
         >
           {resending ? t('resending') : t('resend_otp')}
         </button>
@@ -96,7 +124,7 @@ export default function OtpVerification({ phone, email, username, language, onVe
       {onBack && (
         <button
           onClick={onBack}
-          className="w-full bg-transparent border border-gray-300 text-soultalk-medium-gray font-bold py-2 px-4 rounded-lg hover:bg-soultalk-warm-gray focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender transition-all duration-300 ease-in-out mt-2"
+          className="w-full st-combo1-outline mt-2"
         >
           {t('back')}
         </button>
