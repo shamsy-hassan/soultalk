@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Send, ArrowLeft, Clock, Sparkles, Image as ImageIcon, Smile, Phone, Heart, Check, CheckCheck, Ban } from 'lucide-react'; // Added Phone icon for call, removed Mic
+import { Send, ArrowLeft, Clock, Sparkles, Image as ImageIcon, Smile, Phone, Heart, Check, CheckCheck, Ban, ShieldCheck, MessageSquareText } from 'lucide-react'; // Added Phone icon for call, removed Mic
 import { useTranslation } from 'react-i18next';
 import { getLanguageName, getLanguageFlag } from './i18n';
 import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
@@ -19,6 +19,12 @@ const Chat = ({ user, socket }) => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const quickPrompts = [
+    t('chat_prompt_1', { defaultValue: 'Hi! Where are you from?' }),
+    t('chat_prompt_2', { defaultValue: 'What language do you prefer?' }),
+    t('chat_prompt_3', { defaultValue: 'Tell me about your day.' }),
+    t('chat_prompt_4', { defaultValue: 'Teach me a phrase in your language.' }),
+  ];
 
   useEffect(() => {
     if (!socket || !user || !username) return;
@@ -220,6 +226,14 @@ const Chat = ({ user, socket }) => {
     setNewMessage('');
   };
 
+  const applyPrompt = (text) => {
+    setNewMessage((prev) => (prev?.trim() ? `${prev}\n${text}` : text));
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+    handleTyping();
+  };
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -246,21 +260,21 @@ const Chat = ({ user, socket }) => {
   const targetUserProfileImageUrl = resolveProfilePictureUrl(targetUser.profile_picture_url);
 
   return (
-    <div className="flex-1 flex flex-col rounded-2xl overflow-hidden border border-gray-100 shadow-[0_20px_48px_-36px_rgba(30,41,59,0.55)] bg-gradient-to-b from-soultalk-white to-soultalk-warm-gray/30 dark:border-white/10 dark:from-slate-950 dark:to-slate-900">
+    <div className="flex-1 flex flex-col rounded-2xl overflow-hidden border border-emerald-400/15 shadow-[0_20px_48px_-36px_rgba(0,0,0,0.65)] bg-gradient-to-b from-soultalk-white to-soultalk-warm-gray/30">
       {/* Chat Header */}
-      <div className="sticky top-0 z-20 bg-soultalk-white/95 backdrop-blur-sm p-3 sm:p-4 border-b border-gray-100 flex items-center justify-between shadow-sm safe-pt safe-px dark:bg-slate-950/70 dark:border-white/10">
+      <div className="sticky top-0 z-20 bg-soultalk-white/95 backdrop-blur-sm p-3 sm:p-4 border-b border-emerald-400/15 flex items-center justify-between shadow-sm safe-pt safe-px">
         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
           <button
             onClick={() => navigate(-1)} // Changed to navigate to previous page
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors md:hidden dark:hover:bg-white/10" // Show back button only on mobile
+            className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors md:hidden" // Show back button only on mobile
           >
-            <ArrowLeft className="w-5 h-5 text-soultalk-dark-gray dark:text-gray-100" />
+            <ArrowLeft className="w-5 h-5 text-soultalk-dark-gray" />
           </button>
           <div className="relative">
             <img
               src={targetUserProfileImageUrl}
               alt={targetUser.username}
-              className="w-10 h-10 rounded-full object-cover ring-1 ring-black/5 dark:ring-white/10"
+              className="w-10 h-10 rounded-full object-cover ring-1 ring-emerald-400/15"
               onError={(e) => { e.currentTarget.src = DEFAULT_PROFILE_IMAGE_URL; }}
             />
             {/* Soul Status Indicator for target user */}
@@ -269,8 +283,8 @@ const Chat = ({ user, socket }) => {
             </div>
           </div>
           <div className="min-w-0">
-            <h2 className="text-base sm:text-lg font-bold text-soultalk-dark-gray truncate dark:text-gray-100">{username}</h2>
-            <div className="flex items-center space-x-1 text-xs text-soultalk-medium-gray truncate dark:text-gray-400">
+            <h2 className="text-base sm:text-lg font-bold text-soultalk-dark-gray truncate">{username}</h2>
+            <div className="flex items-center space-x-1 text-xs text-soultalk-medium-gray truncate">
               {t('speaking')}: {getLanguageName(targetUser.language)} {getLanguageFlag(targetUser.language)}
             </div>
           </div>
@@ -281,14 +295,14 @@ const Chat = ({ user, socket }) => {
               type="button"
               aria-disabled="true"
               onClick={(e) => e.preventDefault()}
-              className="relative p-2 rounded-lg transition-colors hover:bg-soultalk-warm-gray cursor-not-allowed dark:hover:bg-white/10"
+              className="relative p-2 rounded-lg transition-colors hover:bg-emerald-500/10 cursor-not-allowed"
             >
-              <Phone className="w-5 h-5 text-soultalk-dark-gray opacity-80 dark:text-gray-100" /> {/* Call Button */}
-              <span className="pointer-events-none absolute -top-1 -right-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-gray-200 opacity-0 group-hover:opacity-100 transition-opacity dark:bg-slate-950 dark:ring-white/10">
+              <Phone className="w-5 h-5 text-soultalk-dark-gray opacity-80" /> {/* Call Button */}
+              <span className="pointer-events-none absolute -top-1 -right-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-soultalk-warm-gray shadow-sm ring-1 ring-emerald-400/15 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Ban className="h-3 w-3 text-soultalk-coral" />
               </span>
             </button>
-            <div className="pointer-events-none absolute right-0 top-full mt-2 w-max max-w-[240px] rounded-xl bg-white/95 px-3 py-2 text-xs text-soultalk-dark-gray shadow-lg ring-1 ring-black/5 backdrop-blur opacity-0 group-hover:opacity-100 transition-opacity dark:bg-slate-950/95 dark:text-gray-100 dark:ring-white/10">
+            <div className="pointer-events-none absolute right-0 top-full mt-2 w-max max-w-[240px] rounded-xl bg-soultalk-warm-gray/95 px-3 py-2 text-xs text-soultalk-dark-gray shadow-lg ring-1 ring-emerald-400/15 backdrop-blur opacity-0 group-hover:opacity-100 transition-opacity">
               <div className="flex items-center gap-2">
                 <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-soultalk-coral/10 ring-1 ring-soultalk-coral/20">
                   <Ban className="h-3.5 w-3.5 text-soultalk-coral" />
@@ -304,20 +318,20 @@ const Chat = ({ user, socket }) => {
       </div>
 
       {/* Language Bridge Indicator (Full for desktop, compact for mobile) */}
-      <div className="bg-soultalk-warm-gray/70 p-3 text-center border-b border-gray-100 hidden md:block dark:bg-slate-900/30 dark:border-white/10"> {/* Hidden on mobile */}
-        <div className="inline-flex items-center space-x-2 text-sm text-soultalk-medium-gray bg-soultalk-white rounded-full px-4 py-2 shadow-sm max-w-full overflow-x-auto subtle-scrollbar ring-1 ring-black/5 dark:bg-slate-900/40 dark:text-gray-200 dark:ring-white/10">
+      <div className="bg-soultalk-warm-gray/70 p-3 text-center border-b border-emerald-400/15 hidden md:block"> {/* Hidden on mobile */}
+        <div className="inline-flex items-center space-x-2 text-sm text-soultalk-medium-gray bg-soultalk-warm-gray rounded-full px-4 py-2 shadow-sm max-w-full overflow-x-auto subtle-scrollbar ring-1 ring-emerald-400/15">
           <span>{getLanguageFlag(user.language)} {t('language_you_speak', { language: getLanguageName(user.language) })}</span>
-          <span className="text-soultalk-medium-gray dark:text-gray-500">—</span>
+          <span className="text-soultalk-medium-gray">—</span>
           <Sparkles className="w-4 h-4 text-soultalk-lavender" /> {/* Small bridge icon */}
-          <span className="text-soultalk-medium-gray dark:text-gray-500">—</span>
+          <span className="text-soultalk-medium-gray">—</span>
           <span>{getLanguageFlag(targetUser.language)} {t('language_they_speak', { language: getLanguageName(targetUser.language) })}</span>
         </div>
-        <p className="text-xs text-soultalk-medium-gray mt-1 dark:text-gray-400">{t('messages_translate_automatically_explanation')}</p>
+        <p className="text-xs text-soultalk-medium-gray mt-1">{t('messages_translate_automatically_explanation')}</p>
       </div>
 
       {/* Compact Language Bridge Indicator for Mobile */}
-      <div className="bg-soultalk-warm-gray/70 p-2 text-center border-b border-gray-100 md:hidden dark:bg-slate-900/30 dark:border-white/10"> {/* Visible on mobile */}
-        <div className="inline-flex items-center space-x-1 text-xs text-soultalk-medium-gray bg-soultalk-white rounded-full px-3 py-1 shadow-sm ring-1 ring-black/5 dark:bg-slate-900/40 dark:text-gray-200 dark:ring-white/10">
+      <div className="bg-soultalk-warm-gray/70 p-2 text-center border-b border-emerald-400/15 md:hidden"> {/* Visible on mobile */}
+        <div className="inline-flex items-center space-x-1 text-xs text-soultalk-medium-gray bg-soultalk-warm-gray rounded-full px-3 py-1 shadow-sm ring-1 ring-emerald-400/15">
           <span>{getLanguageFlag(user.language)}</span>
           <Sparkles className="w-3 h-3 text-soultalk-lavender" />
           <span>{getLanguageFlag(targetUser.language)}</span>
@@ -326,6 +340,51 @@ const Chat = ({ user, socket }) => {
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto subtle-scrollbar p-3 sm:p-4 md:p-5 bg-transparent">
+        {messages.length === 0 && (
+          <div className="max-w-2xl mx-auto py-6">
+            <div className="hero-panel p-5 md:p-6">
+              <div className="pointer-events-none absolute -right-10 -top-14 h-32 w-32 rounded-full bg-soultalk-lavender/20 blur-2xl" />
+              <div className="pointer-events-none absolute -left-10 -bottom-14 h-32 w-32 rounded-full bg-soultalk-coral/15 blur-2xl" />
+              <div className="relative space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-soultalk-dark-gray inline-flex items-center gap-2">
+                      <MessageSquareText className="w-4 h-4 text-soultalk-lavender" />
+                      {t('chat_starter_title', { defaultValue: 'Start the conversation' })}
+                    </p>
+                    <p className="text-sm text-soultalk-medium-gray mt-1">
+                      {t('chat_starter_body', { defaultValue: 'Pick a prompt or type in your language. SoulTalk will translate for both of you.' })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {quickPrompts.map((prompt) => (
+                    <button
+                      key={prompt}
+                      type="button"
+                      onClick={() => applyPrompt(prompt)}
+                      className="px-3 py-2 rounded-full bg-soultalk-warm-gray text-soultalk-dark-gray border border-emerald-400/15 hover:bg-emerald-500/10 transition-colors text-sm"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="rounded-xl bg-soultalk-warm-gray/35 border border-emerald-400/15 p-4 text-sm text-soultalk-medium-gray">
+                  <p className="font-semibold text-soultalk-dark-gray inline-flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-soultalk-lavender" />
+                    {t('chat_safety_title', { defaultValue: 'Safety reminder' })}
+                  </p>
+                  <p className="mt-1">
+                    {t('chat_safety_body', { defaultValue: 'Don’t share OTP codes, passwords, or sensitive personal info. If something feels wrong, stop and report it via Settings → Feedback.' })}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -333,31 +392,31 @@ const Chat = ({ user, socket }) => {
           >
             <div className={`group relative max-w-[86%] sm:max-w-[78%] lg:max-w-[56%] p-3.5 sm:p-4 shadow-sm ring-1 rounded-2xl ${
               msg.from === user.username
-                ? 'bg-gradient-to-tr from-sky-500 to-blue-600 text-white rounded-br-none ring-sky-500/25'
-                : 'bg-emerald-50 text-emerald-950 rounded-bl-none ring-emerald-200/80'
+                ? 'bg-gradient-to-tr from-soultalk-gradient-start to-soultalk-gradient-end text-emerald-50 rounded-br-none ring-emerald-400/20'
+                : 'bg-soultalk-warm-gray text-soultalk-dark-gray rounded-bl-none ring-emerald-400/15'
             }`}>
               {/* Original message (faint) for received messages if translated */}
               {(msg.from !== user.username && msg.originalText !== msg.translatedText) && (
-                <p className="text-xs text-emerald-900/60 mb-1">{msg.originalText}</p>
+                <p className="text-xs text-soultalk-medium-gray mb-1">{msg.originalText}</p>
               )}
               {/* Main translated message */}
               <p className="text-sm">{msg.from === user.username ? msg.originalText : msg.translatedText}</p>
               
               {/* Soul Translate Badge on hover (using group-hover for parent message div) */}
-              <div className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-soultalk-warm-gray px-2 py-1 rounded-full flex items-center space-x-1 ring-1 ring-black/5 dark:bg-slate-950/60 dark:ring-white/10">
+              <div className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-soultalk-white/70 px-2 py-1 rounded-full flex items-center space-x-1 ring-1 ring-emerald-400/15 backdrop-blur">
                 <Sparkles className="w-3 h-3 text-soultalk-lavender" />
-                <span className="text-soultalk-medium-gray dark:text-gray-300">SoulTalk</span>
+                <span className="text-soultalk-medium-gray">SoulTalk</span>
               </div>
 
               {/* Timestamp and Read Receipt */}
-              <div className={`text-xs mt-2 flex items-center ${msg.from === user.username ? 'text-white/75 justify-end' : 'text-emerald-900/60 justify-start'}`}>
+              <div className={`text-xs mt-2 flex items-center ${msg.from === user.username ? 'text-emerald-50/75 justify-end' : 'text-soultalk-medium-gray justify-start'}`}>
                 <Clock className="w-3 h-3 mr-1" />
                 <span>{msg.timestamp}</span>
                 {msg.from === user.username && (
                   <span className="ml-1 inline-flex items-center">
-                    {msg.status === 'read' && <CheckCheck className="w-3.5 h-3.5 text-sky-200" />}
-                    {msg.status === 'delivered' && <CheckCheck className="w-3.5 h-3.5 text-soultalk-white/70" />}
-                    {(!msg.status || msg.status === 'sent') && <Check className="w-3.5 h-3.5 text-soultalk-white/70" />}
+                    {msg.status === 'read' && <CheckCheck className="w-3.5 h-3.5 text-emerald-100" />}
+                    {msg.status === 'delivered' && <CheckCheck className="w-3.5 h-3.5 text-emerald-50/70" />}
+                    {(!msg.status || msg.status === 'sent') && <Check className="w-3.5 h-3.5 text-emerald-50/70" />}
                   </span>
                 )}
               </div>
@@ -367,12 +426,12 @@ const Chat = ({ user, socket }) => {
         
         {isTyping && (
           <div className="mb-4 flex justify-start">
-            <div className="inline-block bg-soultalk-warm-gray text-soultalk-dark-gray rounded-2xl rounded-bl-none p-3 ring-1 ring-black/5 dark:bg-slate-900/40 dark:text-gray-100 dark:ring-white/10">
+            <div className="inline-block bg-soultalk-warm-gray text-soultalk-dark-gray rounded-2xl rounded-bl-none p-3 ring-1 ring-emerald-400/15">
               <div className="typing-indicator">
                 <div className="typing-dot"></div>
                 <div className="typing-dot" style={{ animationDelay: '0.2s' }}></div>
                 <div className="typing-dot" style={{ animationDelay: '0.4s' }}></div>
-                <span className="text-sm text-soultalk-medium-gray ml-2 dark:text-gray-300">{username} {t('is_typing')}</span>
+                <span className="text-sm text-soultalk-medium-gray ml-2">{username} {t('is_typing')}</span>
               </div>
             </div>
           </div>
@@ -382,9 +441,9 @@ const Chat = ({ user, socket }) => {
       </div>
 
       {/* Input Area */}
-      <div className="sticky bottom-0 z-10 bg-soultalk-white/95 backdrop-blur-sm border-t border-gray-100 p-3 sm:p-4 safe-pb safe-px dark:bg-slate-950/70 dark:border-white/10"> {/* Added sticky bottom-0 */}
+      <div className="sticky bottom-0 z-10 bg-soultalk-white/95 backdrop-blur-sm border-t border-emerald-400/15 p-3 sm:p-4 safe-pb safe-px"> {/* Added sticky bottom-0 */}
         {/* Soul Translator Bar above input */}
-        <div className="mb-3 p-2 bg-soultalk-warm-gray rounded-lg flex items-center justify-center space-x-2 text-sm text-soultalk-medium-gray hidden md:flex ring-1 ring-black/5 dark:bg-slate-900/30 dark:text-gray-200 dark:ring-white/10"> {/* Hidden on mobile */}
+        <div className="mb-3 p-2 bg-soultalk-warm-gray rounded-lg flex items-center justify-center space-x-2 text-sm text-soultalk-medium-gray hidden md:flex ring-1 ring-emerald-400/15"> {/* Hidden on mobile */}
           <span>{t('you')}: {getLanguageFlag(user.language)} {getLanguageName(user.language)}</span>
           <Sparkles className="w-4 h-4 text-soultalk-lavender" />
           <span>{t('them')}: {getLanguageFlag(targetUser.language)} {getLanguageName(targetUser.language)}</span>
@@ -393,11 +452,11 @@ const Chat = ({ user, socket }) => {
         <div className="flex items-end gap-2 sm:gap-3">
           <div className="flex-1">
             <div className="flex flex-wrap gap-2 mb-2">
-              <button type="button" className="p-2 hover:bg-soultalk-warm-gray rounded-lg transition-colors dark:hover:bg-white/10" aria-disabled="true" onClick={(e) => e.preventDefault()}>
-                <ImageIcon className="w-5 h-5 text-soultalk-medium-gray dark:text-gray-400" />
+              <button type="button" className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors" aria-disabled="true" onClick={(e) => e.preventDefault()}>
+                <ImageIcon className="w-5 h-5 text-soultalk-medium-gray" />
               </button>
-              <button type="button" className="p-2 hover:bg-soultalk-warm-gray rounded-lg transition-colors dark:hover:bg-white/10" aria-disabled="true" onClick={(e) => e.preventDefault()}>
-                <Smile className="w-5 h-5 text-soultalk-medium-gray dark:text-gray-400" />
+              <button type="button" className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors" aria-disabled="true" onClick={(e) => e.preventDefault()}>
+                <Smile className="w-5 h-5 text-soultalk-medium-gray" />
               </button>
             </div>
             <div className="relative">
@@ -410,12 +469,14 @@ const Chat = ({ user, socket }) => {
                 }}
                 onKeyPress={handleKeyPress}
                 placeholder={t('type_your_message_in', { language: getLanguageName(user.language) })}
-                className="input-field w-full bg-soultalk-white shadow-sm dark:bg-slate-900/40 dark:border-white/10 dark:text-gray-100 dark:placeholder:text-gray-400"
+                className="input-field w-full shadow-sm"
                 rows="2"
+                maxLength={2000}
               />
             </div>
-            <div className="text-xs text-soultalk-medium-gray mt-2 dark:text-gray-400">
-              {t('press_enter_to_send')} • {t('shift_enter_for_new_line')}
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-soultalk-medium-gray">
+              <span>{t('press_enter_to_send')} • {t('shift_enter_for_new_line')}</span>
+              <span>{t('feedback_char_count', { defaultValue: 'Characters' })}: {newMessage.length}/2000</span>
             </div>
           </div>
           
@@ -425,8 +486,8 @@ const Chat = ({ user, socket }) => {
             aria-label={t('send_message', { defaultValue: 'Send message' })}
             className={`p-3 sm:p-4 rounded-xl flex items-center justify-center shrink-0 ${
               newMessage.trim()
-                ? 'bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white hover:opacity-90'
-                : 'bg-soultalk-warm-gray text-soultalk-medium-gray dark:bg-slate-900/30 dark:text-gray-300'
+                ? 'bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-emerald-50 hover:opacity-90'
+                : 'bg-soultalk-warm-gray text-soultalk-medium-gray'
             } transition-all duration-300 transform hover:scale-105 disabled:opacity-60 disabled:hover:scale-100`}
           >
             <Send className="w-5 h-5" />

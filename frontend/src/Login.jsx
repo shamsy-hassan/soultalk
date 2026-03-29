@@ -29,7 +29,7 @@ const Login = ({ onLogin }) => {
         <div className="text-center mb-12 lg:mb-16">
           {goodbyeMessage && (
             <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-top-2 fade-in duration-300">
-              <div className="bg-white/95 text-soultalk-dark-gray px-6 py-3 rounded-full shadow-lg border border-gray-200 flex items-center gap-2">
+              <div className="bg-gray-950/85 text-soultalk-dark-gray px-6 py-3 rounded-full shadow-lg border border-gray-800/60 flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-soultalk-teal" />
                 <span className="font-medium">{goodbyeMessage}</span>
               </div>
@@ -42,7 +42,7 @@ const Login = ({ onLogin }) => {
               <div className="relative w-20 h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-soultalk-gradient-start to-soultalk-gradient-end rounded-2xl flex items-center justify-center shadow-xl transform group-hover:scale-105 transition-transform duration-300">
                 <MessageSquare className="w-10 h-10 lg:w-12 lg:h-12 text-white" />
               </div>
-              <div className="absolute -top-2 -right-2 lg:-top-3 lg:-right-3 w-8 h-8 lg:w-9 lg:h-9 bg-white rounded-full flex items-center justify-center shadow-lg border border-gray-200">
+              <div className="absolute -top-2 -right-2 lg:-top-3 lg:-right-3 w-8 h-8 lg:w-9 lg:h-9 bg-gray-950/80 rounded-full flex items-center justify-center shadow-lg border border-gray-800/60">
                 <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 text-soultalk-lavender" />
               </div>
             </div>
@@ -55,7 +55,7 @@ const Login = ({ onLogin }) => {
             {t('soultalk_footer')}
           </p>
           <div className="mt-6 flex justify-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/80 px-4 py-2 text-sm text-soultalk-dark-gray shadow-sm backdrop-blur-sm">
+            <div className="inline-flex items-center gap-2 rounded-full border border-gray-800/60 bg-gray-950/35 px-4 py-2 text-sm text-soultalk-dark-gray shadow-sm backdrop-blur-sm">
               <span className="inline-flex h-2 w-2 rounded-full bg-soultalk-teal shadow-[0_0_0_4px_rgba(20,184,166,0.16)]" />
               <span>Instant translation. No password.</span>
               <ChevronRight className="h-4 w-4 opacity-70" />
@@ -69,7 +69,7 @@ const Login = ({ onLogin }) => {
             {/* How It Works Card */}
             <div className="st-combo1-panel rounded-2xl p-6 lg:p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-white/80 rounded-xl border border-gray-100">
+                <div className="p-2.5 bg-gray-950/35 rounded-xl border border-gray-800/60">
                   <Globe className="w-6 h-6 text-soultalk-lavender" />
                 </div>
                 <div>
@@ -86,7 +86,7 @@ const Login = ({ onLogin }) => {
                 ].map((item, idx) => (
                   <div key={idx} className="flex gap-4">
                     <div className="flex-shrink-0">
-                      <div className="w-12 h-12 bg-white/80 rounded-xl flex items-center justify-center border border-gray-100">
+                      <div className="w-12 h-12 bg-gray-950/35 rounded-xl flex items-center justify-center border border-gray-800/60">
                         <item.Icon className="w-5 h-5 text-soultalk-teal" />
                       </div>
                     </div>
@@ -105,7 +105,7 @@ const Login = ({ onLogin }) => {
             {/* Live Example Card */}
             <div className="st-combo1-panel rounded-2xl p-6 lg:p-8">
               <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 bg-white/80 rounded-lg border border-gray-100">
+                <div className="p-2 bg-gray-950/35 rounded-lg border border-gray-800/60">
                   <Users className="w-5 h-5 text-soultalk-lavender" />
                 </div>
                 <span className="font-semibold text-soultalk-dark-gray">{t('live_example')}</span>
@@ -122,7 +122,7 @@ const Login = ({ onLogin }) => {
 
           {/* Right Column - Verification Card */}
           <div className="st-combo1-surface rounded-2xl overflow-hidden">
-            <div className="px-6 lg:px-8 py-5 bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-white">
+            <div className="px-6 lg:px-8 py-5 bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-white st-white-visible">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-white/15 rounded-lg border border-white/20">
                   <Phone className="w-5 h-5 text-white" />
@@ -161,7 +161,7 @@ const Login = ({ onLogin }) => {
 
         {/* Bottom Decorative Element */}
         <div className="mt-12 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-sm text-soultalk-dark-gray border border-gray-200">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-950/35 backdrop-blur-sm rounded-full text-sm text-soultalk-dark-gray border border-gray-800/60">
             <Shield className="w-4 h-4 text-soultalk-teal" />
             <span>Secure & encrypted communication</span>
             <ChevronRight className="w-4 h-4" />

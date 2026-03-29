@@ -8,16 +8,32 @@ export default {
   theme: {
     extend: {
       colors: {
-        'soultalk-white': '#FFFFFF',
-        'soultalk-warm-gray': '#F8FAFC',
-        'soultalk-coral': '#F43F5E',
-        'soultalk-teal': '#14B8A6',
-        'soultalk-lavender': '#4F46E5',
-        'soultalk-dark-gray': '#0F172A',
-        'soultalk-medium-gray': '#475569',
-        // For primary gradient as specified:
-        'soultalk-gradient-start': '#6366F1',
-        'soultalk-gradient-end': '#14B8A6',
+        // App theme tokens (powered by CSS variables; see src/index.css).
+        'soultalk-white': 'rgb(var(--st-white) / <alpha-value>)', // base background
+        'soultalk-warm-gray': 'rgb(var(--st-warm-gray) / <alpha-value>)', // surface / panels
+        'soultalk-coral': 'rgb(var(--st-coral) / <alpha-value>)', // primary accent
+        'soultalk-teal': 'rgb(var(--st-teal) / <alpha-value>)', // secondary accent
+        'soultalk-lavender': 'rgb(var(--st-lavender) / <alpha-value>)', // focus / strong accent
+        'soultalk-dark-gray': 'rgb(var(--st-dark-gray) / <alpha-value>)', // primary text
+        'soultalk-medium-gray': 'rgb(var(--st-medium-gray) / <alpha-value>)', // muted text
+        // Primary gradient
+        'soultalk-gradient-start': 'rgb(var(--st-gradient-start) / <alpha-value>)',
+        'soultalk-gradient-end': 'rgb(var(--st-gradient-end) / <alpha-value>)',
+
+        // Make existing `emerald-*` utilities theme-aware (the UI uses these a lot).
+        emerald: {
+          50: 'rgb(var(--st-dark-gray) / <alpha-value>)',
+          100: 'rgb(var(--st-dark-gray) / <alpha-value>)',
+          200: 'rgb(var(--st-medium-gray) / <alpha-value>)',
+          300: 'rgb(var(--st-medium-gray) / <alpha-value>)',
+          400: 'rgb(var(--st-lavender) / <alpha-value>)',
+          500: 'rgb(var(--st-coral) / <alpha-value>)',
+          600: 'rgb(var(--st-gradient-end) / <alpha-value>)',
+          700: 'rgb(var(--st-gradient-end) / <alpha-value>)',
+          800: 'rgb(var(--st-warm-gray) / <alpha-value>)',
+          900: 'rgb(var(--st-white) / <alpha-value>)',
+          950: 'rgb(var(--st-white) / <alpha-value>)',
+        },
       }, // Correctly close the colors object here
       keyframes: {
         'pulse-slow': {

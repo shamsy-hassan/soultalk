@@ -293,9 +293,9 @@ export default function VerifyFlow({ onLogin }) {
                 ? "bg-emerald-500"
                 : state === "current"
                   ? "bg-soultalk-lavender"
-                  : "bg-slate-200 dark:bg-white/10";
+                  : "bg-emerald-400/30";
             const textClass =
-              state === "current" ? "text-slate-900 dark:text-gray-100" : "text-slate-500 dark:text-gray-400";
+              state === "current" ? "text-soultalk-dark-gray" : "text-soultalk-medium-gray";
             return (
               <div key={s.id} className="flex items-center">
                 <div className={`h-2.5 w-2.5 rounded-full ${dotClass}`} />
@@ -303,7 +303,7 @@ export default function VerifyFlow({ onLogin }) {
                   {s.label}
                 </span>
                 {idx !== steps.length - 1 && (
-                  <div className="mx-3 h-px w-8 bg-slate-200 dark:bg-white/10 hidden sm:block" />
+                  <div className="mx-3 h-px w-8 bg-emerald-400/20 hidden sm:block" />
                 )}
               </div>
             );
@@ -325,8 +325,8 @@ export default function VerifyFlow({ onLogin }) {
         <p
           className={`text-center break-words text-sm sm:text-base rounded-xl border px-4 py-3 ${
             messageIsError
-              ? "text-red-700 border-red-200 bg-red-50 dark:text-red-200 dark:border-red-500/30 dark:bg-red-500/10"
-              : "text-slate-700 border-slate-200 bg-slate-50 dark:text-gray-200 dark:border-white/10 dark:bg-white/5"
+              ? "text-red-200 border-red-500/30 bg-red-500/10"
+              : "text-soultalk-dark-gray border-emerald-400/15 bg-soultalk-warm-gray/60"
           }`}
         >
           {message}
@@ -340,21 +340,21 @@ export default function VerifyFlow({ onLogin }) {
       {step === "confirm_registered" && (
         <div className="text-center space-y-4">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-gray-100">
+            <h2 className="text-xl font-semibold text-soultalk-dark-gray">
               {t("number_registered_title")}
             </h2>
-            <p className="mt-2 text-sm text-slate-600 dark:text-gray-300">
+            <p className="mt-2 text-sm text-soultalk-medium-gray">
               {t("number_registered_subtitle", {
                 defaultValue: "Continue with the account linked to this phone number.",
               })}
             </p>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left dark:border-white/10 dark:bg-white/5">
-            <div className="text-xs font-medium text-slate-500 dark:text-gray-400">
+          <div className="rounded-xl border border-emerald-400/15 bg-soultalk-warm-gray/60 px-4 py-3 text-left">
+            <div className="text-xs font-medium text-soultalk-medium-gray">
               {t("account_found", { defaultValue: "Account found" })}
             </div>
-            <div className="mt-1 text-sm font-semibold text-slate-900 dark:text-gray-100 break-words">
+            <div className="mt-1 text-sm font-semibold text-soultalk-dark-gray break-words">
               {t("number_registered_message", {
                 username: maskName(existingUsername),
                 email: maskEmail(existingEmail),
@@ -388,8 +388,8 @@ export default function VerifyFlow({ onLogin }) {
           className="space-y-4"
         >
           <div>
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-gray-100">{t("enter_your_details")}</h2>
-            <p className="mt-1 text-sm text-slate-600 dark:text-gray-300">
+            <h2 className="text-xl font-semibold text-soultalk-dark-gray">{t("enter_your_details")}</h2>
+            <p className="mt-1 text-sm text-soultalk-medium-gray">
               {t("details_help", {
                 defaultValue: "We use your email to deliver a one-time code. No passwords.",
               })}
@@ -397,7 +397,7 @@ export default function VerifyFlow({ onLogin }) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 dark:text-gray-200">{t("email", { defaultValue: "Email" })}</label>
+            <label className="text-sm font-medium text-soultalk-medium-gray">{t("email", { defaultValue: "Email" })}</label>
             <input
               type="email"
               placeholder={t("email_for_otp")}
@@ -405,12 +405,12 @@ export default function VerifyFlow({ onLogin }) {
               onChange={(e) => setUserEmail(e.target.value)}
               autoComplete="email"
               required
-              className="input-field bg-white/95"
+              className="input-field"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 dark:text-gray-200">{t("username", { defaultValue: "Username" })}</label>
+            <label className="text-sm font-medium text-soultalk-medium-gray">{t("username", { defaultValue: "Username" })}</label>
             <input
               type="text"
               placeholder={t("username")}
@@ -418,19 +418,19 @@ export default function VerifyFlow({ onLogin }) {
               onChange={(e) => setUserUsername(e.target.value)}
               autoComplete="username"
               required
-              className="input-field bg-white/95"
+              className="input-field"
             />
           </div>
           {/* Language selector will go here, dynamically filtered */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 dark:text-gray-200">
+            <label className="text-sm font-medium text-soultalk-medium-gray">
               {t("select_language", { defaultValue: "Preferred language" })}
             </label>
             <select
               value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value)}
               required
-              className="input-field bg-white/95"
+              className="input-field"
             >
               <option value="">{t("select_language")}</option>
               {availableLanguages.map((lang) => (

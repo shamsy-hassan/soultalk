@@ -34,7 +34,9 @@ def init_db():
                 language TEXT NOT NULL,
                 online BOOLEAN NOT NULL,
                 phone TEXT UNIQUE,
-                email TEXT UNIQUE
+                email TEXT UNIQUE,
+                profile_picture_url TEXT,
+                bio TEXT
             )
         ''')
 
@@ -153,6 +155,27 @@ def get_chat_partners(username):
             u.phone,
             u.email,
             u.profile_picture_url,
+            u.bio,
+            (
+                SELECT m2.message
+                FROM messages m2
+                WHERE (
+                    (m2.from_user = ? AND m2.to_user = u.username)
+                    OR (m2.from_user = u.username AND m2.to_user = ?)
+                )
+                ORDER BY m2.timestamp DESC, m2.id DESC
+                LIMIT 1
+            ) AS last_message,
+            (
+                SELECT m2.from_user
+                FROM messages m2
+                WHERE (
+                    (m2.from_user = ? AND m2.to_user = u.username)
+                    OR (m2.from_user = u.username AND m2.to_user = ?)
+                )
+                ORDER BY m2.timestamp DESC, m2.id DESC
+                LIMIT 1
+            ) AS last_message_from,
             MAX(m.timestamp) as last_message_at
         FROM messages m
         JOIN users u
@@ -161,10 +184,10 @@ def get_chat_partners(username):
               ELSE m.from_user
           END
         WHERE m.from_user = ? OR m.to_user = ?
-        GROUP BY u.id, u.username, u.language, u.online, u.phone, u.email, u.profile_picture_url
+        GROUP BY u.id, u.username, u.language, u.online, u.phone, u.email, u.profile_picture_url, u.bio
         ORDER BY last_message_at DESC
         ''',
-        (username, username, username)
+        (username, username, username, username, username, username, username)
     )
     partners = cursor.fetchall()
     conn.close()
@@ -237,6 +260,16 @@ def run_migrations():
             print("Migration for 'profile_picture_url' column successful.")
         except sqlite3.OperationalError as e:
             print(f"Error migrating 'profile_picture_url' column: {e}")
+
+    # Migration for 'bio' column
+    if 'bio' not in columns:
+        print("Applying migration: Adding 'bio' column to 'users' table.")
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN bio TEXT")
+            conn.commit()
+            print("Migration for 'bio' column successful.")
+        except sqlite3.OperationalError as e:
+            print(f"Error migrating 'bio' column: {e}")
 
     # Check if the 'messages' table exists before attempting to migrate it
     try:

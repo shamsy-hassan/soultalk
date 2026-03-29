@@ -73,9 +73,9 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
     <div className="relative" ref={menuRef}>
       <button
         onClick={toggleMenu}
-        className="flex items-center space-x-3 mb-6 p-2.5 rounded-xl bg-soultalk-warm-gray border border-gray-200 w-full text-left cursor-pointer hover:bg-gray-200 transition-colors dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10"
+        className="flex items-center space-x-3 mb-6 p-2.5 rounded-xl bg-soultalk-warm-gray border border-emerald-400/15 w-full text-left cursor-pointer hover:bg-emerald-500/10 transition-colors"
       >
-        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-soultalk-coral to-soultalk-teal flex items-center justify-center text-soultalk-white text-xl font-bold">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-soultalk-coral to-soultalk-teal flex items-center justify-center text-emerald-50 text-xl font-bold">
           <img
             src={currentUserAvatarUrl}
             alt="Profile"
@@ -84,19 +84,19 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
           />
         </div>
         <div className="flex-1">
-          <p className="font-semibold text-soultalk-dark-gray dark:text-gray-100">{user.username}</p>
-          <p className="text-sm text-soultalk-medium-gray flex items-center dark:text-gray-300">
+          <p className="font-semibold text-soultalk-dark-gray">{user.username}</p>
+          <p className="text-sm text-soultalk-medium-gray flex items-center">
             {t('speaking')}: {getLanguageName(user.language)} {getLanguageFlag(user.language)}
           </p>
         </div>
-        {isOpen ? <ChevronUp className="w-5 h-5 text-soultalk-medium-gray dark:text-gray-300" /> : <ChevronDown className="w-5 h-5 text-soultalk-medium-gray dark:text-gray-300" />}
+        {isOpen ? <ChevronUp className="w-5 h-5 text-soultalk-medium-gray" /> : <ChevronDown className="w-5 h-5 text-soultalk-medium-gray" />}
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 mt-2 w-full bg-soultalk-white/98 backdrop-blur-sm rounded-xl shadow-xl z-10 p-2 border border-gray-100 space-y-2 dark:bg-slate-950/80 dark:border-white/10">
+        <div className="absolute left-0 mt-2 w-full bg-soultalk-white/98 backdrop-blur-sm rounded-xl shadow-xl z-10 p-2 border border-emerald-400/15 space-y-2">
           <button
             onClick={handleProfileClick}
-            className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-soultalk-dark-gray hover:bg-soultalk-warm-gray rounded-lg transition-colors dark:text-gray-100 dark:hover:bg-white/5"
+            className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-soultalk-dark-gray hover:bg-emerald-500/10 rounded-lg transition-colors"
           >
             <span className="inline-flex items-center">
               <Settings className="w-4 h-4 mr-2" />
@@ -106,25 +106,25 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
 
           <button
             onClick={() => setShowLanguageOptions((prev) => !prev)}
-            className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-soultalk-dark-gray hover:bg-soultalk-warm-gray rounded-lg transition-colors dark:text-gray-100 dark:hover:bg-white/5"
+            className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-soultalk-dark-gray hover:bg-emerald-500/10 rounded-lg transition-colors"
           >
             <span className="inline-flex items-center">
               <Globe className="w-4 h-4 mr-2" />
               {t('change_language')}
             </span>
-            <span className="text-xs text-soultalk-medium-gray dark:text-gray-300">
+            <span className="text-xs text-soultalk-medium-gray">
               {getLanguageFlag(user.language)} {getLanguageName(user.language)}
             </span>
           </button>
 
           {showLanguageOptions && (
-            <div className="rounded-lg border border-gray-100 overflow-hidden bg-white dark:bg-slate-950/60 dark:border-white/10">
+            <div className="rounded-lg border border-emerald-400/15 overflow-hidden bg-soultalk-warm-gray/60">
               {availableLanguages.map((lang) => (
                 <button
                   key={lang.code}
                   onClick={() => handleLanguageChange(lang.code)}
                   className={`flex items-center w-full px-3 py-2 text-sm ${
-                    user.language === lang.code ? 'bg-soultalk-lavender text-soultalk-white' : 'text-soultalk-dark-gray hover:bg-soultalk-warm-gray dark:text-gray-100 dark:hover:bg-white/5'
+                    user.language === lang.code ? 'bg-soultalk-lavender text-emerald-50' : 'text-soultalk-dark-gray hover:bg-emerald-500/10'
                   } transition-colors`}
                 >
                   {lang.flag || getLanguageFlag(lang.code)} {t(`language_${lang.code}`, { defaultValue: lang.nativeName || lang.name || lang.code })}
@@ -135,7 +135,7 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
 
           <button
             onClick={() => setShowAccountActions((prev) => !prev)}
-            className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-soultalk-medium-gray hover:bg-soultalk-warm-gray rounded-lg transition-colors dark:text-gray-300 dark:hover:bg-white/5"
+            className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-soultalk-medium-gray hover:bg-emerald-500/10 rounded-lg transition-colors"
           >
             <span className="inline-flex items-center">
               <Shield className="w-4 h-4 mr-2" />
@@ -147,7 +147,7 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
           {showAccountActions && (
             <button
               onClick={handleLogout}
-              className="flex items-center w-full px-3 py-2 text-sm text-soultalk-dark-gray hover:bg-soultalk-coral hover:text-soultalk-white rounded-lg transition-colors dark:text-gray-100"
+              className="flex items-center w-full px-3 py-2 text-sm text-soultalk-dark-gray hover:bg-soultalk-coral hover:text-emerald-50 rounded-lg transition-colors"
             >
               <LogOut className="w-4 h-4 mr-2" />
               {t('logout')}

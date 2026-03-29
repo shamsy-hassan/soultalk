@@ -75,7 +75,7 @@ export default function LoadingSplash({ onDone }) {
             phase === 'first' ? 'opacity-100' : 'opacity-0 pointer-events-none',
           ].join(' ')}
         >
-          <div className="st-heartbeat mb-5 rounded-3xl bg-white/75 px-7 py-7 shadow-[0_18px_60px_-40px_rgba(99,102,241,0.38)] backdrop-blur">
+          <div className="st-heartbeat mb-5 rounded-3xl bg-soultalk-warm-gray/70 px-7 py-7 shadow-[0_18px_60px_-40px_rgba(0,0,0,0.55)] backdrop-blur">
             <Heart className="h-12 w-12 text-soultalk-lavender" fill="currentColor" />
           </div>
           <div className="text-center">
@@ -106,7 +106,7 @@ export default function LoadingSplash({ onDone }) {
           ].join(' ')}
         >
           <div className="mb-4 st-love-orbit relative">
-            <div className="st-love-core rounded-3xl bg-white/80 px-8 py-8 shadow-[0_18px_60px_-40px_rgba(99,102,241,0.36)] backdrop-blur">
+            <div className="st-love-core rounded-3xl bg-soultalk-warm-gray/70 px-8 py-8 shadow-[0_18px_60px_-40px_rgba(0,0,0,0.55)] backdrop-blur">
               <Heart className="h-12 w-12 text-soultalk-gradient-end" fill="currentColor" />
             </div>
             <div className="st-orbit st-orbit-a">

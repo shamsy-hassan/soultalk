@@ -268,6 +268,22 @@ def update_profile_picture_by_username(username, profile_picture_url):
     conn.commit()
     conn.close()
 
+def update_bio(phone_number, bio):
+    """Update the bio for an existing user"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET bio = ? WHERE phone = ?", (bio, phone_number))
+    conn.commit()
+    conn.close()
+
+def update_bio_by_username(username, bio):
+    """Update the bio for an existing user using username"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET bio = ? WHERE username = ?", (bio, username))
+    conn.commit()
+    conn.close()
+
 
 def update_language_by_username(username, language):
     """Update a user's preferred language using username."""

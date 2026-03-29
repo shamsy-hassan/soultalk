@@ -27,7 +27,7 @@ const UserAvatar = ({ targetUser, isOnline }) => {
       {/* Soul Connection Badge (for mutual connections) */}
       {Math.random() > 0.5 && ( // Keep Math.random for now as per original code
         <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-soultalk-coral to-soultalk-lavender rounded-full flex items-center justify-center border-2 border-white shadow-sm">
-          <Heart className="w-2.5 h-2.5 text-white fill-current" />
+          <Heart className="w-2.5 h-2.5 text-white fill-current st-white-visible" />
         </div>
       )}
     </div>

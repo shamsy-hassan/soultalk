@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { MessageSquare, ChevronRight, Sparkles } from 'lucide-react';
+import { MessageSquare, ChevronRight, Sparkles, Search, UsersRound, Filter, X } from 'lucide-react';
 import { getChatPartners } from './api';
 import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
 
@@ -10,6 +10,8 @@ const Chats = ({ user, unreadByUser = {} }) => {
   const navigate = useNavigate();
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState('');
+  const [unreadOnly, setUnreadOnly] = useState(false);
   const totalUnread = Object.values(unreadByUser).reduce((sum, value) => sum + (Number(value) || 0), 0);
 
   useEffect(() => {
@@ -51,7 +53,7 @@ const Chats = ({ user, unreadByUser = {} }) => {
         <button
           type="button"
           onClick={() => navigate('/users')}
-          className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end px-4 py-2 text-sm font-semibold text-white shadow-sm hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender dark:focus:ring-offset-[#0f172a]"
+          className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end px-4 py-2 text-sm font-semibold text-white st-white-visible shadow-sm hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender dark:focus:ring-offset-[#0f172a]"
         >
           {t('discover_souls')}
           <ChevronRight className="h-4 w-4" />
@@ -71,6 +73,13 @@ const Chats = ({ user, unreadByUser = {} }) => {
     })
     .map(({ partner }) => partner);
 
+  const visibleChats = sortedChats.filter((partner) => {
+    const unreadCount = unreadByUser[partner.username] || 0;
+    if (unreadOnly && unreadCount <= 0) return false;
+    if (!query.trim()) return true;
+    return partner.username?.toLowerCase().includes(query.trim().toLowerCase());
+  });
+
   return (
     <div className="space-y-4">
       <div className="hero-panel p-5 md:p-6">
@@ -82,17 +91,113 @@ const Chats = ({ user, unreadByUser = {} }) => {
             </p>
           </div>
 
-          <div className="inline-flex items-center gap-2 self-start rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-soultalk-medium-gray shadow-sm ring-1 ring-black/5 backdrop-blur dark:bg-white/5 dark:text-gray-300 dark:ring-white/10">
-            <Sparkles className="h-4 w-4 text-soultalk-lavender" />
-            <span>
-              {t('unread_messages', { defaultValue: 'Unread' })}: {totalUnread}
-            </span>
+          <div className="flex flex-wrap items-center gap-2 self-start">
+            <div className="inline-flex items-center gap-2 rounded-full bg-gray-950/35 px-3 py-1.5 text-xs font-medium text-soultalk-medium-gray shadow-sm ring-1 ring-white/10 backdrop-blur">
+              <Sparkles className="h-4 w-4 text-soultalk-lavender" />
+              <span>
+                {t('unread_messages', { defaultValue: 'Unread' })}: {totalUnread}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/users')}
+              className="inline-flex items-center gap-2 rounded-full bg-soultalk-warm-gray/70 px-3 py-1.5 text-xs font-semibold text-soultalk-dark-gray border border-emerald-400/15 hover:bg-emerald-500/10 transition-colors"
+            >
+              <UsersRound className="h-4 w-4 text-soultalk-lavender" />
+              {t('discover_souls')}
+              <ChevronRight className="h-4 w-4 opacity-70" />
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {sortedChats.map((partner) => {
+      <div className="card-elevated p-4 rounded-2xl space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="md:col-span-2">
+            <label className="block text-sm text-soultalk-dark-gray dark:text-gray-100">
+              {t('search', { defaultValue: 'Search' })}
+              <div className="relative mt-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-soultalk-medium-gray dark:text-gray-400" />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="input-field pl-11 pr-11"
+                  placeholder={t('search_chats_placeholder', { defaultValue: 'Search chats by username…' })}
+                />
+                {query && (
+                  <button
+                    type="button"
+                    onClick={() => setQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-soultalk-warm-gray dark:hover:bg-white/10"
+                    aria-label={t('clear_search', { defaultValue: 'Clear search' })}
+                  >
+                    <X className="h-4 w-4 text-soultalk-medium-gray dark:text-gray-300" />
+                  </button>
+                )}
+              </div>
+            </label>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setUnreadOnly((v) => !v)}
+            className={`text-left p-4 rounded-2xl border transition-colors ${
+              unreadOnly
+                ? 'bg-emerald-500/10 border-emerald-400/25'
+                : 'bg-soultalk-warm-gray border-emerald-400/15 hover:bg-emerald-500/10'
+            }`}
+          >
+            <p className="font-semibold text-soultalk-dark-gray inline-flex items-center gap-2">
+              <Filter className="w-4 h-4 text-soultalk-lavender" />
+              {t('unread_only', { defaultValue: 'Unread only' })}
+            </p>
+            <p className="text-sm text-soultalk-medium-gray mt-1">
+              {t('unread_only_desc', { defaultValue: 'Show chats that need your attention.' })}
+            </p>
+          </button>
+        </div>
+
+        <div className="rounded-xl bg-soultalk-warm-gray/35 border border-emerald-400/15 p-4 text-sm text-soultalk-medium-gray">
+          {t('chats_help', { defaultValue: 'Tip: Unread chats are shown first. The dot shows if a soul is currently online.' })}
+        </div>
+      </div>
+
+      {visibleChats.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 mx-auto mb-4 bg-soultalk-warm-gray rounded-full flex items-center justify-center">
+            <MessageSquare className="w-8 h-8 text-soultalk-medium-gray" />
+          </div>
+          <h4 className="text-lg font-medium text-soultalk-dark-gray mb-2 dark:text-gray-100">
+            {t('no_chats_found', { defaultValue: 'No chats found' })}
+          </h4>
+          <p className="text-soultalk-medium-gray text-sm dark:text-gray-400">
+            {t('try_different_search_term')}
+          </p>
+          <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setQuery('');
+                setUnreadOnly(false);
+              }}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-soultalk-warm-gray px-4 py-2 text-sm font-semibold text-soultalk-dark-gray border border-emerald-400/15 hover:bg-emerald-500/10 transition-colors"
+            >
+              <X className="w-4 h-4" />
+              {t('reset', { defaultValue: 'Reset' })}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/users')}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end px-4 py-2 text-sm font-semibold text-white st-white-visible shadow-sm hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90"
+            >
+              {t('discover_souls')}
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {visibleChats.map((partner) => {
           const unreadCount = unreadByUser[partner.username] || 0;
           const hasUnread = unreadCount > 0;
 
@@ -117,13 +222,13 @@ const Chats = ({ user, unreadByUser = {} }) => {
                 <div className="min-w-0">
                   <p className="font-semibold text-soultalk-dark-gray truncate dark:text-gray-100">{partner.username}</p>
                   <p className={`text-xs truncate ${hasUnread ? 'text-soultalk-coral font-semibold' : 'text-soultalk-medium-gray dark:text-gray-400'}`}>
-                    {partner.last_message_at || ''}
+                    {partner.last_message || ''}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 {hasUnread && (
-                  <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-soultalk-coral text-soultalk-white text-[11px] font-semibold inline-flex items-center justify-center">
+                  <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-soultalk-coral text-soultalk-white st-white-visible text-[11px] font-semibold inline-flex items-center justify-center">
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
@@ -136,7 +241,8 @@ const Chats = ({ user, unreadByUser = {} }) => {
             </div>
           </button>
         )})}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

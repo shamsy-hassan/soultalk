@@ -17,7 +17,7 @@ function Navbar({ user, onMenuClick, isScrolled }) {
   const currentUserAvatarUrl = resolveProfilePictureUrl(user?.profile_picture_url);
 
   return (
-    <header className={`sticky top-0 z-30 bg-white/85 dark:bg-gray-900/85 backdrop-blur-lg border-b border-gray-200/60 dark:border-gray-700/50 transition-all duration-300 ${
+    <header className={`sticky top-0 z-30 bg-soultalk-white/90 backdrop-blur-lg border-b border-emerald-400/15 transition-all duration-300 ${
       isScrolled ? 'shadow-md' : ''
     }`}>
       <div className="px-4 py-3 flex items-center justify-between">
@@ -25,28 +25,28 @@ function Navbar({ user, onMenuClick, isScrolled }) {
           {/* Mobile Menu Button */}
           <button
             onClick={onMenuClick}
-            className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-200 active:scale-95"
+            className="lg:hidden p-2 hover:bg-emerald-500/10 rounded-xl border border-transparent hover:border-emerald-400/20 transition-all duration-200 active:scale-95"
             aria-label="Toggle sidebar"
           >
-            <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+            <Menu className="w-6 h-6 text-soultalk-dark-gray" />
           </button>
 
           {/* Logo - Desktop */}
           <div className="hidden lg:flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-soultalk-coral to-soultalk-teal rounded-xl flex items-center justify-center shadow-lg">
-              <Heart className="w-5 h-5 text-white fill-current" />
+              <Heart className="w-5 h-5 text-white fill-current st-white-visible" />
             </div>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-soultalk-coral to-soultalk-teal bg-clip-text text-transparent">
                 SoulTalk
               </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{t('connect_across_cultures')}</p>
+              <p className="text-xs text-soultalk-medium-gray">{t('connect_across_cultures')}</p>
             </div>
           </div>
 
           {/* Page Title */}
           <div className="hidden md:block">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h2 className="text-lg font-semibold text-soultalk-dark-gray">
               {getPageTitle()}
             </h2>
           </div>
@@ -54,7 +54,7 @@ function Navbar({ user, onMenuClick, isScrolled }) {
 
         {/* User Menu Trigger (Avatar) */}
         <div className="relative group">
-          <button className="flex items-center space-x-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-200">
+          <button className="flex items-center space-x-2 p-1.5 hover:bg-emerald-500/10 rounded-xl border border-transparent hover:border-emerald-400/20 transition-all duration-200">
             <img
               src={currentUserAvatarUrl}
               alt="Profile"

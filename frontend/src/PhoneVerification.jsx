@@ -62,7 +62,7 @@ export default function PhoneVerification({ onCheckPhoneSuccess }) { // Renamed 
       {/* Country Code Selector */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
         <select
-          className="w-full sm:w-auto sm:max-w-[260px] input-field bg-white/95 py-3"
+          className="w-full sm:w-auto sm:max-w-[260px] input-field py-3"
           value={selectedCountryCode}
           onChange={(e) => setSelectedCountryCode(e.target.value)}
           disabled={checking}
@@ -82,7 +82,7 @@ export default function PhoneVerification({ onCheckPhoneSuccess }) { // Renamed 
           disabled={checking}
           inputMode="tel"
           autoComplete="tel"
-          className="w-full min-w-0 flex-grow input-field bg-white/95"
+          className="w-full min-w-0 flex-grow input-field"
         />
       </div>
       
@@ -100,7 +100,7 @@ export default function PhoneVerification({ onCheckPhoneSuccess }) { // Renamed 
             message.toLowerCase().includes("error") ||
             message.toLowerCase().includes("fail")
               ? "text-red-700 border-red-200 bg-red-50 dark:text-red-200 dark:border-red-500/30 dark:bg-red-500/10"
-              : "text-soultalk-dark-gray border-slate-200 bg-slate-50 dark:text-gray-200 dark:border-white/10 dark:bg-white/5"
+              : "text-soultalk-dark-gray border-emerald-400/15 bg-soultalk-warm-gray/60"
           }`}
         >
           {message}

@@ -43,12 +43,23 @@ export const uploadProfilePicture = async (formData) => {
   return { res, data };
 };
 
-export const updateUserProfile = async (identifier, profilePictureUrl) => {
-  if (!profilePictureUrl) {
-    throw new Error('Profile picture URL is required for updating user profile');
+export const updateUserProfile = async (identifier, profilePictureUrlOrUpdates) => {
+  const payload = {};
+
+  if (typeof profilePictureUrlOrUpdates === 'string') {
+    payload.profile_picture_url = profilePictureUrlOrUpdates;
+  } else if (profilePictureUrlOrUpdates && typeof profilePictureUrlOrUpdates === 'object') {
+    if (profilePictureUrlOrUpdates.profilePictureUrl) {
+      payload.profile_picture_url = profilePictureUrlOrUpdates.profilePictureUrl;
+    }
+    if (Object.prototype.hasOwnProperty.call(profilePictureUrlOrUpdates, 'bio')) {
+      payload.bio = profilePictureUrlOrUpdates.bio;
+    }
   }
 
-  const payload = { profile_picture_url: profilePictureUrl };
+  if (!payload.profile_picture_url && !Object.prototype.hasOwnProperty.call(payload, 'bio')) {
+    throw new Error('At least one of profilePictureUrl or bio is required for updating user profile');
+  }
 
   if (typeof identifier === 'string') {
     payload.phone = identifier;

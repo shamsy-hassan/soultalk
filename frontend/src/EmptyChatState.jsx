@@ -15,11 +15,11 @@ const EmptyChatState = () => {
         <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-soultalk-coral/40 to-soultalk-teal/40 animate-pulse-slow"></div>
         {/* Inner soul 1 */}
         <div className="absolute w-24 h-24 rounded-full bg-soultalk-coral top-4 left-4 animate-float-one shadow-lg flex items-center justify-center">
-            <Heart className="w-12 h-12 text-soultalk-white" />
+            <Heart className="w-12 h-12 text-soultalk-white st-white-visible" />
         </div>
         {/* Inner soul 2 */}
         <div className="absolute w-24 h-24 rounded-full bg-soultalk-teal bottom-4 right-4 animate-float-two shadow-lg flex items-center justify-center">
-            <Heart className="w-12 h-12 text-soultalk-white" />
+            <Heart className="w-12 h-12 text-soultalk-white st-white-visible" />
         </div>
         {/* Connecting string art */}
         <div className="absolute inset-0 flex items-center justify-center">

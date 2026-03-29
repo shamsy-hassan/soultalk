@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MessageSquare, UserPlus, Heart, X, SlidersHorizontal, ChevronRight } from 'lucide-react'; // Import Heart icon
+import { Search, MessageSquare, UserPlus, Heart, X, SlidersHorizontal, ChevronRight, Sparkles, ShieldCheck, Filter } from 'lucide-react'; // Import Heart icon
 import { useTranslation } from 'react-i18next';
 import { getLanguageName, getLanguageFlag } from './i18n';
 import EmptyChatState from './EmptyChatState'; // Import EmptyChatState
@@ -20,6 +20,8 @@ const Users = ({ user, socket }) => {
   const [selectedLanguageFilter, setSelectedLanguageFilter] = useState(null);
   const [languageFilters, setLanguageFilters] = useState([]);
   const [showLanguageFilters, setShowLanguageFilters] = useState(false);
+  const [onlineOnly, setOnlineOnly] = useState(false);
+  const [hasBioOnly, setHasBioOnly] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -74,10 +76,14 @@ const Users = ({ user, socket }) => {
     }
   };
 
-  const filteredUsers = users.filter(u =>
-    u.username.toLowerCase().includes(search.toLowerCase()) && 
-    (!selectedLanguageFilter || u.language === selectedLanguageFilter)
-  );
+  const filteredUsers = users.filter(u => {
+    const matchesSearch = u.username.toLowerCase().includes(search.toLowerCase());
+    const matchesLanguage = !selectedLanguageFilter || u.language === selectedLanguageFilter;
+    const matchesOnline = !onlineOnly || Boolean(u.online);
+    const hasBio = Boolean((u.bio || u.about || '').trim());
+    const matchesBio = !hasBioOnly || hasBio;
+    return matchesSearch && matchesLanguage && matchesOnline && matchesBio;
+  });
   const resultsCount = filteredUsers.length;
   const activeLanguageLabel = selectedLanguageFilter
     ? `${getLanguageFlag(selectedLanguageFilter)} ${getLanguageName(selectedLanguageFilter)}`
@@ -120,16 +126,29 @@ const Users = ({ user, socket }) => {
           {t('connect_with_people_description')}
             </p>
           </div>
-          <div className="inline-flex items-center gap-2 self-start rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-soultalk-medium-gray shadow-sm ring-1 ring-black/5 backdrop-blur dark:bg-white/5 dark:text-gray-300 dark:ring-white/10">
+          <div className="inline-flex items-center gap-2 self-start rounded-full bg-gray-950/35 px-3 py-1.5 text-xs font-medium text-soultalk-medium-gray shadow-sm ring-1 ring-white/10 backdrop-blur">
             <SlidersHorizontal className="h-4 w-4 text-soultalk-lavender" />
             <span>{activeLanguageLabel}</span>
-            <span className="text-soultalk-medium-gray/60 dark:text-gray-400">•</span>
+            <span className="text-soultalk-medium-gray/60">•</span>
             <span>{t('results', { defaultValue: 'Results' })}: {resultsCount}</span>
           </div>
         </div>
       </div>
 
-      <div className="card-elevated p-3 rounded-2xl mb-4">
+      <div className="card-elevated p-4 rounded-2xl mb-4 space-y-3">
+        <div className="rounded-xl bg-soultalk-warm-gray/35 border border-emerald-400/15 p-4 text-sm text-soultalk-medium-gray">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-2 font-semibold text-soultalk-dark-gray">
+              <Sparkles className="w-4 h-4 text-soultalk-lavender" />
+              {t('how_it_works', { defaultValue: 'How it works' })}
+            </span>
+            <span className="text-soultalk-medium-gray/60">•</span>
+            <span>{t('users_tip_1', { defaultValue: 'Tap a soul to open chat.' })}</span>
+            <span className="text-soultalk-medium-gray/60">•</span>
+            <span>{t('users_tip_2', { defaultValue: 'Messages translate automatically in both directions.' })}</span>
+          </div>
+        </div>
+
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-soultalk-medium-gray w-5 h-5 dark:text-gray-400" />
           <input
@@ -137,7 +156,7 @@ const Users = ({ user, socket }) => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('search_souls_placeholder')}
-            className="input-field pl-11 pr-11 bg-white/95 shadow-sm border-gray-200 focus:shadow-md dark:bg-white/5 dark:border-white/10 dark:text-gray-100 dark:placeholder:text-gray-400"
+            className="input-field pl-11 pr-11 shadow-sm focus:shadow-md"
           />
           {search && (
             <button
@@ -149,6 +168,44 @@ const Users = ({ user, socket }) => {
               <X className="h-4 w-4 text-soultalk-medium-gray dark:text-gray-300" />
             </button>
           )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => setOnlineOnly((v) => !v)}
+            className={`text-left p-4 rounded-2xl border transition-colors ${
+              onlineOnly
+                ? 'bg-emerald-500/10 border-emerald-400/25'
+                : 'bg-soultalk-warm-gray border-emerald-400/15 hover:bg-emerald-500/10'
+            }`}
+          >
+            <p className="font-semibold text-soultalk-dark-gray inline-flex items-center gap-2">
+              <Filter className="w-4 h-4 text-soultalk-lavender" />
+              {t('online_only', { defaultValue: 'Online only' })}
+            </p>
+            <p className="text-sm text-soultalk-medium-gray mt-1">
+              {t('online_only_desc', { defaultValue: 'Show souls currently active.' })}
+            </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setHasBioOnly((v) => !v)}
+            className={`text-left p-4 rounded-2xl border transition-colors ${
+              hasBioOnly
+                ? 'bg-emerald-500/10 border-emerald-400/25'
+                : 'bg-soultalk-warm-gray border-emerald-400/15 hover:bg-emerald-500/10'
+            }`}
+          >
+            <p className="font-semibold text-soultalk-dark-gray inline-flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-soultalk-lavender" />
+              {t('has_bio_only', { defaultValue: 'With bio' })}
+            </p>
+            <p className="text-sm text-soultalk-medium-gray mt-1">
+              {t('has_bio_only_desc', { defaultValue: 'Find souls who added an intro.' })}
+            </p>
+          </button>
         </div>
       </div>
 
@@ -166,7 +223,7 @@ const Users = ({ user, socket }) => {
           }}
           className={`inline-flex items-center gap-2 px-3 py-2 text-sm rounded-full transition-colors border ${
               !selectedLanguageFilter
-                ? 'bg-soultalk-lavender text-soultalk-white border-soultalk-lavender'
+                ? 'bg-soultalk-lavender text-soultalk-white st-white-visible border-soultalk-lavender'
                 : 'bg-soultalk-warm-gray text-soultalk-medium-gray hover:bg-gray-200 border-gray-200 dark:bg-white/5 dark:text-gray-300 dark:border-white/10 dark:hover:bg-white/10'
             }`}
           type="button"
@@ -175,17 +232,19 @@ const Users = ({ user, socket }) => {
           {t('all_languages')}
         </button>
 
-          {(selectedLanguageFilter || search) && (
+          {(selectedLanguageFilter || search || onlineOnly || hasBioOnly) && (
             <button
               type="button"
               onClick={() => {
                 setSearch('');
                 setSelectedLanguageFilter(null);
+                setOnlineOnly(false);
+                setHasBioOnly(false);
               }}
-              className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-full border border-gray-200 bg-white hover:bg-soultalk-warm-gray transition-colors dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-full border border-gray-800/60 bg-gray-950/35 hover:bg-soultalk-warm-gray transition-colors"
             >
-              <X className="h-4 w-4 text-soultalk-medium-gray dark:text-gray-300" />
-              <span className="text-soultalk-dark-gray dark:text-gray-100">
+              <X className="h-4 w-4 text-soultalk-medium-gray" />
+              <span className="text-soultalk-dark-gray">
                 {t('reset', { defaultValue: 'Reset' })}
               </span>
             </button>
@@ -201,7 +260,7 @@ const Users = ({ user, socket }) => {
                 type="button"
                 className={`whitespace-nowrap px-3 py-2 text-sm rounded-full transition-colors border ${
                   selectedLanguageFilter === lang.code
-                    ? 'bg-soultalk-lavender text-soultalk-white border-soultalk-lavender'
+                    ? 'bg-soultalk-lavender text-soultalk-white st-white-visible border-soultalk-lavender'
                     : 'bg-soultalk-warm-gray text-soultalk-medium-gray hover:bg-gray-200 border-gray-200 dark:bg-white/5 dark:text-gray-300 dark:border-white/10 dark:hover:bg-white/10'
                 }`}
               >
@@ -293,7 +352,7 @@ const Users = ({ user, socket }) => {
                     e.stopPropagation();
                     startChat(targetUser);
                   }}
-                  className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white font-semibold py-2.5 px-4 hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 transition-all duration-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender dark:focus:ring-offset-[#0f172a]"
+                  className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white st-white-visible font-semibold py-2.5 px-4 hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 transition-all duration-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soultalk-lavender dark:focus:ring-offset-[#0f172a]"
                 >
                   <MessageSquare className="w-4 h-4" />
                   {t('connect')}
@@ -315,6 +374,20 @@ const Users = ({ user, socket }) => {
           <p className="text-soultalk-medium-gray text-sm dark:text-gray-400">
             {search ? t('try_different_search_term') : t('no_other_souls_available')}
           </p>
+          <button
+            type="button"
+            onClick={() => {
+              setSearch('');
+              setSelectedLanguageFilter(null);
+              setOnlineOnly(false);
+              setHasBioOnly(false);
+              setShowLanguageFilters(false);
+            }}
+            className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-soultalk-warm-gray px-4 py-2 text-sm font-semibold text-soultalk-dark-gray border border-emerald-400/15 hover:bg-emerald-500/10 transition-colors"
+          >
+            <X className="w-4 h-4" />
+            {t('reset', { defaultValue: 'Reset' })}
+          </button>
         </div>
       )}
     </div>

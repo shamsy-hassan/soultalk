@@ -86,7 +86,7 @@ export default function OtpVerification({ phone, email, username, language, onVe
         inputMode="numeric"
         pattern="[0-9]*"
         autoComplete="one-time-code"
-        className="w-full input-field bg-white/95 text-center tracking-[0.35em] font-semibold"
+        className="w-full input-field text-center tracking-[0.35em] font-semibold"
         disabled={loading}
       />
       <button 
@@ -100,8 +100,8 @@ export default function OtpVerification({ phone, email, username, language, onVe
         <p
           className={`mt-3 break-words text-sm sm:text-base rounded-xl border px-4 py-3 ${
             messageIsError
-              ? "text-red-700 border-red-200 bg-red-50 dark:text-red-200 dark:border-red-500/30 dark:bg-red-500/10"
-              : "text-emerald-700 border-emerald-200 bg-emerald-50 dark:text-emerald-200 dark:border-emerald-500/30 dark:bg-emerald-500/10"
+              ? "text-red-200 border-red-500/30 bg-red-500/10"
+              : "text-soultalk-dark-gray border-emerald-400/15 bg-soultalk-warm-gray/60"
           }`}
         >
           {message}

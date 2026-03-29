@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename # Add secure_filename
 from otp_phone_manager import (
     generate_otp, verify_otp, get_user_by_phone, get_user_by_username,
     register_number, send_otp_email, update_profile_picture, update_profile_picture_by_username,
-    update_language_by_username
+    update_language_by_username, update_bio, update_bio_by_username
 )
 from languages_catalog import list_languages
 
@@ -103,7 +103,8 @@ def verify():
                 "username": user["username"],
                 "language": user["language"],
                 "phone": user["phone"],
-                "profile_picture_url": user["profile_picture_url"]
+                "profile_picture_url": user["profile_picture_url"],
+                "bio": user["bio"]
             }
         }), 200
         
@@ -143,9 +144,17 @@ def update_user_profile():
     phone = data.get("phone")
     username = data.get("username")
     profile_picture_url = data.get("profile_picture_url")
+    bio = data.get("bio", None)
+    if bio is None:
+        bio = data.get("about", None)
 
-    if not profile_picture_url:
-        return jsonify({"error": "Profile picture URL is required"}), 400
+    if isinstance(bio, str):
+        bio = bio.strip()
+        if bio == "":
+            bio = None
+
+    if not profile_picture_url and bio is None:
+        return jsonify({"error": "At least one of profile_picture_url or bio is required"}), 400
     if not phone and not username:
         return jsonify({"error": "Phone number or username is required"}), 400
     
@@ -153,10 +162,16 @@ def update_user_profile():
     # For simplicity, we'll assume the phone number is sufficient for this update
     
     if phone:
-        update_profile_picture(phone, profile_picture_url)
+        if profile_picture_url:
+            update_profile_picture(phone, profile_picture_url)
+        if bio is not None:
+            update_bio(phone, bio)
         user = get_user_by_phone(phone)
     else:
-        update_profile_picture_by_username(username, profile_picture_url)
+        if profile_picture_url:
+            update_profile_picture_by_username(username, profile_picture_url)
+        if bio is not None:
+            update_bio_by_username(username, bio)
         user = get_user_by_username(username)
 
     return jsonify({
@@ -165,7 +180,8 @@ def update_user_profile():
             "username": user["username"],
             "language": user["language"],
             "phone": user["phone"],
-            "profile_picture_url": user["profile_picture_url"]
+            "profile_picture_url": user["profile_picture_url"],
+            "bio": user.get("bio")
         }
     }), 200
 
@@ -202,6 +218,7 @@ def update_user_language():
             "username": user["username"],
             "language": user["language"],
             "phone": user["phone"],
-            "profile_picture_url": user["profile_picture_url"]
+            "profile_picture_url": user["profile_picture_url"],
+            "bio": user.get("bio")
         }
     }), 200
