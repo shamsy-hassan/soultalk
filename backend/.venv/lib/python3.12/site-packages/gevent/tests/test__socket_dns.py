@@ -18,7 +18,6 @@ import gevent.socket as gevent_socket
 import gevent.testing as greentest
 
 from gevent.testing import util
-from gevent.testing.six import xrange
 from gevent.testing import flaky
 from gevent.testing.skipping import skipWithoutExternalNetwork
 
@@ -32,7 +31,6 @@ if getattr(resolver, 'pool', None) is not None:
 from gevent.testing.sysinfo import RESOLVER_NOT_SYSTEM
 from gevent.testing.sysinfo import RESOLVER_DNSPYTHON
 from gevent.testing.sysinfo import RESOLVER_ARES
-from gevent.testing.sysinfo import PY2
 from gevent.testing.sysinfo import PYPY
 
 import gevent.testing.timing
@@ -506,9 +504,6 @@ class TestHostname(TestCase):
 
     def _normalize_result_getnameinfo(self, result):
         result = TestCase._normalize_result_getnameinfo(self, result)
-        if PY2:
-            # Not sure why we only saw this on Python 2
-            result = self.__normalize_name(result)
         return result
 
 add(
@@ -536,15 +531,6 @@ class TestLocalhost(TestCase):
         return super(TestLocalhost, self)._normalize_result_getaddrinfo(result)
 
     NORMALIZE_GHBA_IGNORE_ALIAS = True
-    if greentest.RUNNING_ON_TRAVIS and greentest.PY2 and RESOLVER_NOT_SYSTEM:
-        def _normalize_result_gethostbyaddr(self, result):
-            # Beginning in November 2017 after an upgrade to Travis,
-            # we started seeing ares return ::1 for localhost, but
-            # the system resolver is still returning 127.0.0.1 under Python 2
-            result = super(TestLocalhost, self)._normalize_result_gethostbyaddr(result)
-            if isinstance(result, tuple):
-                result = (result[0], result[1], ['127.0.0.1'])
-            return result
 
 
 add(
@@ -760,7 +746,6 @@ class Test_getaddrinfo(TestCase):
         return self._test_getaddrinfo('google.com', 'http', socket.AF_INET6)
 
 
-    @greentest.skipIf(PY2, "Enums only on Python 3.4+")
     def test_enums(self):
         # https://github.com/gevent/gevent/issues/1310
 
@@ -775,19 +760,7 @@ class Test_getaddrinfo(TestCase):
         self.assertIs(af, socket.AF_INET)
 
 class TestInternational(TestCase):
-    if PY2:
-        # We expect these to raise UnicodeEncodeError, which is a
-        # subclass of ValueError
-        REAL_ERRORS = set(TestCase.REAL_ERRORS) - {ValueError,}
-
-        if RESOLVER_ARES:
-
-            def test_russian_getaddrinfo_http(self):
-                # And somehow, test_russion_getaddrinfo_http (``getaddrinfo(name, 'http')``)
-                # manages to work with recent versions of Python 2, but our preemptive encoding
-                # to ASCII causes it to fail with the c-ares resolver; but only that one test out of
-                # all of them.
-                self.skipTest("ares fails to encode.")
+    pass
 
 
 # dns python can actually resolve these: it uses
@@ -805,8 +778,6 @@ class TestInternational(TestCase):
 # ('system:', "herror(2, 'Host name lookup failure')",
 #  'gevent:', "herror(1, 'Unknown host')")
 add(TestInternational, u'президент.рф', 'russian',
-    skip=(PY2 and RESOLVER_DNSPYTHON),
-    skip_reason="dnspython can actually resolve these",
     require_equal_errors=False)
 add(TestInternational, u'президент.рф'.encode('idna'), 'idna',
     require_equal_errors=False)
@@ -822,7 +793,7 @@ class TestInterrupted_gethostbyname(gevent.testing.timing.AbstractGenericWaitTes
 
     def wait(self, timeout):
         with gevent.Timeout(timeout, False):
-            for index in xrange(1000000):
+            for index in range(1000000):
                 try:
                     gevent_socket.gethostbyname('www.x%s.com' % index)
                 except socket.error:

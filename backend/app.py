@@ -28,10 +28,10 @@ def create_app():
     reset_all_user_statuses()
 
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'soultalk-secret-key-2024')
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'HeyBuddy-secret-key-2024')
     cors_origins_env = os.getenv(
         'CORS_ORIGINS',
-        'https://soultalk-liard.vercel.app,http://localhost:5173'
+        'https://HeyBuddy-liard.vercel.app,http://localhost:5173'
     )
     cors_origins = [origin.strip() for origin in cors_origins_env.split(',') if origin.strip()]
 
@@ -56,7 +56,7 @@ def create_app():
 
     @app.route('/')
     def root():
-        return jsonify({"message": "SoulTalk backend is running"}), 200
+        return jsonify({"message": "HeyBuddy backend is running"}), 200
 
     @app.route('/healthz')
     def healthz():
@@ -74,7 +74,7 @@ def create_app():
     return app, socketio
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Run the SoulTalk backend server.")
+    parser = argparse.ArgumentParser(description="Run the HeyBuddy backend server.")
     parser.add_argument('--host', default=os.getenv('HOST', '0.0.0.0'))
     parser.add_argument('--port', type=int, default=int(os.getenv('PORT', '5000')))
     debug_default = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--log-file',
-        default=os.getenv('SOULTALK_LOG_FILE', '/tmp/soultalk-backend.log'),
+        default=os.getenv('HEYBUDDY_LOG_FILE', '/tmp/HeyBuddy-backend.log'),
         help='Log file path when using --detach.',
     )
     parser.add_argument(
@@ -99,10 +99,10 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
 
-    if args.detach and os.getenv('SOULTALK_DETACHED_CHILD') != '1':
+    if args.detach and os.getenv('HEYBUDDY_DETACHED_CHILD') != '1':
         env = os.environ.copy()
         env['PYTHONUNBUFFERED'] = '1'
-        env['SOULTALK_DETACHED_CHILD'] = '1'
+        env['HEYBUDDY_DETACHED_CHILD'] = '1'
         env['SOCKET_LOG_CONNECTIONS'] = 'true' if args.log_connections else 'false'
 
         with open(args.log_file, 'ab', buffering=0) as log_fp:
@@ -125,7 +125,7 @@ if __name__ == '__main__':
                 start_new_session=True,
             )
 
-        print(f"Started SoulTalk backend in background (pid={proc.pid}).")
+        print(f"Started HeyBuddy backend in background (pid={proc.pid}).")
         print(f"Tailing logs: tail -f {args.log_file}")
         raise SystemExit(0)
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Send, ArrowLeft, Clock, Sparkles, Image as ImageIcon, Smile, Phone, Heart, Check, CheckCheck, Ban, ShieldCheck, MessageSquareText } from 'lucide-react'; // Added Phone icon for call, removed Mic
+import { Send, ArrowLeft, Clock, Sparkles, Image as ImageIcon, Check, CheckCheck, MessageSquareText, Pencil, Trash2, X, MoreVertical } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getLanguageName, getLanguageFlag } from './i18n';
 import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
@@ -16,14 +16,20 @@ const Chat = ({ user, socket }) => {
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [targetUser, setTargetUser] = useState(null);
+  const [editingMessageId, setEditingMessageId] = useState(null);
+  const [openMenuForMessageId, setOpenMenuForMessageId] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const editingMessageIdRef = useRef(null);
+  const openMenuForMessageIdRef = useRef(null);
+  const openMenuContainerRef = useRef(null);
+  const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const quickPrompts = [
-    t('chat_prompt_1', { defaultValue: 'Hi! Where are you from?' }),
-    t('chat_prompt_2', { defaultValue: 'What language do you prefer?' }),
-    t('chat_prompt_3', { defaultValue: 'Tell me about your day.' }),
-    t('chat_prompt_4', { defaultValue: 'Teach me a phrase in your language.' }),
+    t('chat_prompt_1'),
+    t('chat_prompt_2'),
+    t('chat_prompt_3'),
+    t('chat_prompt_4'),
   ];
 
   useEffect(() => {
@@ -33,6 +39,8 @@ const Chat = ({ user, socket }) => {
     socket.on('message_sent', handleMessageSent);
     socket.on('message_delivered', handleMessageDelivered);
     socket.on('message_read', handleMessageRead);
+    socket.on('message_deleted', handleMessageDeleted);
+    socket.on('message_edited', handleMessageEdited);
     socket.on('user_typing', handleUserTyping);
     socket.on('error', handleError);
     socket.on('message_history', handleMessageHistory); 
@@ -44,6 +52,8 @@ const Chat = ({ user, socket }) => {
       socket.off('message_sent');
       socket.off('message_delivered');
       socket.off('message_read');
+      socket.off('message_deleted');
+      socket.off('message_edited');
       socket.off('user_typing');
       socket.off('error');
       socket.off('message_history'); 
@@ -84,21 +94,65 @@ const Chat = ({ user, socket }) => {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    editingMessageIdRef.current = editingMessageId;
+  }, [editingMessageId]);
+
+  useEffect(() => {
+    openMenuForMessageIdRef.current = openMenuForMessageId;
+  }, [openMenuForMessageId]);
+
+  useEffect(() => {
+    const handlePointerDown = (event) => {
+      const openId = openMenuForMessageIdRef.current;
+      if (!openId) return;
+      const container = openMenuContainerRef.current;
+      if (!container) {
+        setOpenMenuForMessageId(null);
+        return;
+      }
+      if (!container.contains(event.target)) {
+        setOpenMenuForMessageId(null);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setOpenMenuForMessageId(null);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown, true);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown, true);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleReceiveMessage = (data) => {
+    const createdAtMs = parseTimestampToMs(data.timestamp) ?? Date.now();
     const message = {
-      id: data.messageId || `${Date.now()}-${data.from}-${user.username}`,
+      id: data.id || data.messageId || `${Date.now()}-${data.from}-${user.username}`,
+      clientId: data.messageId,
+      serverId: data.id,
       from: data.from,
       to: user.username,
-      originalText: data.originalMessage || data.message,
-      translatedText: data.message,
+      messageType: data.messageType || 'text',
+      mediaUrl: data.mediaUrl,
+      originalText: data.originalMessage || data.message || '',
+      translatedText: data.message || '',
       fromLanguage: targetUser?.language || 'en',
       toLanguage: user.language,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isReceived: true
+      timestamp: new Date(createdAtMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      createdAtMs,
+      editedAt: data.editedAt,
+      deleted: Boolean(data.deleted),
+      isReceived: true,
     };
     setMessages(prev => [...prev, message]);
 
@@ -112,29 +166,44 @@ const Chat = ({ user, socket }) => {
 
   const handleMessageSent = (data) => {
     setMessages((prev) => {
-      const alreadyExists = prev.some((msg) => msg.id === data.messageId);
+      const alreadyExists = prev.some((msg) => msg.clientId && msg.clientId === data.messageId);
       if (alreadyExists) {
         return prev.map((msg) =>
-          msg.id === data.messageId
+          msg.clientId === data.messageId
             ? {
                 ...msg,
+                id: data.id ?? msg.id,
+                serverId: data.id ?? msg.serverId,
+                messageType: data.messageType || msg.messageType || 'text',
+                mediaUrl: data.mediaUrl ?? msg.mediaUrl,
                 translatedText: data.translatedMessage || msg.translatedText,
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                status: 'sent'
+                editedAt: data.editedAt ?? msg.editedAt,
+                deleted: Boolean(data.deleted ?? msg.deleted),
+                createdAtMs: parseTimestampToMs(data.timestamp) ?? msg.createdAtMs ?? Date.now(),
+                timestamp: new Date(parseTimestampToMs(data.timestamp) ?? msg.createdAtMs ?? Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                status: 'sent',
               }
             : msg
         );
       }
 
+      const createdAtMs = parseTimestampToMs(data.timestamp) ?? Date.now();
       const message = {
-        id: data.messageId || `${Date.now()}-${user.username}-${data.to}`,
+        id: data.id || data.messageId || `${Date.now()}-${user.username}-${data.to}`,
+        clientId: data.messageId,
+        serverId: data.id,
         from: user.username,
         to: data.to,
-        originalText: data.message,
-        translatedText: data.translatedMessage,
+        messageType: data.messageType || 'text',
+        mediaUrl: data.mediaUrl,
+        originalText: data.message || '',
+        translatedText: data.translatedMessage || '',
         fromLanguage: user.language,
         toLanguage: targetUser?.language || 'en',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date(createdAtMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        createdAtMs,
+        editedAt: data.editedAt,
+        deleted: Boolean(data.deleted),
         isSent: true,
         status: 'sent'
       };
@@ -146,7 +215,7 @@ const Chat = ({ user, socket }) => {
     if (data.to !== username) return;
     setMessages((prev) =>
       prev.map((msg) =>
-        msg.id === data.messageId
+        (msg.clientId && msg.clientId === data.messageId)
           ? { ...msg, status: 'delivered' }
           : msg
       )
@@ -174,19 +243,59 @@ const Chat = ({ user, socket }) => {
     console.error('Chat.jsx: Socket error:', data.message);
   };
 
+  const handleMessageDeleted = (data) => {
+    const deletedId = data?.id;
+    if (!deletedId) return;
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === deletedId || msg.serverId === deletedId
+          ? { ...msg, deleted: true, originalText: '', translatedText: '', mediaUrl: null }
+          : msg
+      )
+    );
+    if (editingMessageIdRef.current === deletedId) {
+      setEditingMessageId(null);
+      setNewMessage('');
+    }
+  };
+
+  const handleMessageEdited = (data) => {
+    const editedId = data?.id;
+    if (!editedId) return;
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.id !== editedId && msg.serverId !== editedId) return msg;
+        const isMine = msg.from === user.username;
+        return {
+          ...msg,
+          originalText: data.message ?? msg.originalText,
+          translatedText: isMine ? (msg.translatedText ?? '') : (data.translatedMessage ?? msg.translatedText),
+          editedAt: data.editedAt ?? msg.editedAt ?? true,
+        };
+      })
+    );
+  };
+
   const handleMessageHistory = (data) => {
     const history = data.messages.map(msg => {
       const isSent = msg.from_user === user.username;
       const isReceived = msg.to_user === user.username;
+      const createdAtMs = parseTimestampToMs(msg.timestamp) ?? Date.now();
       return {
         id: msg.id,
+        serverId: msg.id,
         from: msg.from_user,
         to: msg.to_user,
-        originalText: msg.message,
-        translatedText: msg.translated_message,
+        messageType: msg.message_type || 'text',
+        mediaUrl: msg.media_url,
+        originalText: msg.message || '',
+        translatedText: msg.translated_message || '',
         fromLanguage: isSent ? user.language : targetUser?.language || 'en',
         toLanguage: isReceived ? user.language : targetUser?.language || 'en',
-        timestamp: new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date(createdAtMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        createdAtMs,
+        editedAt: msg.edited_at,
+        deleted: Boolean(msg.deleted),
         isSent: isSent,
         isReceived: isReceived,
         status: isSent ? 'delivered' : undefined,
@@ -195,19 +304,49 @@ const Chat = ({ user, socket }) => {
     setMessages(history);
   };
 
+  const parseTimestampToMs = (value) => {
+    if (!value) return null;
+    if (typeof value === 'number') return value;
+    if (value instanceof Date) return value.getTime();
+    const raw = String(value);
+    const direct = Date.parse(raw);
+    if (!Number.isNaN(direct)) return direct;
+    // SQLite timestamp: "YYYY-MM-DD HH:MM:SS"
+    const sqlite = Date.parse(raw.replace(' ', 'T') + 'Z');
+    if (!Number.isNaN(sqlite)) return sqlite;
+    return null;
+  };
+
   const handleSend = () => {
     if (!newMessage.trim() || !socket) return;
+    if (editingMessageId) {
+      socket.emit('edit_message', {
+        from: user.username,
+        to: username,
+        messageId: editingMessageId,
+        message: newMessage,
+      });
+      setEditingMessageId(null);
+      setNewMessage('');
+      setOpenMenuForMessageId(null);
+      return;
+    }
     const messageId = `${Date.now()}-${user.username}-${username}-${Math.random().toString(36).slice(2, 8)}`;
+    const createdAtMs = Date.now();
 
     const optimisticMessage = {
       id: messageId,
+      clientId: messageId,
       from: user.username,
       to: username,
+      messageType: 'text',
+      mediaUrl: null,
       originalText: newMessage,
       translatedText: newMessage,
       fromLanguage: user.language,
       toLanguage: targetUser?.language || 'en',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: new Date(createdAtMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      createdAtMs,
       isSent: true,
       status: 'sent'
     };
@@ -218,12 +357,92 @@ const Chat = ({ user, socket }) => {
       from: user.username,
       to: username,
       message: newMessage,
-      messageId
+      messageId,
+      messageType: 'text',
     });
 
     setTyping(false);
     socket.emit('typing', { from: user.username, to: username, is_typing: false });
     setNewMessage('');
+  };
+
+  const handleSendImage = async (file) => {
+    if (!file || !socket) return;
+    const messageId = `${Date.now()}-${user.username}-${username}-${Math.random().toString(36).slice(2, 8)}`;
+    const createdAtMs = Date.now();
+
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('Failed to read image'));
+      reader.readAsDataURL(file);
+    });
+
+    if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/')) {
+      return;
+    }
+
+    const optimisticMessage = {
+      id: messageId,
+      clientId: messageId,
+      from: user.username,
+      to: username,
+      messageType: 'image',
+      mediaUrl: dataUrl,
+      originalText: '',
+      translatedText: '',
+      fromLanguage: user.language,
+      toLanguage: targetUser?.language || 'en',
+      timestamp: new Date(createdAtMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      createdAtMs,
+      isSent: true,
+      status: 'sent',
+    };
+
+    setMessages((prev) => [...prev, optimisticMessage]);
+
+    socket.emit('send_message', {
+      from: user.username,
+      to: username,
+      message: '',
+      messageId,
+      messageType: 'image',
+      mediaUrl: dataUrl,
+    });
+  };
+
+  const startEditMessage = (msg) => {
+    const id = msg.serverId || msg.id;
+    if (!id || typeof id !== 'number' || msg.deleted) return;
+    if ((msg.messageType || 'text') !== 'text') return;
+    setOpenMenuForMessageId(null);
+    setEditingMessageId(id);
+    setNewMessage(msg.originalText || '');
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
+
+  const cancelEdit = () => {
+    setEditingMessageId(null);
+    setNewMessage('');
+    setOpenMenuForMessageId(null);
+  };
+
+  const deleteMessage = (msg) => {
+    const id = msg.serverId || msg.id;
+    if (!id || typeof id !== 'number' || msg.deleted || !socket) return;
+    const ok = window.confirm(t('delete_message_confirm', { defaultValue: 'Delete this message?' }));
+    if (!ok) return;
+    socket.emit('delete_message', { from: user.username, messageId: id });
+  };
+
+  const canEditMessage = (msg) => {
+    if (!msg || msg.deleted) return false;
+    if (msg.from !== user.username) return false;
+    if (typeof (msg.serverId || msg.id) !== 'number') return false;
+    if ((msg.messageType || 'text') !== 'text') return false;
+    const createdAtMs = msg.createdAtMs;
+    if (!createdAtMs) return false;
+    return Date.now() - createdAtMs <= 60_000;
   };
 
   const applyPrompt = (text) => {
@@ -260,15 +479,15 @@ const Chat = ({ user, socket }) => {
   const targetUserProfileImageUrl = resolveProfilePictureUrl(targetUser.profile_picture_url);
 
   return (
-    <div className="flex-1 flex flex-col rounded-2xl overflow-hidden border border-emerald-400/15 shadow-[0_20px_48px_-36px_rgba(0,0,0,0.65)] bg-gradient-to-b from-soultalk-white to-soultalk-warm-gray/30">
+    <div className="flex min-h-[calc(100dvh-7rem)] flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white">
       {/* Chat Header */}
-      <div className="sticky top-0 z-20 bg-soultalk-white/95 backdrop-blur-sm p-3 sm:p-4 border-b border-emerald-400/15 flex items-center justify-between shadow-sm safe-pt safe-px">
+      <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white p-3 safe-pt safe-px sm:p-4">
         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
           <button
             onClick={() => navigate(-1)} // Changed to navigate to previous page
             className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors md:hidden" // Show back button only on mobile
           >
-            <ArrowLeft className="w-5 h-5 text-soultalk-dark-gray" />
+            <ArrowLeft className="w-5 h-5 text-heybuddy-dark-gray" />
           </button>
           <div className="relative">
             <img
@@ -277,63 +496,34 @@ const Chat = ({ user, socket }) => {
               className="w-10 h-10 rounded-full object-cover ring-1 ring-emerald-400/15"
               onError={(e) => { e.currentTarget.src = DEFAULT_PROFILE_IMAGE_URL; }}
             />
-            {/* Soul Status Indicator for target user */}
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 text-soultalk-coral animate-pulse" title="Connected soul">
-                <Heart className="w-full h-full fill-current" />
-            </div>
+            <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-base sm:text-lg font-bold text-soultalk-dark-gray truncate">{username}</h2>
-            <div className="flex items-center space-x-1 text-xs text-soultalk-medium-gray truncate">
+            <h2 className="text-base sm:text-lg font-bold text-heybuddy-dark-gray truncate">{username}</h2>
+            <div className="flex items-center space-x-1 text-xs text-heybuddy-medium-gray truncate">
               {t('speaking')}: {getLanguageName(targetUser.language)} {getLanguageFlag(targetUser.language)}
             </div>
           </div>
         </div>
-        <div className="flex items-center space-x-3">
-          <div className="relative group">
-            <button
-              type="button"
-              aria-disabled="true"
-              onClick={(e) => e.preventDefault()}
-              className="relative p-2 rounded-lg transition-colors hover:bg-emerald-500/10 cursor-not-allowed"
-            >
-              <Phone className="w-5 h-5 text-soultalk-dark-gray opacity-80" /> {/* Call Button */}
-              <span className="pointer-events-none absolute -top-1 -right-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-soultalk-warm-gray shadow-sm ring-1 ring-emerald-400/15 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Ban className="h-3 w-3 text-soultalk-coral" />
-              </span>
-            </button>
-            <div className="pointer-events-none absolute right-0 top-full mt-2 w-max max-w-[240px] rounded-xl bg-soultalk-warm-gray/95 px-3 py-2 text-xs text-soultalk-dark-gray shadow-lg ring-1 ring-emerald-400/15 backdrop-blur opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-soultalk-coral/10 ring-1 ring-soultalk-coral/20">
-                  <Ban className="h-3.5 w-3.5 text-soultalk-coral" />
-                </span>
-                <span className="font-medium">Stay tuned… coming soon</span>
-              </div>
-            </div>
-          </div>
-          {/* <button className="p-2 hover:bg-soultalk-warm-gray rounded-lg transition-colors">
-            <Video className="w-5 h-5 text-soultalk-dark-gray" />
-          </button> */}
-        </div>
       </div>
 
       {/* Language Bridge Indicator (Full for desktop, compact for mobile) */}
-      <div className="bg-soultalk-warm-gray/70 p-3 text-center border-b border-emerald-400/15 hidden md:block"> {/* Hidden on mobile */}
-        <div className="inline-flex items-center space-x-2 text-sm text-soultalk-medium-gray bg-soultalk-warm-gray rounded-full px-4 py-2 shadow-sm max-w-full overflow-x-auto subtle-scrollbar ring-1 ring-emerald-400/15">
+      <div className="border-b border-slate-100 bg-slate-50 px-3 py-2 text-center hidden sm:block">
+        <div className="inline-flex items-center space-x-2 text-xs text-heybuddy-medium-gray">
           <span>{getLanguageFlag(user.language)} {t('language_you_speak', { language: getLanguageName(user.language) })}</span>
-          <span className="text-soultalk-medium-gray">—</span>
-          <Sparkles className="w-4 h-4 text-soultalk-lavender" /> {/* Small bridge icon */}
-          <span className="text-soultalk-medium-gray">—</span>
+          <span className="text-heybuddy-medium-gray">—</span>
+          <Sparkles className="w-4 h-4 text-heybuddy-lavender" /> {/* Small bridge icon */}
+          <span className="text-heybuddy-medium-gray">—</span>
           <span>{getLanguageFlag(targetUser.language)} {t('language_they_speak', { language: getLanguageName(targetUser.language) })}</span>
         </div>
-        <p className="text-xs text-soultalk-medium-gray mt-1">{t('messages_translate_automatically_explanation')}</p>
+        <p className="text-xs text-heybuddy-medium-gray mt-1">{t('messages_translate_automatically_explanation')}</p>
       </div>
 
       {/* Compact Language Bridge Indicator for Mobile */}
-      <div className="bg-soultalk-warm-gray/70 p-2 text-center border-b border-emerald-400/15 md:hidden"> {/* Visible on mobile */}
-        <div className="inline-flex items-center space-x-1 text-xs text-soultalk-medium-gray bg-soultalk-warm-gray rounded-full px-3 py-1 shadow-sm ring-1 ring-emerald-400/15">
+      <div className="border-b border-slate-100 bg-slate-50 p-2 text-center sm:hidden">
+        <div className="inline-flex items-center space-x-1 text-xs text-heybuddy-medium-gray">
           <span>{getLanguageFlag(user.language)}</span>
-          <Sparkles className="w-3 h-3 text-soultalk-lavender" />
+          <Sparkles className="w-3 h-3 text-heybuddy-lavender" />
           <span>{getLanguageFlag(targetUser.language)}</span>
         </div>
       </div>
@@ -342,18 +532,13 @@ const Chat = ({ user, socket }) => {
       <div className="flex-1 overflow-y-auto subtle-scrollbar p-3 sm:p-4 md:p-5 bg-transparent">
         {messages.length === 0 && (
           <div className="max-w-2xl mx-auto py-6">
-            <div className="hero-panel p-5 md:p-6">
-              <div className="pointer-events-none absolute -right-10 -top-14 h-32 w-32 rounded-full bg-soultalk-lavender/20 blur-2xl" />
-              <div className="pointer-events-none absolute -left-10 -bottom-14 h-32 w-32 rounded-full bg-soultalk-coral/15 blur-2xl" />
-              <div className="relative space-y-4">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 md:p-6">
+              <div className="space-y-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-soultalk-dark-gray inline-flex items-center gap-2">
-                      <MessageSquareText className="w-4 h-4 text-soultalk-lavender" />
-                      {t('chat_starter_title', { defaultValue: 'Start the conversation' })}
-                    </p>
-                    <p className="text-sm text-soultalk-medium-gray mt-1">
-                      {t('chat_starter_body', { defaultValue: 'Pick a prompt or type in your language. SoulTalk will translate for both of you.' })}
+                      <p className="text-sm font-semibold text-heybuddy-dark-gray inline-flex items-center gap-2">
+                        <MessageSquareText className="w-4 h-4 text-heybuddy-lavender" />
+                      {t('chat_starter_title')}
                     </p>
                   </div>
                 </div>
@@ -364,22 +549,13 @@ const Chat = ({ user, socket }) => {
                       key={prompt}
                       type="button"
                       onClick={() => applyPrompt(prompt)}
-                      className="px-3 py-2 rounded-full bg-soultalk-warm-gray text-soultalk-dark-gray border border-emerald-400/15 hover:bg-emerald-500/10 transition-colors text-sm"
+                      className="px-3 py-2 rounded-full bg-heybuddy-warm-gray text-heybuddy-dark-gray border border-emerald-400/15 hover:bg-emerald-500/10 transition-colors text-sm"
                     >
                       {prompt}
                     </button>
                   ))}
                 </div>
 
-                <div className="rounded-xl bg-soultalk-warm-gray/35 border border-emerald-400/15 p-4 text-sm text-soultalk-medium-gray">
-                  <p className="font-semibold text-soultalk-dark-gray inline-flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-soultalk-lavender" />
-                    {t('chat_safety_title', { defaultValue: 'Safety reminder' })}
-                  </p>
-                  <p className="mt-1">
-                    {t('chat_safety_body', { defaultValue: 'Don’t share OTP codes, passwords, or sensitive personal info. If something feels wrong, stop and report it via Settings → Feedback.' })}
-                  </p>
-                </div>
               </div>
             </div>
           </div>
@@ -387,31 +563,108 @@ const Chat = ({ user, socket }) => {
 
         {messages.map((msg) => (
           <div
-            key={msg.id}
+            key={msg.clientId || msg.id}
             className={`mb-4 flex ${msg.from === user.username ? 'justify-end' : 'justify-start'}`}
           >
             <div className={`group relative max-w-[86%] sm:max-w-[78%] lg:max-w-[56%] p-3.5 sm:p-4 shadow-sm ring-1 rounded-2xl ${
               msg.from === user.username
-                ? 'bg-gradient-to-tr from-soultalk-gradient-start to-soultalk-gradient-end text-emerald-50 rounded-br-none ring-emerald-400/20'
-                : 'bg-soultalk-warm-gray text-soultalk-dark-gray rounded-bl-none ring-emerald-400/15'
+                ? 'bg-heybuddy-coral text-white rounded-br-none'
+                : 'bg-slate-100 text-heybuddy-dark-gray rounded-bl-none'
             }`}>
-              {/* Original message (faint) for received messages if translated */}
-              {(msg.from !== user.username && msg.originalText !== msg.translatedText) && (
-                <p className="text-xs text-soultalk-medium-gray mb-1">{msg.originalText}</p>
+              {msg.from === user.username && !msg.deleted && typeof (msg.serverId || msg.id) === 'number' && (
+                <div
+                  ref={openMenuForMessageId === (msg.serverId || msg.id) ? openMenuContainerRef : null}
+                  className="absolute -top-3 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const id = msg.serverId || msg.id;
+                      setOpenMenuForMessageId((prev) => (prev === id ? null : id));
+                    }}
+                    className="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-heybuddy-white/90 text-heybuddy-dark-gray ring-1 ring-emerald-400/15 shadow-sm hover:bg-heybuddy-white"
+                    aria-haspopup="menu"
+                    aria-expanded={openMenuForMessageId === (msg.serverId || msg.id)}
+                    aria-label={t('message_actions', { defaultValue: 'Message actions' })}
+                    title={t('message_actions', { defaultValue: 'Message actions' })}
+                  >
+                    <MoreVertical className="w-4 h-4" />
+                  </button>
+
+                  {openMenuForMessageId === (msg.serverId || msg.id) && (
+                    <div
+                      role="menu"
+                      className="absolute right-0 mt-2 w-44 rounded-xl bg-heybuddy-warm-gray/95 text-heybuddy-dark-gray shadow-xl ring-1 ring-emerald-400/15 backdrop-blur p-1 z-30"
+                    >
+                      {canEditMessage(msg) && (
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            startEditMessage(msg);
+                            setOpenMenuForMessageId(null);
+                          }}
+                          className="w-full px-3 py-2 rounded-lg text-sm text-left hover:bg-emerald-500/10 transition-colors inline-flex items-center gap-2"
+                        >
+                          <Pencil className="w-4 h-4" />
+                          {t('edit_message', { defaultValue: 'Edit message' })}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          deleteMessage(msg);
+                          setOpenMenuForMessageId(null);
+                        }}
+                        className="w-full px-3 py-2 rounded-lg text-sm text-left hover:bg-emerald-500/10 transition-colors inline-flex items-center gap-2 text-heybuddy-coral"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        {t('delete_message', { defaultValue: 'Delete message' })}
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
-              {/* Main translated message */}
-              <p className="text-sm">{msg.from === user.username ? msg.originalText : msg.translatedText}</p>
+
+              {msg.deleted ? (
+                <p className="text-sm italic opacity-75">
+                  {t('message_deleted', { defaultValue: 'Message deleted' })}
+                </p>
+              ) : (msg.messageType === 'image' && msg.mediaUrl) ? (
+                <img
+                  src={msg.mediaUrl}
+                  alt={t('image_message_alt', { defaultValue: 'Sent image' })}
+                  className="max-h-[320px] w-auto rounded-xl object-contain ring-1 ring-black/5 bg-heybuddy-white/40"
+                  loading="lazy"
+                />
+              ) : (
+                <>
+                  {/* Original message (faint) for received messages if translated */}
+                  {(msg.from !== user.username && msg.originalText && msg.originalText !== msg.translatedText) && (
+                    <p className="text-xs text-heybuddy-medium-gray mb-1">{msg.originalText}</p>
+                  )}
+                  <p className="text-sm">{msg.from === user.username ? msg.originalText : msg.translatedText}</p>
+                </>
+              )}
               
               {/* Soul Translate Badge on hover (using group-hover for parent message div) */}
-              <div className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-soultalk-white/70 px-2 py-1 rounded-full flex items-center space-x-1 ring-1 ring-emerald-400/15 backdrop-blur">
-                <Sparkles className="w-3 h-3 text-soultalk-lavender" />
-                <span className="text-soultalk-medium-gray">SoulTalk</span>
-              </div>
+              {!msg.deleted && msg.messageType === 'text' && (
+                <div className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-heybuddy-white/70 px-2 py-1 rounded-full flex items-center space-x-1 ring-1 ring-emerald-400/15 backdrop-blur">
+                  <Sparkles className="w-3 h-3 text-heybuddy-lavender" />
+                    <span className="text-heybuddy-medium-gray">{t('HeyBuddy_title')}</span>
+                </div>
+              )}
 
               {/* Timestamp and Read Receipt */}
-              <div className={`text-xs mt-2 flex items-center ${msg.from === user.username ? 'text-emerald-50/75 justify-end' : 'text-soultalk-medium-gray justify-start'}`}>
+              <div className={`text-xs mt-2 flex items-center ${msg.from === user.username ? 'text-emerald-50/75 justify-end' : 'text-heybuddy-medium-gray justify-start'}`}>
                 <Clock className="w-3 h-3 mr-1" />
                 <span>{msg.timestamp}</span>
+                {msg.editedAt && !msg.deleted && msg.messageType === 'text' && (
+                  <span className="ml-2 opacity-80">
+                    • {t('edited_label', { defaultValue: 'edited' })}
+                  </span>
+                )}
                 {msg.from === user.username && (
                   <span className="ml-1 inline-flex items-center">
                     {msg.status === 'read' && <CheckCheck className="w-3.5 h-3.5 text-emerald-100" />}
@@ -426,12 +679,12 @@ const Chat = ({ user, socket }) => {
         
         {isTyping && (
           <div className="mb-4 flex justify-start">
-            <div className="inline-block bg-soultalk-warm-gray text-soultalk-dark-gray rounded-2xl rounded-bl-none p-3 ring-1 ring-emerald-400/15">
+            <div className="inline-block bg-heybuddy-warm-gray text-heybuddy-dark-gray rounded-2xl rounded-bl-none p-3 ring-1 ring-emerald-400/15">
               <div className="typing-indicator">
                 <div className="typing-dot"></div>
                 <div className="typing-dot" style={{ animationDelay: '0.2s' }}></div>
                 <div className="typing-dot" style={{ animationDelay: '0.4s' }}></div>
-                <span className="text-sm text-soultalk-medium-gray ml-2">{username} {t('is_typing')}</span>
+                <span className="text-sm text-heybuddy-medium-gray ml-2">{username} {t('is_typing')}</span>
               </div>
             </div>
           </div>
@@ -441,22 +694,49 @@ const Chat = ({ user, socket }) => {
       </div>
 
       {/* Input Area */}
-      <div className="sticky bottom-0 z-10 bg-soultalk-white/95 backdrop-blur-sm border-t border-emerald-400/15 p-3 sm:p-4 safe-pb safe-px"> {/* Added sticky bottom-0 */}
-        {/* Soul Translator Bar above input */}
-        <div className="mb-3 p-2 bg-soultalk-warm-gray rounded-lg flex items-center justify-center space-x-2 text-sm text-soultalk-medium-gray hidden md:flex ring-1 ring-emerald-400/15"> {/* Hidden on mobile */}
-          <span>{t('you')}: {getLanguageFlag(user.language)} {getLanguageName(user.language)}</span>
-          <Sparkles className="w-4 h-4 text-soultalk-lavender" />
-          <span>{t('them')}: {getLanguageFlag(targetUser.language)} {getLanguageName(targetUser.language)}</span>
-        </div>
+      <div className="sticky bottom-0 z-10 border-t border-slate-200 bg-white p-3 safe-pb safe-px sm:p-4">
+
+        {editingMessageId && (
+          <div className="mb-3 flex items-center justify-between gap-2 rounded-xl bg-emerald-500/10 border border-emerald-400/15 px-3 py-2 text-xs text-heybuddy-dark-gray">
+            <span className="font-medium">{t('editing_message', { defaultValue: 'Editing message' })}</span>
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="inline-flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-emerald-500/10 transition-colors"
+            >
+              <X className="w-4 h-4" />
+              {t('cancel')}
+            </button>
+          </div>
+        )}
 
         <div className="flex items-end gap-2 sm:gap-3">
           <div className="flex-1">
             <div className="flex flex-wrap gap-2 mb-2">
-              <button type="button" className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors" aria-disabled="true" onClick={(e) => e.preventDefault()}>
-                <ImageIcon className="w-5 h-5 text-soultalk-medium-gray" />
-              </button>
-              <button type="button" className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors" aria-disabled="true" onClick={(e) => e.preventDefault()}>
-                <Smile className="w-5 h-5 text-soultalk-medium-gray" />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = '';
+                  if (!file) return;
+                  try {
+                    await handleSendImage(file);
+                  } catch (error) {
+                    console.error('Failed to send image:', error);
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+                aria-label={t('send_image', { defaultValue: 'Send image' })}
+                title={t('send_image', { defaultValue: 'Send image' })}
+              >
+                <ImageIcon className="w-5 h-5 text-heybuddy-medium-gray" />
               </button>
             </div>
             <div className="relative">
@@ -469,26 +749,33 @@ const Chat = ({ user, socket }) => {
                 }}
                 onKeyPress={handleKeyPress}
                 placeholder={t('type_your_message_in', { language: getLanguageName(user.language) })}
-                className="input-field w-full shadow-sm"
-                rows="2"
+                className="input-field w-full resize-none"
+                rows="1"
                 maxLength={2000}
               />
             </div>
-            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-soultalk-medium-gray">
-              <span>{t('press_enter_to_send')} • {t('shift_enter_for_new_line')}</span>
-              <span>{t('feedback_char_count', { defaultValue: 'Characters' })}: {newMessage.length}/2000</span>
-            </div>
-          </div>
+	            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-heybuddy-medium-gray">
+	              <span>{t('press_enter_to_send')} • {t('shift_enter_for_new_line')}</span>
+	              <span>
+	                {t('feedback_char_count')}:{' '}
+	                {t('character_count', {
+	                  count: newMessage.length,
+	                  max: 2000,
+	                  defaultValue: '{{count}}/{{max}}',
+	                })}
+	              </span>
+	            </div>
+	          </div>
           
           <button
             onClick={handleSend}
             disabled={!newMessage.trim()}
-            aria-label={t('send_message', { defaultValue: 'Send message' })}
+            aria-label={t('send_message')}
             className={`p-3 sm:p-4 rounded-xl flex items-center justify-center shrink-0 ${
               newMessage.trim()
-                ? 'bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-emerald-50 hover:opacity-90'
-                : 'bg-soultalk-warm-gray text-soultalk-medium-gray'
-            } transition-all duration-300 transform hover:scale-105 disabled:opacity-60 disabled:hover:scale-100`}
+                ? 'bg-heybuddy-coral text-white hover:bg-heybuddy-gradient-end'
+                : 'bg-slate-100 text-heybuddy-medium-gray'
+            } transition-colors disabled:opacity-60`}
           >
             <Send className="w-5 h-5" />
           </button>

@@ -1,5 +1,5 @@
 {
-  "name": "soultalk",
+  "name": "HeyBuddy",
   "version": "1.0.0",
   "description": "This is a web application that allows users to chat with each other.",
   "main": "index.js",
@@ -8,15 +8,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shamsy-hassan/soultalk.git"
+    "url": "git+https://github.com/shamsy-hassan/HeyBuddy.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/shamsy-hassan/soultalk/issues"
+    "url": "https://github.com/shamsy-hassan/HeyBuddy/issues"
   },
-  "homepage": "https://github.com/shamsy-hassan/soultalk#readme",
+  "homepage": "https://github.com/shamsy-hassan/HeyBuddy#readme",
   "dependencies": {
     "@hotosm/iso-countries-languages": "^1.1.2"
   },

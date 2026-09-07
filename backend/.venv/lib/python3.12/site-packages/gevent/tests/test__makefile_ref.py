@@ -5,7 +5,6 @@ import socket
 import ssl
 import threading
 import errno
-import weakref
 
 
 import gevent.testing as greentest
@@ -17,10 +16,8 @@ dirname = os.path.dirname(os.path.abspath(__file__))
 CERTFILE = os.path.join(dirname, '2_7_keycert.pem')
 pid = os.getpid()
 
-PY3 = greentest.PY3
 PYPY = greentest.PYPY
 CPYTHON = not PYPY
-PY2 = not PY3
 fd_types = int
 
 WIN = greentest.WIN
@@ -111,10 +108,7 @@ class Test(greentest.TestCase):
         else:
             # Under Python3, the socket module returns -1 for a fileno
             # of a closed socket; under Py2 it raises
-            if PY3:
-                self.assertEqual(sock.fileno(), -1)
-            else:
-                self.assert_raises_EBADF(sock.fileno)
+            self.assertEqual(sock.fileno(), -1)
             self.assert_raises_EBADF(sock.getsockname)
             self.assert_raises_EBADF(sock.accept)
         if rest:
@@ -156,11 +150,8 @@ class TestSocket(Test):
             # Under python 2, this closes socket wrapper object but not the file descriptor;
             # under python 3, both stay open
             s.close()
-            if PY3:
-                self.assert_open(s, fileno)
-            else:
-                self.assert_closed(s)
-                self.assert_open(fileno)
+            self.assert_open(s, fileno)
+
             f.close()
             self.assert_closed(s)
             self.assert_closed(fileno)
@@ -217,11 +208,8 @@ class TestSocket(Test):
             client_socket.close()
             # Under python 2, this closes socket wrapper object but not the file descriptor;
             # under python 3, both stay open
-            if PY3:
-                self.assert_open(client_socket, fileno)
-            else:
-                self.assert_closed(client_socket)
-                self.assert_open(fileno)
+            self.assert_open(client_socket, fileno)
+
             f.close()
             self.assert_closed(client_socket, fileno)
 
@@ -258,7 +246,10 @@ class TestSSL(Test):
         try:
             # Note: We get ResourceWarning about 'x'
             # on Python 3 if we don't join the spawned thread
-            x = ssl.SSLContext().wrap_socket(connector)
+            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            x = ctx.wrap_socket(connector)
             # Wait to be fully accepted. We could otherwise raise ahead
             # of the server and close ourself before it's ready to read.
             accepted_event.wait()
@@ -283,7 +274,10 @@ class TestSSL(Test):
         with Closing() as closer:
             s = closer(self.make_open_socket())
             fileno = s.fileno()
-            s = closer(ssl.SSLContext().wrap_socket(s))
+            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            s = closer(ctx.wrap_socket(s))
             fileno = s.fileno()
             self.assert_open(s, fileno)
             s.close()
@@ -292,7 +286,7 @@ class TestSSL(Test):
     def test_makefile1(self):
         with Closing() as closer:
             raw_s = closer(self.make_open_socket())
-            s = closer(ssl.SSLContext().wrap_socket(raw_s))
+            s = closer(ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER).wrap_socket(raw_s))
 
             fileno = s.fileno()
             self.assert_open(s, fileno)
@@ -309,7 +303,7 @@ class TestSSL(Test):
             s = closer(self.make_open_socket())
             fileno = s.fileno()
 
-            s = closer(ssl.SSLContext().wrap_socket(s))
+            s = closer(ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER).wrap_socket(s))
             fileno = s.fileno()
             self.assert_open(s, fileno)
             f = closer(s.makefile())
@@ -321,7 +315,13 @@ class TestSSL(Test):
             self.assert_closed(s, fileno)
 
     def _wrap_socket(self, sock, *, keyfile, certfile, server_side=False):
-        context = ssl.SSLContext()
+        context = ssl.SSLContext(
+            ssl.PROTOCOL_TLS_SERVER
+            if server_side
+            else ssl.PROTOCOL_TLS_CLIENT
+        )
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
         context.load_cert_chain(certfile=certfile, keyfile=keyfile)
         return context.wrap_socket(sock, server_side=server_side)
 
@@ -398,7 +398,8 @@ class TestSSL(Test):
         raw_listener = tcp_listener(backlog=1)
         fileno = raw_listener.fileno()
         port = raw_listener.getsockname()[1]
-        listener = self._wrap_socket(raw_listener, keyfile=CERTFILE, certfile=CERTFILE)
+        listener = self._wrap_socket(raw_listener, keyfile=CERTFILE, certfile=CERTFILE,
+                                     server_side=True)
 
         connector = socket.socket()
         t = self._make_ssl_connect_task(connector, port)
@@ -418,14 +419,18 @@ class TestSSL(Test):
     def test_serverssl_makefile2(self):
         raw_listener = tcp_listener(backlog=1)
         port = raw_listener.getsockname()[1]
-        listener = self._wrap_socket(raw_listener, keyfile=CERTFILE, certfile=CERTFILE)
+        listener = self._wrap_socket(raw_listener, keyfile=CERTFILE, certfile=CERTFILE,
+                                     server_side=True)
 
         accepted_event = threading.Event()
         read_event = threading.Event()
         def connect(connector=socket.socket()):
             try:
                 connector.connect((DEFAULT_CONNECT, port))
-                s = ssl.SSLContext().wrap_socket(connector)
+                ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+                ctx.check_hostname = False
+                ctx.verify_mode = ssl.CERT_NONE
+                s = ctx.wrap_socket(connector)
                 accepted_event.wait()
                 s.sendall(b'test_serverssl_makefile2')
                 s.shutdown(socket.SHUT_RDWR)
@@ -481,23 +486,13 @@ class Closing(object):
             return o[0]
         return self
 
-    if PY2 and CPYTHON:
-        # This implementation depends or refcounting
-        # for things to close. Eww.
-        def closing(self, o):
-            self._objects.append(weakref.ref(o))
-            return o
-        def objects(self):
-            return [r() for r in self._objects if r() is not None]
+    def objects(self):
+        # PyPy returns an object without __len__...
+        return list(reversed(self._objects))
 
-    else:
-        def objects(self):
-            # PyPy returns an object without __len__...
-            return list(reversed(self._objects))
-
-        def closing(self, o):
-            self._objects.append(o)
-            return o
+    def closing(self, o):
+        self._objects.append(o)
+        return o
 
     __call__ = closing
 

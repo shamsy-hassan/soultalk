@@ -8,7 +8,7 @@ import datetime
 import uuid
 from werkzeug.utils import secure_filename # Add secure_filename
 from otp_phone_manager import (
-    generate_otp, verify_otp, get_user_by_phone, get_user_by_username,
+    generate_otp, verify_otp, get_user_by_phone, get_user_by_email, get_user_by_username,
     register_number, send_otp_email, update_profile_picture, update_profile_picture_by_username,
     update_language_by_username, update_bio, update_bio_by_username
 )
@@ -23,14 +23,14 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@bp.route("/check-phone", methods=["POST"])
-def check_phone():
+@bp.route("/check-email", methods=["POST"])
+def check_email():
     data = request.get_json()
-    phone = data.get("phone")
-    if not phone:
-        return jsonify({"error": "Phone number required"}), 400
+    email = (data.get("email") or "").strip().lower()
+    if not email:
+        return jsonify({"error": "Email address required"}), 400
     
-    user = get_user_by_phone(phone)
+    user = get_user_by_email(email)
     if user:
         user_data = dict(user)
         return jsonify({
@@ -44,20 +44,12 @@ def check_phone():
 @bp.route("/request-otp", methods=["POST"])
 def request_otp():
     data = request.get_json()
-    phone = data.get("phone")
-    email = data.get("email")
+    email = (data.get("email") or "").strip().lower()
 
-    if not phone:
-        return jsonify({"error": "Phone number required"}), 400
-
-    # If email is not provided, check if the user is registered
     if not email:
-        user = get_user_by_phone(phone)
-        if user:
-            user_data = dict(user)
-            email = user_data.get("email")
+        return jsonify({"error": "Email address required"}), 400
 
-    otp = generate_otp(phone)
+    otp = generate_otp(email)
     
     if email:
         sent, error_reason = send_otp_email(email, otp)
@@ -68,26 +60,27 @@ def request_otp():
             }), 503
         return jsonify({"message": f"OTP sent to {email} successfully"}), 200
     else:
-        print(f"OTP for {phone}: {otp}")
-        return jsonify({"message": "OTP printed to console (no email provided)"}), 200
+        return jsonify({"error": "Email delivery is not configured"}), 503
 
 @bp.route("/verify-otp", methods=["POST"])
 def verify():
     data = request.get_json()
-    phone = data.get("phone")
+    email = (data.get("email") or "").strip().lower()
     otp = data.get("otp")
     username = data.get("username")
     language = data.get("language")
-    email = data.get("email")
     profile_picture_url = data.get("profile_picture_url") # Get profile_picture_url
 
-    if verify_otp(phone, otp):
-        user = get_user_by_phone(phone)
+    if not email or not otp:
+        return jsonify({"error": "Email address and OTP are required"}), 400
+
+    if verify_otp(email, otp):
+        user = get_user_by_email(email)
         if not user:
             if not all([username, language, email]):
                 return jsonify({"error": "Username, language, and email are required for new users"}), 400
-            register_number(phone, username, language, email, profile_picture_url) # Pass profile_picture_url
-            user = get_user_by_phone(phone)
+            register_number(None, username, language, email, profile_picture_url)
+            user = get_user_by_email(email)
 
         # Generate JWT
         token = jwt.encode({
@@ -97,7 +90,7 @@ def verify():
         }, current_app.config['SECRET_KEY'])
 
         return jsonify({
-            "message": "Phone verified successfully",
+            "message": "Email verified successfully",
             "token": token,
             "user": {
                 "username": user["username"],

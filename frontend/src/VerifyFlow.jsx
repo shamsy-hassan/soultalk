@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { countryCodes } from './countryCodes';
 import ProfileSetup from "./ProfileSetup"; // Import ProfileSetup
 import { getLanguages } from "./api";
-import i18n, { resolveUiLanguage } from "./i18n";
+import i18n, { resolveUiLanguage, getLanguageName } from "./i18n";
 import { BACKEND_BASE_URL } from "./config";
 
 const maskEmail = (email) => {
@@ -158,12 +158,15 @@ export default function VerifyFlow({ onLogin }) {
               method: "POST",
               body: formData, // No Content-Type header needed; browser sets it for FormData
           });
-          const uploadData = await uploadRes.json();
-
-          if (!uploadRes.ok) {
-              setMessage(uploadData.error || "Failed to upload profile picture.");
-              return;
-          }
+	          const uploadData = await uploadRes.json();
+	
+	          if (!uploadRes.ok) {
+	              setMessage(
+	                  uploadData.error ||
+	                    t("failed_to_upload_profile_picture", { defaultValue: "Failed to upload profile picture." })
+	                );
+	              return;
+	          }
 
           const permanentProfilePictureUrl = uploadData.profile_picture_url;
 
@@ -176,12 +179,15 @@ export default function VerifyFlow({ onLogin }) {
                   profile_picture_url: permanentProfilePictureUrl,
               }),
           });
-          const updateData = await updateRes.json();
-
-          if (!updateRes.ok) {
-              setMessage(updateData.error || "Failed to save profile picture URL.");
-              return;
-          }
+	          const updateData = await updateRes.json();
+	
+	          if (!updateRes.ok) {
+	              setMessage(
+	                  updateData.error ||
+	                    t("failed_to_save_profile_picture_url", { defaultValue: "Failed to save profile picture URL." })
+	                );
+	              return;
+	          }
 
           setProfilePicture(permanentProfilePictureUrl); // Store the permanent URL
           setVerifiedUser(prevUser => ({
@@ -191,10 +197,14 @@ export default function VerifyFlow({ onLogin }) {
           setMessage(updateData.message);
           setStep("done");
 
-      } catch (err) {
-          setMessage("Error during profile picture upload or update.");
-      }
-  };
+	      } catch (err) {
+	          setMessage(
+	            t("error_uploading_or_updating_profile_picture", {
+	              defaultValue: "Error during profile picture upload or update.",
+	            })
+	          );
+	      }
+	  };
 
   const handleStartChatting = () => {
     if (verifiedUser) {
@@ -268,11 +278,11 @@ export default function VerifyFlow({ onLogin }) {
   })();
 
   const steps = [
-    { id: "phone", label: t("step_phone", { defaultValue: "Phone" }) },
-    { id: "details", label: t("step_details", { defaultValue: "Details" }) },
-    { id: "otp", label: t("step_otp", { defaultValue: "Code" }) },
-    { id: "profile", label: t("step_profile", { defaultValue: "Photo" }) },
-    { id: "done", label: t("step_done", { defaultValue: "Done" }) },
+    { id: "phone", label: t("step_phone") },
+    { id: "details", label: t("step_details") },
+    { id: "otp", label: t("step_otp") },
+    { id: "profile", label: t("step_profile") },
+    { id: "done", label: t("step_done") },
   ];
 
   const messageLower = (message || "").toLowerCase();
@@ -292,10 +302,10 @@ export default function VerifyFlow({ onLogin }) {
               state === "complete"
                 ? "bg-emerald-500"
                 : state === "current"
-                  ? "bg-soultalk-lavender"
+                  ? "bg-heybuddy-lavender"
                   : "bg-emerald-400/30";
             const textClass =
-              state === "current" ? "text-soultalk-dark-gray" : "text-soultalk-medium-gray";
+              state === "current" ? "text-heybuddy-dark-gray" : "text-heybuddy-medium-gray";
             return (
               <div key={s.id} className="flex items-center">
                 <div className={`h-2.5 w-2.5 rounded-full ${dotClass}`} />
@@ -326,7 +336,7 @@ export default function VerifyFlow({ onLogin }) {
           className={`text-center break-words text-sm sm:text-base rounded-xl border px-4 py-3 ${
             messageIsError
               ? "text-red-200 border-red-500/30 bg-red-500/10"
-              : "text-soultalk-dark-gray border-emerald-400/15 bg-soultalk-warm-gray/60"
+              : "text-heybuddy-dark-gray border-emerald-400/15 bg-heybuddy-warm-gray/60"
           }`}
         >
           {message}
@@ -340,21 +350,19 @@ export default function VerifyFlow({ onLogin }) {
       {step === "confirm_registered" && (
         <div className="text-center space-y-4">
           <div>
-            <h2 className="text-xl font-semibold text-soultalk-dark-gray">
+            <h2 className="text-xl font-semibold text-heybuddy-dark-gray">
               {t("number_registered_title")}
             </h2>
-            <p className="mt-2 text-sm text-soultalk-medium-gray">
-              {t("number_registered_subtitle", {
-                defaultValue: "Continue with the account linked to this phone number.",
-              })}
+            <p className="mt-2 text-sm text-heybuddy-medium-gray">
+              {t("number_registered_subtitle")}
             </p>
           </div>
 
-          <div className="rounded-xl border border-emerald-400/15 bg-soultalk-warm-gray/60 px-4 py-3 text-left">
-            <div className="text-xs font-medium text-soultalk-medium-gray">
-              {t("account_found", { defaultValue: "Account found" })}
+          <div className="rounded-xl border border-emerald-400/15 bg-heybuddy-warm-gray/60 px-4 py-3 text-left">
+            <div className="text-xs font-medium text-heybuddy-medium-gray">
+              {t("account_found")}
             </div>
-            <div className="mt-1 text-sm font-semibold text-soultalk-dark-gray break-words">
+            <div className="mt-1 text-sm font-semibold text-heybuddy-dark-gray break-words">
               {t("number_registered_message", {
                 username: maskName(existingUsername),
                 email: maskEmail(existingEmail),
@@ -388,16 +396,14 @@ export default function VerifyFlow({ onLogin }) {
           className="space-y-4"
         >
           <div>
-            <h2 className="text-xl font-semibold text-soultalk-dark-gray">{t("enter_your_details")}</h2>
-            <p className="mt-1 text-sm text-soultalk-medium-gray">
-              {t("details_help", {
-                defaultValue: "We use your email to deliver a one-time code. No passwords.",
-              })}
+            <h2 className="text-xl font-semibold text-heybuddy-dark-gray">{t("enter_your_details")}</h2>
+            <p className="mt-1 text-sm text-heybuddy-medium-gray">
+              {t("details_help")}
             </p>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-soultalk-medium-gray">{t("email", { defaultValue: "Email" })}</label>
+            <label className="text-sm font-medium text-heybuddy-medium-gray">{t("email")}</label>
             <input
               type="email"
               placeholder={t("email_for_otp")}
@@ -410,7 +416,7 @@ export default function VerifyFlow({ onLogin }) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-soultalk-medium-gray">{t("username", { defaultValue: "Username" })}</label>
+            <label className="text-sm font-medium text-heybuddy-medium-gray">{t("username")}</label>
             <input
               type="text"
               placeholder={t("username")}
@@ -423,8 +429,8 @@ export default function VerifyFlow({ onLogin }) {
           </div>
           {/* Language selector will go here, dynamically filtered */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-soultalk-medium-gray">
-              {t("select_language", { defaultValue: "Preferred language" })}
+            <label className="text-sm font-medium text-heybuddy-medium-gray">
+              {t("select_language")}
             </label>
             <select
               value={selectedLanguage}
@@ -435,9 +441,7 @@ export default function VerifyFlow({ onLogin }) {
               <option value="">{t("select_language")}</option>
               {availableLanguages.map((lang) => (
                 <option key={lang.code} value={lang.code}>
-                  {t(`language_${lang.code}`, {
-                    defaultValue: lang.nativeName || lang.name || lang.code,
-                  })}
+                  {getLanguageName(lang.code)}
                 </option>
               ))}
             </select>
@@ -468,8 +472,8 @@ export default function VerifyFlow({ onLogin }) {
 
       {step === "done" && (
         <div className="text-center mt-8">
-          <h2 className="text-xl sm:text-2xl font-bold text-soultalk-lavender mb-4">✅ {t('phone_verified_successfully')}!</h2>
-          <p className="text-base sm:text-lg text-soultalk-dark-gray mb-6 break-words">{t('welcome_username', { username: verifiedUser?.username })}</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-heybuddy-lavender mb-4">✅ {t('phone_verified_successfully')}!</h2>
+          <p className="text-base sm:text-lg text-heybuddy-dark-gray mb-6 break-words">{t('welcome_username', { username: verifiedUser?.username })}</p>
           <button
             onClick={handleStartChatting}
             className="w-full st-combo1-button"

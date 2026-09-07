@@ -95,7 +95,7 @@ export const resolveUiLanguage = (code) => {
   return 'en';
 };
 
-export const SOULTALK_USER_STORAGE_KEY = 'soultalk_user';
+export const HEYBUDDY_USER_STORAGE_KEY = 'HeyBuddy_user';
 export const I18NEXT_LANGUAGE_STORAGE_KEY = 'i18nextLng';
 
 export const setUiLanguage = async (code) => {
@@ -117,7 +117,12 @@ export const getLanguageName = (code) => {
   if (!code) {
     return '';
   }
-  return i18n.t(`language_${code}`, { defaultValue: code });
+  const normalized = String(code).split('-')[0];
+  const key = `language_${normalized}`;
+  if (i18n.exists(key)) {
+    return i18n.t(key);
+  }
+  return normalized;
 };
 
 export const getLanguageFlag = (code) => {
@@ -174,7 +179,7 @@ const installLanguageStorageSync = () => {
       return;
     }
 
-    if (event.key === SOULTALK_USER_STORAGE_KEY && event.newValue) {
+    if (event.key === HEYBUDDY_USER_STORAGE_KEY && event.newValue) {
       try {
         const nextUser = JSON.parse(event.newValue);
         if (nextUser?.language) {

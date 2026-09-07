@@ -15,7 +15,6 @@ import threading
 import subprocess
 from time import sleep
 
-from . import six
 from gevent._config import validate_bool
 from gevent._compat import perf_counter
 from gevent.monkey import get_original
@@ -222,7 +221,7 @@ def getname(command, env=None, setenv=None):
             continue
         result.append('%s=%s' % (key, value))
 
-    if isinstance(command, six.string_types):
+    if isinstance(command, str):
         result.append(command)
     else:
         result.extend(command)

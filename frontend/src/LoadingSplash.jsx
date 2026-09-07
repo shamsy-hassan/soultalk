@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Heart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const getPrefersReducedMotion = () => {
   if (typeof window === 'undefined' || !window.matchMedia) return false;
@@ -7,6 +8,7 @@ const getPrefersReducedMotion = () => {
 };
 
 export default function LoadingSplash({ onDone }) {
+  const { t } = useTranslation();
   const prefersReducedMotion = getPrefersReducedMotion();
   // Total splash time: 5s (2.5s per phase).
   const totalMs = 5000;
@@ -75,26 +77,26 @@ export default function LoadingSplash({ onDone }) {
             phase === 'first' ? 'opacity-100' : 'opacity-0 pointer-events-none',
           ].join(' ')}
         >
-          <div className="st-heartbeat mb-5 rounded-3xl bg-soultalk-warm-gray/70 px-7 py-7 shadow-[0_18px_60px_-40px_rgba(0,0,0,0.55)] backdrop-blur">
-            <Heart className="h-12 w-12 text-soultalk-lavender" fill="currentColor" />
+          <div className="st-heartbeat mb-5 rounded-3xl bg-heybuddy-warm-gray/70 px-7 py-7 shadow-[0_18px_60px_-40px_rgba(0,0,0,0.55)] backdrop-blur">
+            <Heart className="h-12 w-12 text-heybuddy-lavender" fill="currentColor" />
           </div>
           <div className="text-center">
-            <div className="text-2xl font-extrabold tracking-tight text-soultalk-dark-gray">
-              SoulTalk
-            </div>
-            <div className="mt-1 text-sm text-soultalk-dark-gray/70">
-              Connecting hearts, across languages
+	            <div className="text-2xl font-extrabold tracking-tight text-heybuddy-dark-gray">
+	              {t('HeyBuddy_title')}
+	            </div>
+            <div className="mt-1 text-sm text-heybuddy-dark-gray/70">
+              {t('connecting_hearts_across_languages')}
             </div>
           </div>
 
           <div className="pointer-events-none absolute -top-6 left-8 st-float-1">
-            <Heart className="h-5 w-5 text-soultalk-gradient-end/70" fill="currentColor" />
+            <Heart className="h-5 w-5 text-heybuddy-gradient-end/70" fill="currentColor" />
           </div>
           <div className="pointer-events-none absolute top-10 right-10 st-float-2">
-            <Heart className="h-4 w-4 text-soultalk-lavender/70" fill="currentColor" />
+            <Heart className="h-4 w-4 text-heybuddy-lavender/70" fill="currentColor" />
           </div>
           <div className="pointer-events-none absolute -bottom-6 right-14 st-float-3">
-            <Heart className="h-6 w-6 text-soultalk-gradient-start/60" fill="currentColor" />
+            <Heart className="h-6 w-6 text-heybuddy-gradient-start/60" fill="currentColor" />
           </div>
         </div>
 
@@ -106,23 +108,23 @@ export default function LoadingSplash({ onDone }) {
           ].join(' ')}
         >
           <div className="mb-4 st-love-orbit relative">
-            <div className="st-love-core rounded-3xl bg-soultalk-warm-gray/70 px-8 py-8 shadow-[0_18px_60px_-40px_rgba(0,0,0,0.55)] backdrop-blur">
-              <Heart className="h-12 w-12 text-soultalk-gradient-end" fill="currentColor" />
+            <div className="st-love-core rounded-3xl bg-heybuddy-warm-gray/70 px-8 py-8 shadow-[0_18px_60px_-40px_rgba(0,0,0,0.55)] backdrop-blur">
+              <Heart className="h-12 w-12 text-heybuddy-gradient-end" fill="currentColor" />
             </div>
             <div className="st-orbit st-orbit-a">
-              <Heart className="h-4 w-4 text-soultalk-lavender/80" fill="currentColor" />
+              <Heart className="h-4 w-4 text-heybuddy-lavender/80" fill="currentColor" />
             </div>
             <div className="st-orbit st-orbit-b">
-              <Heart className="h-4 w-4 text-soultalk-gradient-start/70" fill="currentColor" />
+              <Heart className="h-4 w-4 text-heybuddy-gradient-start/70" fill="currentColor" />
             </div>
           </div>
 
           <div className="text-center">
-            <div className="st-love-text text-xl font-extrabold tracking-tight text-soultalk-dark-gray">
-              With love
+            <div className="st-love-text text-xl font-extrabold tracking-tight text-heybuddy-dark-gray">
+              {t('with_love')}
             </div>
-            <div className="mt-1 text-sm text-soultalk-dark-gray/70">
-              Loading your space…
+            <div className="mt-1 text-sm text-heybuddy-dark-gray/70">
+              {t('loading_your_space')}
             </div>
           </div>
         </div>

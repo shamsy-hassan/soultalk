@@ -8,12 +8,14 @@ import SettingsPage from './Settings';
 import PrivacyPolicy from './PrivacyPolicy';
 import Feedback from './Feedback';
 import Sidebar from './Sidebar'; // Import the new Sidebar component
+import MyMedia from './MyMedia';
+import Friends from './Friends';
 import { io } from 'socket.io-client';
 import './index.css';
 import { useTranslation } from 'react-i18next';
 import { setUiLanguage, hardReload } from './i18n';
 import { applyTheme, readString, PREF_THEME_KEY } from './theme'; // Import theme utilities
-import { Heart, MessageSquare, X, Camera } from 'lucide-react'; // Import icons for logo and mobile menu
+import { Menu, X, Camera } from 'lucide-react';
 import ProfileSetup from './ProfileSetup'; // Import ProfileSetup component
 import { resolveProfilePictureUrl, DEFAULT_PROFILE_IMAGE_URL } from './profileImage';
 import { uploadProfilePicture, updateUserProfile } from './profileAPI';
@@ -85,7 +87,7 @@ function App() {
   const location = useLocation();
   const [showSplash, setShowSplash] = useState(true);
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('soultalk_user');
+    const savedUser = localStorage.getItem('HeyBuddy_user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
   const [socket, setSocket] = useState(null);
@@ -197,7 +199,7 @@ function App() {
 
   const handleLogin = (userData) => {
     setUser(userData);
-    localStorage.setItem('soultalk_user', JSON.stringify(userData));
+    localStorage.setItem('HeyBuddy_user', JSON.stringify(userData));
     void setUiLanguage(userData.language);
   };
 
@@ -209,7 +211,7 @@ function App() {
     setUser(null);
     setUnreadByUser({});
     setMessageToast(null);
-    localStorage.removeItem('soultalk_user');
+    localStorage.removeItem('HeyBuddy_user');
     localStorage.removeItem('i18nextLng');
     void setUiLanguage('en');
     setSocket(null);
@@ -233,7 +235,7 @@ function App() {
     const { changed } = await setUiLanguage(newLang);
     setUser(prevUser => {
       const updatedUser = { ...prevUser, language: newLang };
-      localStorage.setItem('soultalk_user', JSON.stringify(updatedUser));
+      localStorage.setItem('HeyBuddy_user', JSON.stringify(updatedUser));
       return updatedUser;
     });
 
@@ -289,13 +291,16 @@ function App() {
         const formData = new FormData();
         formData.append('profile_picture', imageBlob, 'profile.jpeg');
 
-        const { res: uploadRes, data: uploadData } = await uploadProfilePicture(formData);
-        if (!uploadRes.ok) {
-          setProfileSetupError(uploadData.error || 'Failed to upload profile picture.');
-          return;
-        }
-        updates.profilePictureUrl = uploadData.profile_picture_url;
-      }
+	        const { res: uploadRes, data: uploadData } = await uploadProfilePicture(formData);
+	        if (!uploadRes.ok) {
+	          setProfileSetupError(
+	            uploadData.error ||
+	              t('failed_to_upload_profile_picture', { defaultValue: 'Failed to upload profile picture.' })
+	          );
+	          return;
+	        }
+	        updates.profilePictureUrl = uploadData.profile_picture_url;
+	      }
 
       if (!updates.profilePictureUrl && !Object.prototype.hasOwnProperty.call(updates, 'bio')) {
         navigate('/users');
@@ -308,33 +313,35 @@ function App() {
       );
 
       if (!updateRes.ok) {
-        setProfileSetupError(updateData.error || 'Failed to update profile.');
-        return;
-      }
+        setProfileSetupError(
+          updateData.error || t('failed_to_update_profile', { defaultValue: 'Failed to update profile.' })
+        );
+	        return;
+	      }
 
       const updatedUser = { ...user, ...updateData.user };
       setUser(updatedUser);
-      localStorage.setItem('soultalk_user', JSON.stringify(updatedUser));
+      localStorage.setItem('HeyBuddy_user', JSON.stringify(updatedUser));
       navigate('/users');
-    } catch (error) {
-      setProfileSetupError('Error while saving profile changes.');
-      console.error('Error while saving profile changes:', error);
-    }
-  };
+	    } catch (error) {
+	      setProfileSetupError(t('error_saving_profile_changes', { defaultValue: 'Error while saving profile changes.' }));
+	      console.error('Error while saving profile changes:', error);
+	    }
+	  };
 
   const currentUserAvatarUrl = resolveProfilePictureUrl(user?.profile_picture_url);
   const unreadCount = Object.values(unreadByUser).reduce((sum, value) => sum + value, 0);
 
   return (
-    <div className="flex min-h-screen bg-soultalk-white text-soultalk-dark-gray">
+    <div className="flex min-h-screen bg-heybuddy-white text-heybuddy-dark-gray">
       {showSplash && <LoadingSplash onDone={() => setShowSplash(false)} />}
 
       {/* Sidebar - Desktop always visible, mobile as drawer */}
       {user && (
         <div
-          className={`fixed inset-y-0 left-0 z-40 w-[86vw] max-w-[300px] shadow-lg transform ${
+          className={`fixed inset-y-0 left-0 z-40 w-[86vw] max-w-[248px] shadow-lg transform ${
             showSidebarMobile ? 'translate-x-0' : '-translate-x-full'
-          } md:translate-x-0 md:shadow-none transition-transform duration-300 ease-in-out bg-soultalk-white overflow-hidden`}
+          } md:translate-x-0 md:shadow-none transition-transform duration-300 ease-in-out bg-heybuddy-white overflow-hidden`}
         >
           <Sidebar 
             user={user} 
@@ -355,37 +362,24 @@ function App() {
       )}
 
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col min-w-0 ${user ? 'md:ml-[300px]' : ''}`}> {/* Adjust margin for desktop sidebar when user is logged in */}
-        {user && (
-	          <nav className="backdrop-blur-sm px-3 py-3 sm:px-4 md:px-6 shadow-sm flex items-center justify-between z-20 sticky top-0 border-b safe-pt safe-px bg-soultalk-white/90 border-emerald-400/15">
-	            {/* Left side: App Logo/Name and Mobile Sidebar Toggle */}
-	            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
-	              {/* Mobile Sidebar Toggle - only on small screens */}
+      <div className={`flex-1 flex flex-col min-w-0 ${user ? 'md:ml-[248px]' : ''}`}>
+	        {user && (
+	          <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/95 px-3 py-3 backdrop-blur sm:px-5 safe-pt safe-px">
+	            <div className="flex min-w-0 items-center gap-3">
 	              <button
-	                className="md:hidden p-2 rounded-lg shadow-md bg-soultalk-warm-gray text-soultalk-dark-gray"
+	                className="rounded-lg p-2 text-heybuddy-dark-gray hover:bg-slate-50 md:hidden"
 	                onClick={() => setShowSidebarMobile(!showSidebarMobile)}
-	                aria-label="Toggle sidebar"
+	                aria-label={t('toggle_sidebar')}
 	              >
-	                <MessageSquare className="w-6 h-6" />
+	                <Menu className="h-5 w-5" />
 	              </button>
-	              <div className="flex items-center space-x-2 min-w-0">
-	                <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-soultalk-coral to-soultalk-teal flex items-center justify-center shadow-sm">
-	                  <Heart className="w-5 h-5 text-emerald-50" />
-	                </div>
-	                <div className="min-w-0">
-	                  <h1 className="text-lg sm:text-xl font-bold tracking-tight truncate text-soultalk-dark-gray">
-	                    SoulTalk
-	                  </h1>
-	                  <p className="text-xs hidden md:block text-soultalk-medium-gray">
-	                    {t('spread_joy', { defaultValue: 'SPREAD JOY' })}
-	                  </p>
-	                </div>
-	              </div>
+	              <h1 className="truncate text-base font-semibold text-heybuddy-dark-gray sm:text-lg">{t('HeyBuddy_title')}</h1>
 	            </div>
-	          </nav>
+	            <span className="hidden text-sm text-heybuddy-medium-gray sm:block">{user?.username}</span>
+	          </header>
 	        )}
 
-        <main className="flex-1 overflow-y-auto subtle-scrollbar p-3 sm:p-4 md:p-6 safe-px"> {/* Adjusted padding */}
+	        <main className="flex-1 overflow-y-auto subtle-scrollbar bg-slate-50/70 p-3 sm:p-5 md:p-6 safe-px">
           <Routes>
             <Route 
               path="/" 
@@ -411,6 +405,14 @@ function App() {
               path="/feedback"
               element={user ? <Feedback user={user} /> : <Navigate to="/" />}
             />
+            <Route
+              path="/media"
+              element={user ? <MyMedia user={user} /> : <Navigate to="/" />}
+            />
+            <Route
+              path="/friends"
+              element={user ? <Friends user={user} /> : <Navigate to="/" />}
+            />
             <Route 
               path="/chat/:username" 
               element={user ? <Chat user={user} socket={socket} /> : <Navigate to="/" />} 
@@ -431,28 +433,24 @@ function App() {
           </Routes>
         </main>
 
-        <footer className="py-6 border-t text-center text-sm safe-pb safe-px border-emerald-400/15 text-soultalk-medium-gray">
-          <p>{t('soultalk_footer')}</p>
-          <p className="text-xs mt-2">{t('made_with_love')}</p>
-        </footer>
       </div>
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 safe-px safe-pb">
-          <div className="bg-soultalk-warm-gray p-5 sm:p-6 rounded-lg shadow-xl max-w-sm w-full max-h-[90dvh] overflow-y-auto border border-emerald-400/15">
-            <h2 className="text-xl font-semibold mb-4 text-soultalk-dark-gray">{t('logout_confirm_title')}</h2>
-            <p className="text-soultalk-medium-gray mb-6">{t('logout_confirm_message')}</p>
+          <div className="bg-heybuddy-warm-gray p-5 sm:p-6 rounded-lg shadow-xl max-w-sm w-full max-h-[90dvh] overflow-y-auto border border-emerald-400/15">
+            <h2 className="text-xl font-semibold mb-4 text-heybuddy-dark-gray">{t('logout_confirm_title')}</h2>
+            <p className="text-heybuddy-medium-gray mb-6">{t('logout_confirm_message')}</p>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={cancelLogout}
-                className="px-4 py-2 bg-emerald-500/10 text-soultalk-dark-gray rounded-lg hover:bg-emerald-500/15 transition-colors border border-emerald-400/15"
+                className="px-4 py-2 bg-emerald-500/10 text-heybuddy-dark-gray rounded-lg hover:bg-emerald-500/15 transition-colors border border-emerald-400/15"
               >
                 {t('cancel')}
               </button>
               <button
                 onClick={performLogout}
-                className="px-4 py-2 bg-soultalk-coral text-emerald-50 rounded-lg hover:bg-soultalk-coral/90 transition-colors"
+                className="px-4 py-2 bg-heybuddy-coral text-emerald-50 rounded-lg hover:bg-heybuddy-coral/90 transition-colors"
               >
                 {t('logout')}
               </button>
@@ -463,9 +461,9 @@ function App() {
 
       {showProfilePreview && user && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 safe-px safe-pb">
-          <div className={`w-full max-w-md rounded-2xl overflow-hidden shadow-2xl bg-soultalk-warm-gray border border-emerald-400/15`}>
+          <div className={`w-full max-w-md rounded-2xl overflow-hidden shadow-2xl bg-heybuddy-warm-gray border border-emerald-400/15`}>
             <div className="flex items-center justify-between p-4 border-b border-emerald-400/15">
-              <h3 className="font-semibold text-soultalk-dark-gray">
+              <h3 className="font-semibold text-heybuddy-dark-gray">
                 {t('profile_photo')}
               </h3>
               <button
@@ -474,7 +472,7 @@ function App() {
                 className="p-2 rounded-lg hover:bg-emerald-500/10 transition-colors"
                 aria-label={t('close_profile_preview')}
               >
-                <X className="w-5 h-5 text-soultalk-medium-gray" />
+                <X className="w-5 h-5 text-heybuddy-medium-gray" />
               </button>
             </div>
 
@@ -486,7 +484,7 @@ function App() {
                   className="w-full max-w-[224px] aspect-square rounded-2xl object-cover shadow-lg"
                   onError={(e) => { e.currentTarget.src = DEFAULT_PROFILE_IMAGE_URL; }}
                 />
-                <p className="mt-3 font-medium text-soultalk-dark-gray">
+                <p className="mt-3 font-medium text-heybuddy-dark-gray">
                   {user.username}
                 </p>
               </div>
@@ -498,7 +496,7 @@ function App() {
                     setShowProfilePreview(false);
                     handleNavigateToProfileSetup();
                   }}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-soultalk-gradient-start to-soultalk-gradient-end text-soultalk-white st-white-visible font-semibold py-2.5 px-4 hover:from-soultalk-gradient-start/90 hover:to-soultalk-gradient-end/90 transition-all"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-heybuddy-gradient-start to-heybuddy-gradient-end text-heybuddy-white st-white-visible font-semibold py-2.5 px-4 hover:from-heybuddy-gradient-start/90 hover:to-heybuddy-gradient-end/90 transition-all"
                 >
                   <Camera className="w-4 h-4" />
                   {t('change_profile_picture')}
@@ -506,7 +504,7 @@ function App() {
                 <button
                   type="button"
                   onClick={() => setShowProfilePreview(false)}
-                  className="w-full rounded-xl py-2.5 px-4 font-medium transition-colors bg-emerald-500/10 text-soultalk-dark-gray hover:bg-emerald-500/15 border border-emerald-400/15"
+                  className="w-full rounded-xl py-2.5 px-4 font-medium transition-colors bg-emerald-500/10 text-heybuddy-dark-gray hover:bg-emerald-500/15 border border-emerald-400/15"
                 >
                   {t('close')}
                 </button>
@@ -523,14 +521,14 @@ function App() {
             navigate(`/chat/${messageToast.from}`);
             setMessageToast(null);
           }}
-          className="fixed top-20 left-4 right-4 md:top-4 md:left-auto md:right-4 md:w-[340px] z-50 rounded-xl shadow-xl p-4 text-left safe-pt safe-px bg-soultalk-warm-gray/92 text-soultalk-dark-gray border border-emerald-400/15 backdrop-blur"
+          className="fixed top-20 left-4 right-4 md:top-4 md:left-auto md:right-4 md:w-[340px] z-50 rounded-xl shadow-xl p-4 text-left safe-pt safe-px bg-heybuddy-warm-gray/92 text-heybuddy-dark-gray border border-emerald-400/15 backdrop-blur"
         >
           <p className="text-sm font-semibold">
             {messageToast.count > 1
               ? t('new_messages_from', { count: messageToast.count, username: messageToast.from })
               : t('new_message_from', { count: messageToast.count, username: messageToast.from })}
           </p>
-          <p className="text-xs mt-1 text-soultalk-medium-gray">{t('tap_to_open_chat')}</p>
+          <p className="text-xs mt-1 text-heybuddy-medium-gray">{t('tap_to_open_chat')}</p>
         </button>
       )}
     </div>

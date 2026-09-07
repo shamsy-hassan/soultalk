@@ -1,6 +1,5 @@
 # testing gevent's Event, Lock, RLock, Semaphore, BoundedSemaphore with standard test_threading
 
-from gevent.testing.six import xrange
 import gevent.testing as greentest
 
 setup_ = """from gevent import monkey; monkey.patch_all()
@@ -412,7 +411,7 @@ class ThreadTests(unittest.TestCase):
             # and removed in Python 3.9
             old_interval = sys.getcheckinterval() # pylint:disable=no-member
             try:
-                for i in xrange(1, 100):
+                for i in range(1, 100):
                     # Try a couple times at each thread-switching interval
                     # to get more interleavings.
                     sys.setcheckinterval(i // 5) # pylint:disable=no-member

@@ -51,11 +51,11 @@ export default function PhoneVerification({ onCheckPhoneSuccess }) { // Renamed 
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-base font-semibold text-soultalk-dark-gray">
-          {t("enter_phone", { defaultValue: "Enter your phone number" })}
+        <h3 className="text-base font-semibold text-heybuddy-dark-gray">
+          {t("enter_phone")}
         </h3>
-        <p className="mt-1 text-sm text-soultalk-medium-gray">
-          {t("phone_help", { defaultValue: "We’ll send a one-time code to your email." })}
+        <p className="mt-1 text-sm text-heybuddy-medium-gray">
+          {t("phone_help")}
         </p>
       </div>
 
@@ -100,7 +100,7 @@ export default function PhoneVerification({ onCheckPhoneSuccess }) { // Renamed 
             message.toLowerCase().includes("error") ||
             message.toLowerCase().includes("fail")
               ? "text-red-700 border-red-200 bg-red-50 dark:text-red-200 dark:border-red-500/30 dark:bg-red-500/10"
-              : "text-soultalk-dark-gray border-emerald-400/15 bg-soultalk-warm-gray/60"
+              : "text-heybuddy-dark-gray border-emerald-400/15 bg-heybuddy-warm-gray/60"
           }`}
         >
           {message}

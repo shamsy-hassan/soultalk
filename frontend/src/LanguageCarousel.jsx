@@ -1,5 +1,6 @@
 import { useMemo, useRef, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Languages, Sparkles, Globe2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import i18n, { getLanguageFlag, resolveUiLanguage, setUiLanguage, hardReload } from './i18n';
 
 const NATIVE_LANGUAGE_CONTENT = {
@@ -82,6 +83,7 @@ const NATIVE_LANGUAGE_CONTENT = {
 };
 
 export default function LanguageCarousel() {
+  const { t } = useTranslation();
   const railRef = useRef(null);
   const [isPaused, setIsPaused] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(resolveUiLanguage(i18n.language));
@@ -149,26 +151,26 @@ export default function LanguageCarousel() {
   return (
     <section className="mb-8 sm:mb-12">
       <div className="hero-panel p-5 sm:p-7 shadow-[0_24px_64px_-44px_rgba(99,102,241,0.42)]">
-        <div className="pointer-events-none absolute -right-10 -top-14 h-32 w-32 rounded-full bg-soultalk-lavender/20 blur-2xl" />
-        <div className="pointer-events-none absolute -left-10 -bottom-14 h-36 w-36 rounded-full bg-soultalk-coral/20 blur-2xl" />
+        <div className="pointer-events-none absolute -right-10 -top-14 h-32 w-32 rounded-full bg-heybuddy-lavender/20 blur-2xl" />
+        <div className="pointer-events-none absolute -left-10 -bottom-14 h-36 w-36 rounded-full bg-heybuddy-coral/20 blur-2xl" />
 
         <div className="relative flex flex-wrap items-start justify-between gap-4 mb-5">
           <div>
-            <p className="inline-flex items-center gap-2 text-soultalk-dark-gray font-semibold text-base sm:text-lg dark:text-soultalk-white dark:st-white-visible">
+            <p className="inline-flex items-center gap-2 text-heybuddy-dark-gray font-semibold text-base sm:text-lg dark:text-heybuddy-white dark:st-white-visible">
               <Languages className="w-5 h-5" />
-              Choose your language
+              {t('choose_your_language')}
             </p>
-            <p className="text-sm sm:text-base text-soultalk-medium-gray mt-1 max-w-2xl dark:text-gray-400">
-              Each card stays in its native language. Tap one card to translate the onboarding content below.
+            <p className="text-sm sm:text-base text-heybuddy-medium-gray mt-1 max-w-2xl dark:text-gray-400">
+              {t('language_carousel_hint')}
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-              <span className="inline-flex items-center gap-1 rounded-full bg-gray-950/35 px-3 py-1 text-soultalk-dark-gray border border-gray-800/60">
-                <Sparkles className="w-3.5 h-3.5 text-soultalk-coral" />
-                Real-time
+              <span className="inline-flex items-center gap-1 rounded-full bg-gray-950/35 px-3 py-1 text-heybuddy-dark-gray border border-gray-800/60">
+                <Sparkles className="w-3.5 h-3.5 text-heybuddy-coral" />
+                {t('real_time')}
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-gray-950/35 px-3 py-1 text-soultalk-dark-gray border border-gray-800/60">
-                <Globe2 className="w-3.5 h-3.5 text-soultalk-teal" />
-                Multi-language onboarding
+              <span className="inline-flex items-center gap-1 rounded-full bg-gray-950/35 px-3 py-1 text-heybuddy-dark-gray border border-gray-800/60">
+                <Globe2 className="w-3.5 h-3.5 text-heybuddy-teal" />
+                {t('multi_language_onboarding')}
               </span>
             </div>
           </div>
@@ -176,16 +178,16 @@ export default function LanguageCarousel() {
             <button
               type="button"
               onClick={() => scrollRail('prev')}
-              className="p-2.5 rounded-xl bg-gray-950/35 text-soultalk-dark-gray border border-gray-800/60 hover:bg-gray-900/60 transition-colors"
-              aria-label="Scroll languages left"
+              className="p-2.5 rounded-xl bg-gray-950/35 text-heybuddy-dark-gray border border-gray-800/60 hover:bg-gray-900/60 transition-colors"
+              aria-label={t('scroll_languages_left')}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               type="button"
               onClick={() => scrollRail('next')}
-              className="p-2.5 rounded-xl bg-gray-950/35 text-soultalk-dark-gray border border-gray-800/60 hover:bg-gray-900/60 transition-colors"
-              aria-label="Scroll languages right"
+              className="p-2.5 rounded-xl bg-gray-950/35 text-heybuddy-dark-gray border border-gray-800/60 hover:bg-gray-900/60 transition-colors"
+              aria-label={t('scroll_languages_right')}
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -209,16 +211,16 @@ export default function LanguageCarousel() {
                 onClick={() => handleLanguagePick(lang.code)}
                 className={`snap-start shrink-0 w-[min(84vw,320px)] sm:w-[280px] lg:w-[320px] rounded-2xl border p-5 text-left transition-all ${
                   isActive
-                    ? 'border-soultalk-lavender bg-gray-950/40 shadow-md'
-                    : 'border-gray-800/60 bg-gray-950/30 hover:border-soultalk-lavender/50 hover:shadow-md hover:bg-gray-950/40'
+                    ? 'border-heybuddy-lavender bg-gray-950/40 shadow-md'
+                    : 'border-gray-800/60 bg-gray-950/30 hover:border-heybuddy-lavender/50 hover:shadow-md hover:bg-gray-950/40'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <p className="text-3xl">{lang.flag}</p>
-                  <p className="text-[11px] uppercase tracking-[0.16em] text-soultalk-medium-gray">{lang.code}</p>
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-heybuddy-medium-gray">{lang.code}</p>
                 </div>
-                <p className="mt-3 text-lg font-semibold text-soultalk-dark-gray break-words">{lang.label}</p>
-                <p className="mt-2 text-sm text-soultalk-medium-gray">
+                <p className="mt-3 text-lg font-semibold text-heybuddy-dark-gray break-words">{lang.label}</p>
+                <p className="mt-2 text-sm text-heybuddy-medium-gray">
                   {lang.line}
                 </p>
               </button>

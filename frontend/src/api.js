@@ -44,6 +44,22 @@ export const getChatPartners = async (currentUsername) => {
   return response.data;
 };
 
+export const getFavorites = async (username) => {
+  const response = await axios.get(`${BACKEND_BASE_URL}/api/favorites`, {
+    params: { username },
+  });
+  return response.data;
+};
+
+export const setFavorite = async (username, favoriteUsername, isFavorite) => {
+  const response = await axios.post(`${BACKEND_BASE_URL}/api/favorites`, {
+    username,
+    favorite_username: favoriteUsername,
+    is_favorite: isFavorite,
+  });
+  return response.data;
+};
+
 export const submitFeedback = async ({ username, email, category, message, language }) => {
   const response = await axios.post(`${BACKEND_BASE_URL}/api/feedback`, {
     username,
@@ -51,6 +67,13 @@ export const submitFeedback = async ({ username, email, category, message, langu
     category,
     message,
     language
+  });
+  return response.data;
+};
+
+export const getUserImages = async (username, { limit = 200 } = {}) => {
+  const response = await axios.get(`${BACKEND_BASE_URL}/api/media/images`, {
+    params: { username, limit },
   });
   return response.data;
 };

@@ -3,7 +3,15 @@ import smtplib
 import ssl
 from email.message import EmailMessage
 
-from database import get_user, add_user, get_all_users, get_chat_partners
+from database import (
+    get_user,
+    add_user,
+    get_all_users,
+    get_chat_partners,
+    get_favorite_users,
+    get_user_image_media,
+    set_favorite_user,
+)
 from config import EMAIL_HOST, EMAIL_PORT, EMAIL_ADDRESS, EMAIL_PASSWORD, FEEDBACK_TO_EMAIL
 from translate import translate_text
 
@@ -18,10 +26,10 @@ def send_feedback_email(to_email, username, sender_email, category, original_mes
     msg = EmailMessage()
     msg['From'] = EMAIL_ADDRESS
     msg['To'] = to_email
-    msg['Subject'] = f"SoulTalk Feedback: {category}"
+    msg['Subject'] = f"HeyBuddy Feedback: {category}"
 
     body = f"""
-New feedback received from SoulTalk.
+New feedback received from HeyBuddy.
 
 User: {username}
 Sender email: {sender_email or 'Not provided'}
@@ -121,7 +129,7 @@ def get_user_details(username):
 
 @bp.route('/test', methods=['GET'])
 def test():
-    return jsonify({'message': 'SoulTalk API is running!'}), 200
+    return jsonify({'message': 'HeyBuddy API is running!'}), 200
 
 
 @bp.route('/chats', methods=['GET'])
@@ -135,6 +143,29 @@ def get_chats():
         return jsonify({'chats': chats}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@bp.route('/favorites', methods=['GET'])
+def get_favorites():
+    username = request.args.get('username')
+    if not username:
+        return jsonify({'error': 'username is required'}), 400
+    return jsonify({'favorites': get_favorite_users(username)}), 200
+
+@bp.route('/favorites', methods=['POST'])
+def update_favorite():
+    data = request.get_json() or {}
+    username = (data.get('username') or '').strip()
+    favorite_username = (data.get('favorite_username') or '').strip()
+    is_favorite = bool(data.get('is_favorite'))
+    if not username or not favorite_username:
+        return jsonify({'error': 'username and favorite_username are required'}), 400
+    if not get_user(favorite_username):
+        return jsonify({'error': 'User not found'}), 404
+    try:
+        set_favorite_user(username, favorite_username, is_favorite)
+    except ValueError as error:
+        return jsonify({'error': str(error)}), 400
+    return jsonify({'is_favorite': is_favorite}), 200
 
 
 @bp.route('/feedback', methods=['POST'])
@@ -172,5 +203,37 @@ def submit_feedback():
             return jsonify({'error': 'Feedback could not be delivered by email'}), 500
 
         return jsonify({'message': 'Feedback sent successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/media/images', methods=['GET'])
+def get_media_images():
+    try:
+        username = request.args.get('username')
+        limit_raw = request.args.get('limit', '200')
+        if not username:
+            return jsonify({'error': 'username is required'}), 400
+
+        try:
+            limit = int(limit_raw)
+        except Exception:
+            limit = 200
+        limit = max(1, min(limit, 500))
+
+        media = get_user_image_media(username, limit=limit)
+        # Keep payload minimal.
+        shaped = [
+            {
+                'id': row.get('id'),
+                'from_user': row.get('from_user'),
+                'to_user': row.get('to_user'),
+                'media_url': row.get('media_url'),
+                'timestamp': row.get('timestamp'),
+            }
+            for row in media
+            if row.get('media_url')
+        ]
+        return jsonify({'images': shaped}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

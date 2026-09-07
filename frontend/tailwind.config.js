@@ -9,16 +9,16 @@ export default {
     extend: {
       colors: {
         // App theme tokens (powered by CSS variables; see src/index.css).
-        'soultalk-white': 'rgb(var(--st-white) / <alpha-value>)', // base background
-        'soultalk-warm-gray': 'rgb(var(--st-warm-gray) / <alpha-value>)', // surface / panels
-        'soultalk-coral': 'rgb(var(--st-coral) / <alpha-value>)', // primary accent
-        'soultalk-teal': 'rgb(var(--st-teal) / <alpha-value>)', // secondary accent
-        'soultalk-lavender': 'rgb(var(--st-lavender) / <alpha-value>)', // focus / strong accent
-        'soultalk-dark-gray': 'rgb(var(--st-dark-gray) / <alpha-value>)', // primary text
-        'soultalk-medium-gray': 'rgb(var(--st-medium-gray) / <alpha-value>)', // muted text
+        'heybuddy-white': 'rgb(var(--st-white) / <alpha-value>)', // base background
+        'heybuddy-warm-gray': 'rgb(var(--st-warm-gray) / <alpha-value>)', // surface / panels
+        'heybuddy-coral': 'rgb(var(--st-coral) / <alpha-value>)', // primary accent
+        'heybuddy-teal': 'rgb(var(--st-teal) / <alpha-value>)', // secondary accent
+        'heybuddy-lavender': 'rgb(var(--st-lavender) / <alpha-value>)', // focus / strong accent
+        'heybuddy-dark-gray': 'rgb(var(--st-dark-gray) / <alpha-value>)', // primary text
+        'heybuddy-medium-gray': 'rgb(var(--st-medium-gray) / <alpha-value>)', // muted text
         // Primary gradient
-        'soultalk-gradient-start': 'rgb(var(--st-gradient-start) / <alpha-value>)',
-        'soultalk-gradient-end': 'rgb(var(--st-gradient-end) / <alpha-value>)',
+        'heybuddy-gradient-start': 'rgb(var(--st-gradient-start) / <alpha-value>)',
+        'heybuddy-gradient-end': 'rgb(var(--st-gradient-end) / <alpha-value>)',
 
         // Make existing `emerald-*` utilities theme-aware (the UI uses these a lot).
         emerald: {

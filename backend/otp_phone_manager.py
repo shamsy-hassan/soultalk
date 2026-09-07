@@ -59,13 +59,13 @@ def generate_otp(phone_number):
 def send_otp_email(to_email, otp_code):
     """Send OTP email via Resend HTTP and/or SMTP (configurable)."""
     body = f"""
-    Your One-Time Password (OTP) for SoulTalk is: {otp_code}
+    Your One-Time Password (OTP) for HeyBuddy is: {otp_code}
 
     This OTP is valid for {OTP_EXPIRY_MINUTES} minutes.
     If you did not request this, please ignore this email.
     """
 
-    subject = "SoulTalk OTP Verification"
+    subject = "HeyBuddy OTP Verification"
 
     def _send_via_resend_http():
         if not (RESEND_API_KEY and RESEND_FROM_EMAIL):

@@ -32,8 +32,8 @@ export default function OtpVerification({ phone, email, username, language, onVe
       const data = await res.json();
       setMessage(data.message || data.error);
       if (res.ok) {
-        localStorage.setItem("soultalk_token", data.token);
-        localStorage.setItem("soultalk_user", JSON.stringify(data.user));
+        localStorage.setItem("HeyBuddy_token", data.token);
+        localStorage.setItem("HeyBuddy_user", JSON.stringify(data.user));
         onVerified(data.user);
       }
     } catch (err) {
@@ -69,11 +69,11 @@ export default function OtpVerification({ phone, email, username, language, onVe
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-base sm:text-lg font-semibold text-soultalk-dark-gray break-words">
+        <h2 className="text-base sm:text-lg font-semibold text-heybuddy-dark-gray break-words">
           {t("enter_6_digit_code", { email })}
         </h2>
-        <p className="mt-1 text-sm text-soultalk-medium-gray">
-          {t("otp_help", { defaultValue: "Enter the 6-digit code to continue." })}
+        <p className="mt-1 text-sm text-heybuddy-medium-gray">
+          {t("otp_help")}
         </p>
       </div>
 
@@ -101,7 +101,7 @@ export default function OtpVerification({ phone, email, username, language, onVe
           className={`mt-3 break-words text-sm sm:text-base rounded-xl border px-4 py-3 ${
             messageIsError
               ? "text-red-200 border-red-500/30 bg-red-500/10"
-              : "text-soultalk-dark-gray border-emerald-400/15 bg-soultalk-warm-gray/60"
+              : "text-heybuddy-dark-gray border-emerald-400/15 bg-heybuddy-warm-gray/60"
           }`}
         >
           {message}

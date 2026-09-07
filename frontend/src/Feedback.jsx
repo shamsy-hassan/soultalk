@@ -63,26 +63,26 @@ const Feedback = ({ user }) => {
     <div className="space-y-4">
       <div className="hero-panel p-5 md:p-6">
         <h1 className="section-title">{t('send_feedback')}</h1>
-        <p className="text-sm text-soultalk-medium-gray mt-1">{t('feedback_subtitle')}</p>
+        <p className="text-sm text-heybuddy-medium-gray mt-1">{t('feedback_subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <aside className="card-elevated p-5 rounded-2xl space-y-3 xl:order-2">
-          <h2 className="text-lg font-semibold text-soultalk-dark-gray">
-            {t('feedback_tips_title', { defaultValue: 'Tips for faster help' })}
+          <h2 className="text-lg font-semibold text-heybuddy-dark-gray">
+            {t('feedback_tips_title')}
           </h2>
-          <ul className="text-sm text-soultalk-medium-gray list-disc pl-5 space-y-1">
-            <li>{t('feedback_tip_1', { defaultValue: 'Pick the closest category (Bug / Feature / UX).' })}</li>
-            <li>{t('feedback_tip_2', { defaultValue: 'Describe what you expected vs what happened.' })}</li>
-            <li>{t('feedback_tip_3', { defaultValue: 'If it’s a bug, include steps to reproduce.' })}</li>
+          <ul className="text-sm text-heybuddy-medium-gray list-disc pl-5 space-y-1">
+            <li>{t('feedback_tip_1')}</li>
+            <li>{t('feedback_tip_2')}</li>
+            <li>{t('feedback_tip_3')}</li>
           </ul>
-          <div className="rounded-xl bg-soultalk-warm-gray/35 border border-emerald-400/15 p-4 text-sm text-soultalk-medium-gray">
-            {t('feedback_privacy_note', { defaultValue: 'Avoid sending passwords, OTP codes, or sensitive personal info in feedback.' })}
+          <div className="rounded-xl bg-heybuddy-warm-gray/35 border border-emerald-400/15 p-4 text-sm text-heybuddy-medium-gray">
+            {t('feedback_privacy_note')}
           </div>
         </aside>
 
         <form onSubmit={onSubmit} className="card-elevated p-5 rounded-2xl space-y-3 xl:col-span-2 xl:order-1">
-        <label className="block text-sm text-soultalk-dark-gray dark:text-gray-100">
+        <label className="block text-sm text-heybuddy-dark-gray dark:text-gray-100">
           {t('feedback_email_optional')}
           <input
             type="email"
@@ -93,7 +93,7 @@ const Feedback = ({ user }) => {
           />
         </label>
 
-        <label className="block text-sm text-soultalk-dark-gray dark:text-gray-100">
+        <label className="block text-sm text-heybuddy-dark-gray dark:text-gray-100">
           {t('feedback_category')}
           <select value={category} onChange={(e) => setCategory(e.target.value)} className="input-field mt-1">
             <option value="general">{t('feedback_category_general')}</option>
@@ -103,7 +103,7 @@ const Feedback = ({ user }) => {
           </select>
         </label>
 
-        <label className="block text-sm text-soultalk-dark-gray dark:text-gray-100">
+        <label className="block text-sm text-heybuddy-dark-gray dark:text-gray-100">
           {t('feedback_message')}
           <textarea
             value={message}
@@ -118,33 +118,33 @@ const Feedback = ({ user }) => {
 
         {category === 'bug' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <label className="block text-sm text-soultalk-dark-gray dark:text-gray-100">
-              {t('feedback_steps', { defaultValue: 'Steps to reproduce (optional)' })}
+            <label className="block text-sm text-heybuddy-dark-gray dark:text-gray-100">
+              {t('feedback_steps')}
               <textarea
                 value={steps}
                 onChange={(e) => setSteps(e.target.value)}
                 className="input-field mt-1"
                 rows={4}
-                placeholder={t('feedback_steps_placeholder', { defaultValue: '1) Open Chats\n2) Tap ...\n3) See error' })}
+                placeholder={t('feedback_steps_placeholder')}
                 maxLength={2000}
               />
             </label>
 
-            <label className="block text-sm text-soultalk-dark-gray dark:text-gray-100">
-              {t('feedback_expected', { defaultValue: 'Expected result (optional)' })}
+            <label className="block text-sm text-heybuddy-dark-gray dark:text-gray-100">
+              {t('feedback_expected')}
               <textarea
                 value={expected}
                 onChange={(e) => setExpected(e.target.value)}
                 className="input-field mt-1"
                 rows={4}
-                placeholder={t('feedback_expected_placeholder', { defaultValue: 'What should have happened?' })}
+                placeholder={t('feedback_expected_placeholder')}
                 maxLength={2000}
               />
             </label>
           </div>
         )}
 
-        <label className="flex items-start gap-3 rounded-2xl bg-soultalk-warm-gray/35 border border-emerald-400/15 p-4">
+        <label className="flex items-start gap-3 rounded-2xl bg-heybuddy-warm-gray/35 border border-emerald-400/15 p-4">
           <input
             type="checkbox"
             checked={includeTechDetails}
@@ -152,19 +152,26 @@ const Feedback = ({ user }) => {
             className="mt-1"
           />
           <span className="min-w-0">
-            <span className="block font-semibold text-soultalk-dark-gray">
-              {t('feedback_include_tech', { defaultValue: 'Include technical details' })}
+            <span className="block font-semibold text-heybuddy-dark-gray">
+              {t('feedback_include_tech')}
             </span>
-            <span className="block text-sm text-soultalk-medium-gray mt-1">
-              {t('feedback_include_tech_desc', { defaultValue: 'Adds device/browser info to help us debug (recommended for bugs).' })}
+            <span className="block text-sm text-heybuddy-medium-gray mt-1">
+              {t('feedback_include_tech_desc')}
             </span>
           </span>
         </label>
 
-        <div className="flex items-center justify-between gap-3 text-xs text-soultalk-medium-gray">
-          <span>{t('feedback_char_count', { defaultValue: 'Characters' })}: {message.length}/2000</span>
-          <span>{t('feedback_response_note', { defaultValue: 'We may reply if you include an email address.' })}</span>
-        </div>
+	        <div className="flex items-center justify-between gap-3 text-xs text-heybuddy-medium-gray">
+	          <span>
+	            {t('feedback_char_count')}:{' '}
+	            {t('character_count', {
+	              count: message.length,
+	              max: 2000,
+	              defaultValue: '{{count}}/{{max}}',
+	            })}
+	          </span>
+	          <span>{t('feedback_response_note')}</span>
+	        </div>
 
         <button
           type="submit"
@@ -174,7 +181,7 @@ const Feedback = ({ user }) => {
           {sending ? t('sending') : t('send_feedback')}
         </button>
 
-        {status && <p className="text-sm text-soultalk-medium-gray dark:text-gray-200 rounded-lg bg-soultalk-warm-gray/60 dark:bg-white/5 px-3 py-2 border border-gray-100 dark:border-white/10">{status}</p>}
+        {status && <p className="text-sm text-heybuddy-medium-gray dark:text-gray-200 rounded-lg bg-heybuddy-warm-gray/60 dark:bg-white/5 px-3 py-2 border border-gray-100 dark:border-white/10">{status}</p>}
         </form>
       </div>
     </div>

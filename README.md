@@ -6,7 +6,7 @@ This is a web application that allows users to chat with each other.
 
 1.  Navigate to the `frontend` directory:
     ```bash
-    cd soultalk/frontend
+    cd HeyBuddy/frontend
     ```
 2.  Install the dependencies:
     ```bash

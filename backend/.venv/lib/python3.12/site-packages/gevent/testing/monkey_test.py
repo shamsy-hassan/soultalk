@@ -135,6 +135,7 @@ with open(test_filename, encoding='utf-8') as module_file:
     module_source = module_file.read()
 module_source = disable_tests_in_source(module_source, test_name)
 
+
 # We write the module source to a file so that tracebacks
 # show correctly, since disabling the tests changes line
 # numbers. However, note that __file__ must still point to the

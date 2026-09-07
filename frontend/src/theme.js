@@ -57,15 +57,15 @@ export const setFontFamilyVar = (familyId) => {
 
 const THEME_VARS = {
   default: {
-    '--st-white': '5 46 22',
-    '--st-warm-gray': '6 78 59',
-    '--st-coral': '34 197 94',
-    '--st-teal': '16 185 129',
-    '--st-lavender': '22 163 74',
-    '--st-dark-gray': '236 253 245',
-    '--st-medium-gray': '167 243 208',
-    '--st-gradient-start': '22 163 74',
-    '--st-gradient-end': '5 150 105',
+    '--st-white': '255 255 255',
+    '--st-warm-gray': '248 250 252',
+    '--st-coral': '13 148 136',
+    '--st-teal': '20 184 166',
+    '--st-lavender': '124 58 237',
+    '--st-dark-gray': '15 23 42',
+    '--st-medium-gray': '100 116 139',
+    '--st-gradient-start': '13 148 136',
+    '--st-gradient-end': '20 184 166',
   },
   grey: {
     '--st-white': '15 23 42',
@@ -119,4 +119,3 @@ export const applyTheme = (themeId) => {
 
   return safeTheme;
 };
-

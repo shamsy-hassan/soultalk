@@ -1,10 +1,12 @@
 # When testrunner.py is invoked with --coverage, it puts this first
 # on the path as per https://coverage.readthedocs.io/en/coverage-4.0b3/subprocess.html.
 # Note that this disables other sitecustomize.py files.
+import os
 import coverage
 import coverage.exceptions
 try:
-    coverage.process_startup()
+    if not os.environ.get('GEVENT_TEST_SKIP_COVERAGE'):
+        coverage.process_startup()
 except AttributeError as e:
     if 'coverage' in str(e) and 'CTracer' in str(e):
         # AttributeError: module 'coverage.tracer' has no attribute 'CTracer'
