@@ -21,6 +21,7 @@ import {
   setFontFamilyVar,
   applyTheme,
 } from './theme';
+import LanguagePicker from './LanguagePicker';
 
 const Settings = ({ user, onChangeLanguage }) => {
   const { t } = useTranslation();
@@ -141,26 +142,21 @@ const Settings = ({ user, onChangeLanguage }) => {
             {t('language_and_region')}
           </h2>
 
-          <label className="block text-sm text-heybuddy-dark-gray dark:text-gray-100">
-            {t('ui_language')}
-            <select
-              value={uiLanguage}
-              onChange={async (e) => {
-                const next = resolveUiLanguage(e.target.value);
+          <div>
+            <p className="text-sm text-heybuddy-dark-gray dark:text-gray-100">{t('ui_language')}</p>
+            <LanguagePicker
+              languages={sortedLanguages}
+              selectedLanguage={uiLanguage}
+              onSelect={async (code) => {
+                const next = resolveUiLanguage(code);
                 setUiLanguage(next);
                 if (typeof onChangeLanguage === 'function') {
                   await onChangeLanguage(next);
                 }
               }}
-              className="input-field mt-1"
-            >
-              {sortedLanguages.map((code) => (
-                <option key={code} value={code}>
-                  {getLanguageFlag(code)} {getLanguageName(code)}
-                </option>
-              ))}
-            </select>
-          </label>
+              className="mt-1"
+            />
+          </div>
 
           <div className="rounded-xl bg-heybuddy-warm-gray/35 border border-emerald-400/15 p-4 text-sm text-heybuddy-medium-gray">
             {t('language_note')}

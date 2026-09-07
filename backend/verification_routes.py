@@ -174,7 +174,7 @@ def update_user_profile():
             "language": user["language"],
             "phone": user["phone"],
             "profile_picture_url": user["profile_picture_url"],
-            "bio": user.get("bio")
+            "bio": user["bio"]
         }
     }), 200
 
@@ -212,6 +212,6 @@ def update_user_language():
             "language": user["language"],
             "phone": user["phone"],
             "profile_picture_url": user["profile_picture_url"],
-            "bio": user.get("bio")
+            "bio": user["bio"]
         }
     }), 200

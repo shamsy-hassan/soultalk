@@ -16,11 +16,11 @@ import { useTranslation } from 'react-i18next';
 import { BACKEND_BASE_URL } from './config';
 import { getLanguages } from './api';
 import {
-  getLanguageFlag,
-  getLanguageName,
+  SUPPORTED_UI_LANGUAGES,
   resolveUiLanguage,
   setUiLanguage,
 } from './i18n';
+import LanguagePicker from './LanguagePicker';
 
 const STEP_COUNT = 4;
 
@@ -49,12 +49,10 @@ const Login = ({ onLogin }) => {
     t('profile', { defaultValue: 'Profile' }),
   ];
 
-  const languageOptions = useMemo(() => {
-    const source = languages.length
-      ? languages
-      : [{ code: 'en' }, { code: 'sw' }, { code: 'fr' }, { code: 'ar' }];
-    return source.slice(0, 12);
-  }, [languages]);
+  const languageOptions = useMemo(
+    () => (languages.length ? languages : SUPPORTED_UI_LANGUAGES),
+    [languages]
+  );
 
   useEffect(() => {
     const logoutMessage = location.state?.goodbyeMessage;
@@ -401,30 +399,11 @@ const Login = ({ onLogin }) => {
                   {loadingLanguages ? (
                     <div className="py-8 text-center text-sm text-heybuddy-medium-gray">{t('processing')}</div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-2">
-                      {languageOptions.map((language) => {
-                        const code = language.code || language;
-                        const active = selectedLanguage === code;
-                        return (
-                          <button
-                            key={code}
-                            type="button"
-                            onClick={() => void selectLanguage(code)}
-                            className={`flex min-w-0 items-center gap-2 rounded-xl border p-2.5 text-left transition ${
-                              active
-                                ? 'border-heybuddy-teal bg-heybuddy-teal/10'
-                                : 'border-gray-800/60 bg-gray-950/20 hover:border-heybuddy-teal/50'
-                            }`}
-                          >
-                            <span className="shrink-0 text-xl">{getLanguageFlag(code)}</span>
-                            <span className="min-w-0 flex-1 break-words text-sm font-semibold leading-tight">
-                              {getLanguageName(code)}
-                            </span>
-                            {active && <Check className="h-4 w-4 shrink-0 text-heybuddy-teal" />}
-                          </button>
-                        );
-})}
-                    </div>
+                    <LanguagePicker
+                      languages={languageOptions}
+                      selectedLanguage={selectedLanguage}
+                      onSelect={(code) => void selectLanguage(code)}
+                    />
                   )}
                   <div className="mt-4 flex gap-3">
                     <button type="button" onClick={() => goToStep(1)} className="st-combo1-button flex-1">

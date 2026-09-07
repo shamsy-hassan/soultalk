@@ -6,7 +6,7 @@ backend can start even when translation extras aren't installed.
 
 from __future__ import annotations
 
-from typing import Optional
+import requests
 
 try:
     from deep_translator import GoogleTranslator  # type: ignore
@@ -34,10 +34,38 @@ def translate_text(text, from_lang, to_lang):
     try:
         source_lang = (from_lang or 'auto').strip() or 'auto'
         target_lang = (to_lang or 'en').strip() or 'en'
-        translator = GoogleTranslator(source=source_lang, target=target_lang)
-        return translator.translate(text)
-    except Exception as e:
-        print(f"Error during translation: {e}")
+        response = requests.get(
+            'https://translate.googleapis.com/translate_a/single',
+            params={
+                'client': 'gtx',
+                'sl': source_lang,
+                'tl': target_lang,
+                'dt': 't',
+                'q': text.strip(),
+            },
+            timeout=10,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        translated = ''.join(
+            segment[0]
+            for segment in (payload[0] or [])
+            if isinstance(segment, list) and segment and segment[0]
+        ).strip()
+        if translated:
+            return translated
+        raise ValueError('Google returned an empty translation')
+    except (requests.RequestException, ValueError, TypeError, IndexError) as direct_error:
+        if GoogleTranslator is not None:
+            try:
+                return GoogleTranslator(source=source_lang, target=target_lang).translate(text)
+            except Exception as fallback_error:
+                print(
+                    f"Translation unavailable ({source_lang} -> {target_lang}): "
+                    f"{fallback_error}; direct endpoint: {direct_error}"
+                )
+                return text
+        print(f"Translation unavailable ({source_lang} -> {target_lang}): {direct_error}")
         return text
 
 def get_available_languages():
