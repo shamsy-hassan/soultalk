@@ -22,3 +22,4 @@ build/
 # local runtime data
 backend/instance/
 backend/profile_pictures/
+node_modules
