@@ -10,5 +10,6 @@ bidict
 python-dotenv
 PyJWT
 gevent
+gevent-websocket
 greenlet
 deep-translator==1.11.4

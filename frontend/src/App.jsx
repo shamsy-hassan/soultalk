@@ -115,9 +115,7 @@ function App() {
 
   useEffect(() => {
     if (user && !socket) {
-      const newSocket = io(SOCKET_URL, {
-        transports: ['websocket', 'polling'],
-      });
+      const newSocket = io(SOCKET_URL);
       setSocket(newSocket);
 
       newSocket.emit('join', { username: user.username });
