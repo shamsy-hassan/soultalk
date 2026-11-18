@@ -2,7 +2,7 @@
 // Centralized API functions for user profiles
 
 import { BACKEND_BASE_URL } from './config';
-import axios from 'axios';
+import http from './http';
 
 export const verifyOtp = async (phone, otp, username, language, email, profile_picture_url) => {
   const res = await fetch(`${BACKEND_BASE_URL}/api/verify-otp`, {
@@ -82,13 +82,13 @@ export const updateUserProfile = async (identifier, profilePictureUrlOrUpdates) 
 };
 
 export const getUsers = async (currentUsername) => {
-  const response = await axios.get(`${BACKEND_BASE_URL}/api/users`, {
+  const response = await http.get(`${BACKEND_BASE_URL}/api/users`, {
     params: { current_user: currentUsername }
   });
   return response.data;
 };
 
 export const fetchTargetUser = async (username) => {
-  const response = await axios.get(`${BACKEND_BASE_URL}/api/user/${username}`);
+  const response = await http.get(`${BACKEND_BASE_URL}/api/user/${username}`);
   return response.data;
 };

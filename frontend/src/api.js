@@ -2,17 +2,17 @@
 // Centralized API functions
 
 import { BACKEND_BASE_URL } from './config';
-import axios from 'axios'; 
+import http from './http';
 
 export const getUsers = async (currentUsername) => {
-  const response = await axios.get(`${BACKEND_BASE_URL}/api/users`, {
+  const response = await http.get(`${BACKEND_BASE_URL}/api/users`, {
     params: { current_user: currentUsername }
   });
   return response.data;
 };
 
 export const fetchTargetUser = async (username) => {
-  const response = await axios.get(`${BACKEND_BASE_URL}/api/user/${username}`);
+  const response = await http.get(`${BACKEND_BASE_URL}/api/user/${username}`);
   return response.data;
 };
 
@@ -25,12 +25,12 @@ export const getLanguages = async ({ countryCode, uiOnly } = {}) => {
     params.ui_only = 'true';
   }
 
-  const response = await axios.get(`${BACKEND_BASE_URL}/api/languages`, { params });
+  const response = await http.get(`${BACKEND_BASE_URL}/api/languages`, { params });
   return response.data;
 };
 
 export const updateUserLanguage = async (username, language) => {
-  const response = await axios.post(`${BACKEND_BASE_URL}/api/update-user-language`, {
+  const response = await http.post(`${BACKEND_BASE_URL}/api/update-user-language`, {
     username,
     language
   });
@@ -38,21 +38,21 @@ export const updateUserLanguage = async (username, language) => {
 };
 
 export const getChatPartners = async (currentUsername) => {
-  const response = await axios.get(`${BACKEND_BASE_URL}/api/chats`, {
+  const response = await http.get(`${BACKEND_BASE_URL}/api/chats`, {
     params: { current_user: currentUsername }
   });
   return response.data;
 };
 
 export const getFavorites = async (username) => {
-  const response = await axios.get(`${BACKEND_BASE_URL}/api/favorites`, {
+  const response = await http.get(`${BACKEND_BASE_URL}/api/favorites`, {
     params: { username },
   });
   return response.data;
 };
 
 export const setFavorite = async (username, favoriteUsername, isFavorite) => {
-  const response = await axios.post(`${BACKEND_BASE_URL}/api/favorites`, {
+  const response = await http.post(`${BACKEND_BASE_URL}/api/favorites`, {
     username,
     favorite_username: favoriteUsername,
     is_favorite: isFavorite,
@@ -61,7 +61,7 @@ export const setFavorite = async (username, favoriteUsername, isFavorite) => {
 };
 
 export const submitFeedback = async ({ username, email, category, message, language }) => {
-  const response = await axios.post(`${BACKEND_BASE_URL}/api/feedback`, {
+  const response = await http.post(`${BACKEND_BASE_URL}/api/feedback`, {
     username,
     email,
     category,
@@ -72,7 +72,7 @@ export const submitFeedback = async ({ username, email, category, message, langu
 };
 
 export const getUserImages = async (username, { limit = 200 } = {}) => {
-  const response = await axios.get(`${BACKEND_BASE_URL}/api/media/images`, {
+  const response = await http.get(`${BACKEND_BASE_URL}/api/media/images`, {
     params: { username, limit },
   });
   return response.data;
