@@ -53,7 +53,7 @@ const Chats = ({ user, unreadByUser = {} }) => {
         <button
           type="button"
           onClick={() => navigate('/users')}
-          className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-heybuddy-gradient-start to-heybuddy-gradient-end px-4 py-2 text-sm font-semibold text-white st-white-visible shadow-sm hover:from-heybuddy-gradient-start/90 hover:to-heybuddy-gradient-end/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heybuddy-lavender dark:focus:ring-offset-[#0f172a]"
+          className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-heybuddy-gradient-start to-heybuddy-gradient-end px-4 py-2 text-sm font-semibold text-heybuddy-on-accent shadow-sm hover:from-heybuddy-gradient-start/90 hover:to-heybuddy-gradient-end/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heybuddy-lavender"
         >
           {t('discover_souls')}
           <ChevronRight className="h-4 w-4" />
@@ -93,7 +93,7 @@ const Chats = ({ user, unreadByUser = {} }) => {
             <button
               type="button"
               onClick={() => navigate('/users')}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-heybuddy-dark-gray hover:bg-slate-50 transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg border border-heybuddy-border/70 bg-heybuddy-white px-3 py-2 text-xs font-semibold text-heybuddy-dark-gray hover:bg-heybuddy-warm-gray transition-colors"
             >
               <UsersRound className="h-4 w-4 text-heybuddy-lavender" />
               {t('discover_souls')}
@@ -103,7 +103,7 @@ const Chats = ({ user, unreadByUser = {} }) => {
         </div>
       </div>
 
-      <div className="mb-4 rounded-xl border border-slate-200 bg-white p-3">
+      <div className="mb-4 rounded-xl border border-heybuddy-border/70 bg-heybuddy-white p-3">
         <div className="flex flex-col gap-3 sm:flex-row">
           <div className="flex-1">
             <div className="relative">
@@ -118,7 +118,7 @@ const Chats = ({ user, unreadByUser = {} }) => {
                   <button
                     type="button"
                     onClick={() => setQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-heybuddy-warm-gray dark:hover:bg-white/10"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-heybuddy-warm-gray/70"
                     aria-label={t('clear_search')}
                   >
                     <X className="h-4 w-4 text-heybuddy-medium-gray dark:text-gray-300" />
@@ -133,7 +133,7 @@ const Chats = ({ user, unreadByUser = {} }) => {
             className={`inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
               unreadOnly
                 ? 'bg-teal-50 border-teal-200 text-heybuddy-coral'
-                : 'bg-white border-slate-200 hover:bg-slate-50'
+                : 'bg-heybuddy-white border-heybuddy-border/70 hover:bg-heybuddy-warm-gray'
             }`}
           >
             <span className="font-semibold text-heybuddy-dark-gray inline-flex items-center gap-2">
@@ -170,7 +170,7 @@ const Chats = ({ user, unreadByUser = {} }) => {
             <button
               type="button"
               onClick={() => navigate('/users')}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-heybuddy-gradient-start to-heybuddy-gradient-end px-4 py-2 text-sm font-semibold text-white st-white-visible shadow-sm hover:from-heybuddy-gradient-start/90 hover:to-heybuddy-gradient-end/90"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-heybuddy-gradient-start to-heybuddy-gradient-end px-4 py-2 text-sm font-semibold text-heybuddy-on-accent shadow-sm hover:from-heybuddy-gradient-start/90 hover:to-heybuddy-gradient-end/90"
             >
               {t('discover_souls')}
               <ChevronRight className="h-4 w-4" />
@@ -178,7 +178,7 @@ const Chats = ({ user, unreadByUser = {} }) => {
           </div>
         </div>
       ) : (
-        <div className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div className="divide-y divide-heybuddy-border/40 overflow-hidden rounded-xl border border-heybuddy-border/70 bg-heybuddy-white">
           {visibleChats.map((partner) => {
           const unreadCount = unreadByUser[partner.username] || 0;
           const hasUnread = unreadCount > 0;
@@ -189,7 +189,7 @@ const Chats = ({ user, unreadByUser = {} }) => {
             type="button"
             onClick={() => navigate(`/chat/${partner.username}`)}
             aria-label={t('chat_with_username', { username: partner.username })}
-            className={`group w-full p-4 text-left hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-heybuddy-lavender ${
+            className={`group w-full p-4 text-left hover:bg-heybuddy-warm-gray/60 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-heybuddy-lavender ${
               hasUnread ? 'bg-teal-50/50' : ''
             }`}
           >

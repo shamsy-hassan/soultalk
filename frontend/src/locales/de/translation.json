@@ -381,5 +381,19 @@
   "failed_to_upload_profile_picture": "Profilbild konnte nicht hochgeladen werden.",
   "character_count": "{{count}} von {{max}}",
   "percent_value": "{{value}} %",
-  "inspiring_quote_about_connection_quoted": "„{{quote}}“"
+  "inspiring_quote_about_connection_quoted": "„{{quote}}“",
+  "my_media": "Meine Medien",
+  "my_media_subtitle": "Bilder, die du gesendet und empfangen hast.",
+  "no_media_yet": "Noch keine Bilder.",
+  "open_image": "Bild öffnen",
+  "send_image": "Bild senden",
+  "image_placeholder": "[Bild]",
+  "image_message_alt": "Gesendetes Bild",
+  "message_deleted": "Nachricht gelöscht",
+  "edited_label": "bearbeitet",
+  "edit_message": "Nachricht bearbeiten",
+  "editing_message": "Nachricht wird bearbeitet",
+  "delete_message": "Nachricht löschen",
+  "delete_message_confirm": "Diese Nachricht löschen?",
+  "message_actions": "Nachrichtenaktionen"
 }

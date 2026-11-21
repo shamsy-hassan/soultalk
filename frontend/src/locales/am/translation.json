@@ -381,5 +381,19 @@
   "failed_to_upload_profile_picture": "የመገለጫ ፎቶ መጫን አልተቻለም።",
   "character_count": "{{count}}/{{max}}",
   "percent_value": "{{value}}%",
-  "inspiring_quote_about_connection_quoted": "\"{{quote}}\""
+  "inspiring_quote_about_connection_quoted": "\"{{quote}}\"",
+  "my_media": "የእኔ ሚዲያ",
+  "my_media_subtitle": "የላኳቸው እና የተቀበልኳቸው ምስሎች።",
+  "no_media_yet": "እስካሁን ምስሎች የሉም።",
+  "open_image": "ምስል ክፈት",
+  "send_image": "ምስል ላክ",
+  "image_placeholder": "[ምስል]",
+  "image_message_alt": "የተላከ ምስል",
+  "message_deleted": "መልዕክቱ ተሰርዟል",
+  "edited_label": "ተስተካክሏል",
+  "edit_message": "መልዕክት አርትዕ",
+  "editing_message": "መልዕክት በማርትዕ ላይ",
+  "delete_message": "መልዕክት ሰርዝ",
+  "delete_message_confirm": "ይህን መልዕክት ይሰርዙ?",
+  "message_actions": "የመልዕክት እርምጃዎች"
 }

@@ -73,7 +73,7 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
     <div className="relative" ref={menuRef}>
       <button
         onClick={toggleMenu}
-        className="flex items-center space-x-3 mb-5 p-2 rounded-lg w-full text-left cursor-pointer hover:bg-slate-50 transition-colors"
+        className="flex items-center space-x-3 mb-5 p-2 rounded-lg w-full text-left cursor-pointer hover:bg-heybuddy-warm-gray transition-colors"
       >
         <div className="w-12 h-12 rounded-full bg-gradient-to-r from-heybuddy-coral to-heybuddy-teal flex items-center justify-center text-emerald-50 text-xl font-bold">
           <img
@@ -93,7 +93,7 @@ const UserMenu = ({ user, onLogout, onChangeLanguage, onNavigateToProfileSetup }
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 mt-2 w-full bg-white rounded-lg shadow-lg z-10 p-1.5 border border-slate-200 space-y-1">
+        <div className="absolute left-0 mt-2 w-full bg-heybuddy-white rounded-lg shadow-lg z-10 p-1.5 border border-heybuddy-border/70 space-y-1">
           <button
             onClick={handleProfileClick}
             className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-heybuddy-dark-gray hover:bg-emerald-500/10 rounded-lg transition-colors"

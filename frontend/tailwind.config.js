@@ -16,6 +16,8 @@ export default {
         'heybuddy-lavender': 'rgb(var(--st-lavender) / <alpha-value>)', // focus / strong accent
         'heybuddy-dark-gray': 'rgb(var(--st-dark-gray) / <alpha-value>)', // primary text
         'heybuddy-medium-gray': 'rgb(var(--st-medium-gray) / <alpha-value>)', // muted text
+        'heybuddy-border': 'rgb(var(--st-border) / <alpha-value>)',
+        'heybuddy-on-accent': 'rgb(var(--st-on-accent) / <alpha-value>)',
         // Primary gradient
         'heybuddy-gradient-start': 'rgb(var(--st-gradient-start) / <alpha-value>)',
         'heybuddy-gradient-end': 'rgb(var(--st-gradient-end) / <alpha-value>)',

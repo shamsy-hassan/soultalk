@@ -59,11 +59,11 @@ const Friends = ({ user }) => {
       </div>
 
       {loading ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-heybuddy-medium-gray">
+        <div className="rounded-xl border border-heybuddy-border/70 bg-heybuddy-white p-6 text-sm text-heybuddy-medium-gray">
           {t('loading', { defaultValue: 'Loading...' })}
         </div>
       ) : visibleFriends.length === 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
+        <div className="rounded-xl border border-heybuddy-border/70 bg-heybuddy-white p-8 text-center">
           <Heart className="mx-auto h-7 w-7 text-heybuddy-medium-gray" />
           <p className="mt-3 font-medium text-heybuddy-dark-gray">
             {t('no_friends_yet', { defaultValue: 'No saved friends yet' })}
@@ -74,7 +74,7 @@ const Friends = ({ user }) => {
           </button>
         </div>
       ) : (
-        <div className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div className="divide-y divide-heybuddy-border/40 overflow-hidden rounded-xl border border-heybuddy-border/70 bg-heybuddy-white">
           {visibleFriends.map((friend) => (
             <div key={friend.username} className="flex items-center gap-3 p-4">
               <img
@@ -100,7 +100,7 @@ const Friends = ({ user }) => {
               <button
                 type="button"
                 onClick={() => removeFriend(friend)}
-                className="rounded-lg p-2 text-heybuddy-medium-gray hover:bg-slate-100"
+                className="rounded-lg p-2 text-heybuddy-medium-gray hover:bg-heybuddy-warm-gray"
                 aria-label={t('remove_friend', { defaultValue: 'Remove friend' })}
               >
                 <Heart className="h-4 w-4 fill-current" />

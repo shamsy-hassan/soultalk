@@ -92,7 +92,7 @@ const Settings = ({ user, onChangeLanguage }) => {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <section className="border-b border-slate-200 pb-5 space-y-4">
+        <section className="border-b border-heybuddy-border/70 pb-5 space-y-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-heybuddy-dark-gray flex items-center gap-2">
@@ -136,7 +136,7 @@ const Settings = ({ user, onChangeLanguage }) => {
           </div>
         </section>
 
-        <section className="border-b border-slate-200 pb-5 space-y-4">
+        <section className="border-b border-heybuddy-border/70 pb-5 space-y-4">
           <h2 className="text-lg font-semibold text-heybuddy-dark-gray flex items-center gap-2">
             <Globe2 className="w-4 h-4 text-heybuddy-lavender" />
             {t('language_and_region')}
@@ -163,7 +163,7 @@ const Settings = ({ user, onChangeLanguage }) => {
           </div>
         </section>
 
-        <section className="border-b border-slate-200 pb-5 space-y-4">
+        <section className="border-b border-heybuddy-border/70 pb-5 space-y-4">
           <h2 className="text-lg font-semibold text-heybuddy-dark-gray flex items-center gap-2">
             <Accessibility className="w-4 h-4 text-heybuddy-lavender" />
             {t('accessibility')}
@@ -266,7 +266,7 @@ const Settings = ({ user, onChangeLanguage }) => {
           </div>
         </section>
 
-        <section className="border-b border-slate-200 pb-5 space-y-4">
+        <section className="border-b border-heybuddy-border/70 pb-5 space-y-4">
           <h2 className="text-lg font-semibold text-heybuddy-dark-gray flex items-center gap-2">
             <Info className="w-4 h-4 text-heybuddy-lavender" />
             {t('themes')}
@@ -327,7 +327,7 @@ const Settings = ({ user, onChangeLanguage }) => {
           </div>
         </section>
 
-        <section className="border-b border-slate-200 pb-5 space-y-3">
+        <section className="border-b border-heybuddy-border/70 pb-5 space-y-3">
           <h2 className="text-lg font-semibold text-heybuddy-dark-gray mb-1 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-heybuddy-lavender" />
             {t('support_and_trust')}
@@ -360,7 +360,7 @@ const Settings = ({ user, onChangeLanguage }) => {
           </div>
         </section>
 
-        <section className="border-b border-slate-200 pb-5 space-y-3 xl:col-span-2">
+        <section className="border-b border-heybuddy-border/70 pb-5 space-y-3 xl:col-span-2">
           <h2 className="text-lg font-semibold text-heybuddy-dark-gray flex items-center gap-2">
             <Info className="w-4 h-4 text-heybuddy-lavender" />
             {t('about_HeyBuddy')}

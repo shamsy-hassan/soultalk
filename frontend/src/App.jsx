@@ -362,10 +362,10 @@ function App() {
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col min-w-0 ${user ? 'md:ml-[248px]' : ''}`}>
 	        {user && (
-	          <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/95 px-3 py-3 backdrop-blur sm:px-5 safe-pt safe-px">
+	          <header className="sticky top-0 z-20 flex items-center justify-between border-b border-heybuddy-border/70 bg-heybuddy-white/95 px-3 py-3 backdrop-blur sm:px-5 safe-pt safe-px">
 	            <div className="flex min-w-0 items-center gap-3">
 	              <button
-	                className="rounded-lg p-2 text-heybuddy-dark-gray hover:bg-slate-50 md:hidden"
+	                className="rounded-lg p-2 text-heybuddy-dark-gray hover:bg-heybuddy-warm-gray md:hidden"
 	                onClick={() => setShowSidebarMobile(!showSidebarMobile)}
 	                aria-label={t('toggle_sidebar')}
 	              >
@@ -377,7 +377,7 @@ function App() {
 	          </header>
 	        )}
 
-	        <main className="flex-1 overflow-y-auto subtle-scrollbar bg-slate-50/70 p-3 sm:p-5 md:p-6 safe-px">
+	        <main className="flex-1 overflow-y-auto subtle-scrollbar bg-heybuddy-warm-gray/45 p-3 sm:p-5 md:p-6 safe-px">
           <Routes>
             <Route 
               path="/" 

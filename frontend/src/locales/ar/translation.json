@@ -381,5 +381,19 @@
   "failed_to_upload_profile_picture": "فشل رفع صورة الملف الشخصي.",
   "character_count": "{{count}}/{{max}}",
   "percent_value": "{{value}}%",
-  "inspiring_quote_about_connection_quoted": "\"{{quote}}\""
+  "inspiring_quote_about_connection_quoted": "\"{{quote}}\"",
+  "my_media": "وسائطي",
+  "my_media_subtitle": "الصور التي أرسلتها وتلقيتها.",
+  "no_media_yet": "لا توجد صور بعد.",
+  "open_image": "افتح الصورة",
+  "send_image": "أرسل صورة",
+  "image_placeholder": "[صورة]",
+  "image_message_alt": "صورة مُرسلة",
+  "message_deleted": "تم حذف الرسالة",
+  "edited_label": "تم التعديل",
+  "edit_message": "تعديل الرسالة",
+  "editing_message": "جارٍ تعديل الرسالة",
+  "delete_message": "حذف الرسالة",
+  "delete_message_confirm": "هل تريد حذف هذه الرسالة؟",
+  "message_actions": "إجراءات الرسالة"
 }

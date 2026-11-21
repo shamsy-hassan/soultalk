@@ -8,7 +8,7 @@ const EmptyChatState = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex h-full min-h-[360px] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-6 text-center">
+    <div className="flex h-full min-h-[360px] flex-col items-center justify-center rounded-xl border border-heybuddy-border/70 bg-heybuddy-white p-6 text-center">
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-teal-50 text-heybuddy-coral">
         <MessageSquare className="h-6 w-6" />
       </div>

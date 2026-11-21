@@ -381,5 +381,19 @@
   "failed_to_upload_profile_picture": "Failed to upload profile picture.",
   "character_count": "{{count}}/{{max}}",
   "percent_value": "{{value}}%",
-  "inspiring_quote_about_connection_quoted": "\"{{quote}}\""
+  "inspiring_quote_about_connection_quoted": "\"{{quote}}\"",
+  "my_media": "Abba media",
+  "my_media_subtitle": "Koli fanat kee fayat photo.",
+  "no_media_yet": "Photo meqe.",
+  "open_image": "Photo furi",
+  "send_image": "Photo rub",
+  "image_placeholder": "[Photo]",
+  "image_message_alt": "Rubtam photo",
+  "message_deleted": "Message alsu",
+  "edited_label": "baddal",
+  "edit_message": "Message baddali",
+  "editing_message": "Message baddal",
+  "delete_message": "Message hay",
+  "delete_message_confirm": "Ta message hayta?",
+  "message_actions": "Message gexxa"
 }

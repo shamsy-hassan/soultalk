@@ -381,5 +381,19 @@
   "failed_to_upload_profile_picture": "Impossible d’envoyer la photo de profil.",
   "character_count": "{{count}} sur {{max}}",
   "percent_value": "{{value}} %",
-  "inspiring_quote_about_connection_quoted": "« {{quote}} »"
+  "inspiring_quote_about_connection_quoted": "« {{quote}} »",
+  "my_media": "Mes médias",
+  "my_media_subtitle": "Images que vous avez envoyées et reçues.",
+  "no_media_yet": "Aucune image pour le moment.",
+  "open_image": "Ouvrir l’image",
+  "send_image": "Envoyer une image",
+  "image_placeholder": "[Image]",
+  "image_message_alt": "Image envoyée",
+  "message_deleted": "Message supprimé",
+  "edited_label": "modifié",
+  "edit_message": "Modifier le message",
+  "editing_message": "Modification du message",
+  "delete_message": "Supprimer le message",
+  "delete_message_confirm": "Supprimer ce message ?",
+  "message_actions": "Actions du message"
 }

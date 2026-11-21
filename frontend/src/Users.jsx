@@ -111,7 +111,7 @@ const Users = ({ user, socket }) => {
         </button>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-3">
+      <div className="rounded-xl border border-heybuddy-border/70 bg-heybuddy-white p-3">
         <div className="flex flex-col gap-2 sm:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-heybuddy-medium-gray" />
@@ -128,21 +128,21 @@ const Users = ({ user, socket }) => {
               </button>
             )}
           </div>
-          <button type="button" onClick={() => setOnlineOnly((value) => !value)} className={`rounded-lg border px-3 py-2 text-sm ${onlineOnly ? 'border-teal-200 bg-teal-50 text-heybuddy-coral' : 'border-slate-200 bg-white'}`}>
+          <button type="button" onClick={() => setOnlineOnly((value) => !value)} className={`rounded-lg border px-3 py-2 text-sm ${onlineOnly ? 'border-heybuddy-coral/40 bg-heybuddy-coral/10 text-heybuddy-coral' : 'border-heybuddy-border/70 bg-heybuddy-white text-heybuddy-dark-gray'}`}>
             {t('online_only', { defaultValue: 'Online' })}
           </button>
-          <button type="button" onClick={() => setShowLanguages((value) => !value)} className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
+          <button type="button" onClick={() => setShowLanguages((value) => !value)} className="inline-flex items-center justify-center gap-2 rounded-lg border border-heybuddy-border/70 px-3 py-2 text-sm text-heybuddy-dark-gray">
             <SlidersHorizontal className="h-4 w-4" />
             {selectedLanguage ? getLanguageName(selectedLanguage) : t('language', { defaultValue: 'Language' })}
           </button>
         </div>
         {showLanguages && (
           <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-            <button type="button" onClick={() => setSelectedLanguage('')} className="rounded-full border border-slate-200 px-3 py-1.5 text-sm">
+            <button type="button" onClick={() => setSelectedLanguage('')} className="rounded-full border border-heybuddy-border/70 px-3 py-1.5 text-sm text-heybuddy-dark-gray">
               {t('all_languages', { defaultValue: 'All languages' })}
             </button>
             {languageFilters.map((language) => (
-              <button key={language.code} type="button" onClick={() => setSelectedLanguage(language.code)} className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-sm ${selectedLanguage === language.code ? 'border-teal-200 bg-teal-50 text-heybuddy-coral' : 'border-slate-200'}`}>
+              <button key={language.code} type="button" onClick={() => setSelectedLanguage(language.code)} className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-sm ${selectedLanguage === language.code ? 'border-heybuddy-coral/40 bg-heybuddy-coral/10 text-heybuddy-coral' : 'border-heybuddy-border/70 text-heybuddy-dark-gray'}`}>
                 {language.flag || getLanguageFlag(language.code)} {getLanguageName(language.code)}
               </button>
             ))}
@@ -151,22 +151,22 @@ const Users = ({ user, socket }) => {
       </div>
 
       {loading ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-heybuddy-medium-gray">
+        <div className="rounded-xl border border-heybuddy-border/70 bg-heybuddy-white p-6 text-sm text-heybuddy-medium-gray">
           {t('loading', { defaultValue: 'Loading...' })}
         </div>
       ) : visibleUsers.length === 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
+        <div className="rounded-xl border border-heybuddy-border/70 bg-heybuddy-white p-8 text-center">
           <UserPlus className="mx-auto h-7 w-7 text-heybuddy-medium-gray" />
           <p className="mt-3 text-sm text-heybuddy-medium-gray">{t('no_souls_found', { defaultValue: 'No people found' })}</p>
         </div>
       ) : (
-        <div className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div className="divide-y divide-heybuddy-border/40 overflow-hidden rounded-xl border border-heybuddy-border/70 bg-heybuddy-white">
           {visibleUsers.map((target) => {
             const isFavorite = favoriteNames.has(target.username);
             const isRecent = recentNames.has(target.username);
             const isOnline = onlineUsers.has(target.username);
             return (
-              <div key={target.username} className="flex items-center gap-3 p-4 hover:bg-slate-50">
+              <div key={target.username} className="flex items-center gap-3 p-4 hover:bg-heybuddy-warm-gray/60">
                 <button type="button" onClick={() => navigate(`/chat/${target.username}`)} className="relative shrink-0">
                   <img
                     src={resolveProfilePictureUrl(target.profile_picture_url)}

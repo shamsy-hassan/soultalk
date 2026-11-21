@@ -479,9 +479,9 @@ const Chat = ({ user, socket }) => {
   const targetUserProfileImageUrl = resolveProfilePictureUrl(targetUser.profile_picture_url);
 
   return (
-    <div className="flex min-h-[calc(100dvh-7rem)] flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <div className="flex min-h-[calc(100dvh-7rem)] flex-1 flex-col overflow-hidden rounded-xl border border-heybuddy-border/70 bg-heybuddy-white">
       {/* Chat Header */}
-      <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white p-3 safe-pt safe-px sm:p-4">
+      <div className="sticky top-0 z-20 flex items-center justify-between border-b border-heybuddy-border/70 bg-heybuddy-white p-3 safe-pt safe-px sm:p-4">
         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
           <button
             onClick={() => navigate(-1)} // Changed to navigate to previous page
@@ -508,7 +508,7 @@ const Chat = ({ user, socket }) => {
       </div>
 
       {/* Language Bridge Indicator (Full for desktop, compact for mobile) */}
-      <div className="border-b border-slate-100 bg-slate-50 px-3 py-2 text-center hidden sm:block">
+      <div className="border-b border-heybuddy-border/50 bg-heybuddy-warm-gray/65 px-3 py-2 text-center hidden sm:block">
         <div className="inline-flex items-center space-x-2 text-xs text-heybuddy-medium-gray">
           <span>{getLanguageFlag(user.language)} {t('language_you_speak', { language: getLanguageName(user.language) })}</span>
           <span className="text-heybuddy-medium-gray">—</span>
@@ -520,7 +520,7 @@ const Chat = ({ user, socket }) => {
       </div>
 
       {/* Compact Language Bridge Indicator for Mobile */}
-      <div className="border-b border-slate-100 bg-slate-50 p-2 text-center sm:hidden">
+      <div className="border-b border-heybuddy-border/50 bg-heybuddy-warm-gray/65 p-2 text-center sm:hidden">
         <div className="inline-flex items-center space-x-1 text-xs text-heybuddy-medium-gray">
           <span>{getLanguageFlag(user.language)}</span>
           <Sparkles className="w-3 h-3 text-heybuddy-lavender" />
@@ -532,7 +532,7 @@ const Chat = ({ user, socket }) => {
       <div className="flex-1 overflow-y-auto subtle-scrollbar p-3 sm:p-4 md:p-5 bg-transparent">
         {messages.length === 0 && (
           <div className="max-w-2xl mx-auto py-6">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 md:p-6">
+            <div className="rounded-xl border border-heybuddy-border/70 bg-heybuddy-warm-gray p-5 md:p-6">
               <div className="space-y-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -568,8 +568,8 @@ const Chat = ({ user, socket }) => {
           >
             <div className={`group relative max-w-[86%] sm:max-w-[78%] lg:max-w-[56%] p-3.5 sm:p-4 shadow-sm ring-1 rounded-2xl ${
               msg.from === user.username
-                ? 'bg-heybuddy-coral text-white rounded-br-none'
-                : 'bg-slate-100 text-heybuddy-dark-gray rounded-bl-none'
+                ? 'bg-heybuddy-coral text-heybuddy-on-accent rounded-br-none'
+                : 'bg-heybuddy-warm-gray text-heybuddy-dark-gray rounded-bl-none'
             }`}>
               {msg.from === user.username && !msg.deleted && typeof (msg.serverId || msg.id) === 'number' && (
                 <div
@@ -694,7 +694,7 @@ const Chat = ({ user, socket }) => {
       </div>
 
       {/* Input Area */}
-      <div className="sticky bottom-0 z-10 border-t border-slate-200 bg-white p-3 safe-pb safe-px sm:p-4">
+      <div className="sticky bottom-0 z-10 border-t border-heybuddy-border/70 bg-heybuddy-white p-3 safe-pb safe-px sm:p-4">
 
         {editingMessageId && (
           <div className="mb-3 flex items-center justify-between gap-2 rounded-xl bg-emerald-500/10 border border-emerald-400/15 px-3 py-2 text-xs text-heybuddy-dark-gray">
@@ -773,8 +773,8 @@ const Chat = ({ user, socket }) => {
             aria-label={t('send_message')}
             className={`p-3 sm:p-4 rounded-xl flex items-center justify-center shrink-0 ${
               newMessage.trim()
-                ? 'bg-heybuddy-coral text-white hover:bg-heybuddy-gradient-end'
-                : 'bg-slate-100 text-heybuddy-medium-gray'
+                ? 'bg-heybuddy-coral text-heybuddy-on-accent hover:bg-heybuddy-gradient-end'
+                : 'bg-heybuddy-warm-gray text-heybuddy-medium-gray'
             } transition-colors disabled:opacity-60`}
           >
             <Send className="w-5 h-5" />

@@ -15,7 +15,7 @@ const Sidebar = ({ user, socket, onLogout, onChangeLanguage, onNavigateToProfile
     `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
       isActive
         ? 'bg-teal-50 text-heybuddy-coral'
-        : 'text-heybuddy-dark-gray hover:bg-slate-50'
+        : 'text-heybuddy-dark-gray hover:bg-heybuddy-warm-gray'
     }`;
 
   useEffect(() => {
@@ -93,7 +93,7 @@ const Sidebar = ({ user, socket, onLogout, onChangeLanguage, onNavigateToProfile
 
   return (
     <aside
-      className="w-full max-w-[248px] border-r flex flex-col h-[100dvh] p-3 sm:p-4 safe-pt safe-pb safe-px bg-white border-slate-200 min-h-0"
+      className="w-full max-w-[248px] border-r flex flex-col h-[100dvh] p-3 sm:p-4 safe-pt safe-pb safe-px bg-heybuddy-white border-heybuddy-border/70 min-h-0"
     >
       {user && (
         <UserMenu
@@ -177,7 +177,7 @@ const Sidebar = ({ user, socket, onLogout, onChangeLanguage, onNavigateToProfile
         </div>
       </div>
 
-      <div className="mt-auto pt-4 border-t border-slate-200">
+      <div className="mt-auto pt-4 border-t border-heybuddy-border/70">
         <div className="space-y-1">
           <NavLink to="/settings" className={navItemClass}>
             <Settings className="w-4 h-4" />
